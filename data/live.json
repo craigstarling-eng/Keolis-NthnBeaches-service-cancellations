@@ -1,14 +1,14 @@
 {
- "updated": "2026-11-26T15:20:48+11:00",
+ "updated": "2026-11-26T15:25:54+11:00",
  "status": "ok",
  "date": "2026-11-26",
  "scheduled": 3456,
  "count": 100,
  "cancel_pct": 2.9,
- "observed": 511,
- "late": 131,
- "late_pct": 25.6,
- "avg_late_min": 11.9,
+ "observed": 529,
+ "late": 148,
+ "late_pct": 28.0,
+ "avg_late_min": 11.5,
  "am": {
   "scheduled": 800,
   "cancelled": 0
@@ -138,7 +138,7 @@
    "route": "B1",
    "headsign": "Mona Vale",
    "start_time": "14:45",
-   "late_min": 71
+   "late_min": 76
   },
   {
    "route": "263",
@@ -183,16 +183,22 @@
    "late_min": 30
   },
   {
+   "route": "173X",
+   "headsign": "City Wynyard",
+   "start_time": "14:50",
+   "late_min": 30
+  },
+  {
    "route": "144",
    "headsign": "Manly",
    "start_time": "14:04",
    "late_min": 30
   },
   {
-   "route": "173X",
-   "headsign": "City Wynyard",
-   "start_time": "14:50",
-   "late_min": 25
+   "route": "114",
+   "headsign": "RNS Hospital",
+   "start_time": "14:39",
+   "late_min": 24
   },
   {
    "route": "199",
@@ -201,21 +207,15 @@
    "late_min": 23
   },
   {
-   "route": "114",
-   "headsign": "RNS Hospital",
-   "start_time": "14:39",
-   "late_min": 22
+   "route": "154X",
+   "headsign": "Dee Why",
+   "start_time": "15:55",
+   "late_min": 21
   },
   {
    "route": "280",
    "headsign": "Chatswood",
    "start_time": "14:20",
-   "late_min": 19
-  },
-  {
-   "route": "154X",
-   "headsign": "Dee Why",
-   "start_time": "15:55",
    "late_min": 19
   }
  ],
