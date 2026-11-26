@@ -133,7 +133,7 @@ section[hidden]{display:none}
     <h2>Find your school bus</h2>
     <p class="lede">For school services run by Keolis on the Northern Beaches and Lower North Shore. Choose the school, then your home, to see which bus to catch and where.</p>
     <div class="form">
-      <label class="full">School<input id="scSchool" list="scSchools" placeholder="Start typing the school name" autocomplete="off"><datalist id="scSchools"></datalist></label>
+      <label class="full">School<select id="scSchool"><option value="">Loading schools…</option></select></label>
       <label class="full">Home address<input id="scAddr" placeholder="e.g. 12 Pittwater Rd, Manly" autocomplete="street-address"></label>
     </div>
     <div class="steps">
@@ -573,7 +573,7 @@ function tabsInit() {
 // ---------- school bus finder
 let SC = null, scMap = null, scLayer = null, scHome = null, scStarted = false;
 function loadLeaflet() {
-  if (window.L && window.L.map) return Promise.resolve();
+  if (window.leaflet && window.leaflet.map) return Promise.resolve();
   return new Promise((ok, bad) => {
     const css = document.createElement("link"); css.rel = "stylesheet"; css.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"; document.head.appendChild(css);
     const js = document.createElement("script"); js.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"; js.onload = ok; js.onerror = bad; document.head.appendChild(js);
@@ -598,12 +598,12 @@ async function schoolInit() {
   if (scStarted) { if (scMap) setTimeout(() => scMap.invalidateSize(), 50); return; }
   scStarted = true;
   try { SC = await j("data/school.json"); } catch (e) { $("scMsg").textContent = "School bus information is still being prepared. Please check back in a little while."; return; }
-  $("scSchools").innerHTML = Object.keys(SC.schools).sort().map(n => `<option value="${esc(n)}">`).join("");
+  $("scSchool").innerHTML = `<option value="">Choose a school…</option>` + Object.keys(SC.schools).sort().map(n => `<option>${esc(n)}</option>`).join("");
   try { await loadLeaflet(); } catch (e) { $("scMap").innerHTML = `<p class="empty" style="padding:10px">The map couldn't load. Results still work.</p>`; }
-  if (window.L && window.L.map) {
-    scMap = L.map("scMap").setView([-33.75, 151.28], 11);
-    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {maxZoom: 19, attribution: "© OpenStreetMap contributors"}).addTo(scMap);
-    scLayer = L.layerGroup().addTo(scMap);
+  if (window.leaflet && window.leaflet.map) {
+    scMap = leaflet.map("scMap").setView([-33.75, 151.28], 11);
+    leaflet.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {maxZoom: 19, attribution: "© OpenStreetMap contributors"}).addTo(scMap);
+    scLayer = leaflet.layerGroup().addTo(scMap);
     scMap.on("click", e => { scHome = [e.latlng.lat, e.latlng.lng]; $("scAddr").value = "Point on map"; schoolFind(); });
   }
   $("scFind").onclick = async () => {
@@ -628,15 +628,15 @@ async function schoolInit() {
   $("scSchool").onchange = () => { if (scHome) schoolFind(); else showSchool(); };
 }
 function schoolName() {
-  const v = $("scSchool").value.trim().toLowerCase();
-  return Object.keys(SC.schools).find(n => n.toLowerCase() === v) || Object.keys(SC.schools).find(n => n.toLowerCase().includes(v) && v.length > 2);
+  const v = $("scSchool").value;
+  return SC.schools[v] ? v : null;
 }
 function showSchool() {
   const n = schoolName(); if (!n || !scMap) return;
   scLayer.clearLayers();
   const pts = SC.schools[n].map(i => [SC.stops[i][1], SC.stops[i][2]]);
-  pts.forEach(p => L.circleMarker(p, {radius: 8, color: "#d93636", fillOpacity: .9}).addTo(scLayer).bindTooltip(n));
-  scMap.fitBounds(L.latLngBounds(pts).pad(0.5));
+  pts.forEach(p => leaflet.circleMarker(p, {radius: 8, color: "#d93636", fillOpacity: .9}).addTo(scLayer).bindTooltip(n));
+  scMap.fitBounds(leaflet.latLngBounds(pts).pad(0.5));
 }
 function schoolFind() {
   if (!SC) return;
@@ -689,12 +689,12 @@ function drawTrip(ti, k, sk) {
   const t = SC.trips[ti], pts = t[3].map(s => [SC.stops[s[0]][1], SC.stops[s[0]][2]]);
   scLayer.clearLayers();
   const line = t[2] >= 0 && SC.shapes[t[2]] ? decodePolyline(SC.shapes[t[2]]) : pts;
-  L.polyline(line, {color: "#257de0", weight: 5, opacity: .85}).addTo(scLayer);
-  t[3].forEach((s, i) => { if (i !== k && i !== sk) L.circleMarker(pts[i], {radius: 4, color: "#257de0", fillColor: "#fff", fillOpacity: 1, weight: 2}).addTo(scLayer).bindTooltip(`${fmtM(s[1])} ${SC.stops[s[0]][0]}`); });
-  L.circleMarker(pts[k], {radius: 9, color: "#008a17", fillOpacity: .95}).addTo(scLayer).bindTooltip(`Bus stop: ${SC.stops[t[3][k][0]][0]} (${fmtM(t[3][k][1])})`, {permanent: true, direction: "top"});
-  L.circleMarker(pts[sk], {radius: 9, color: "#d93636", fillOpacity: .95}).addTo(scLayer).bindTooltip(`School: ${fmtM(t[3][sk][1])}`, {permanent: true, direction: "top"});
-  if (scHome) L.circleMarker(scHome, {radius: 7, color: "#191919", fillColor: "#ffd400", fillOpacity: 1}).addTo(scLayer).bindTooltip("Home");
-  scMap.fitBounds(L.latLngBounds(line.concat(scHome ? [scHome] : [])).pad(0.1));
+  leaflet.polyline(line, {color: "#257de0", weight: 5, opacity: .85}).addTo(scLayer);
+  t[3].forEach((s, i) => { if (i !== k && i !== sk) leaflet.circleMarker(pts[i], {radius: 4, color: "#257de0", fillColor: "#fff", fillOpacity: 1, weight: 2}).addTo(scLayer).bindTooltip(`${fmtM(s[1])} ${SC.stops[s[0]][0]}`); });
+  leaflet.circleMarker(pts[k], {radius: 9, color: "#008a17", fillOpacity: .95}).addTo(scLayer).bindTooltip(`Bus stop: ${SC.stops[t[3][k][0]][0]} (${fmtM(t[3][k][1])})`, {permanent: true, direction: "top"});
+  leaflet.circleMarker(pts[sk], {radius: 9, color: "#d93636", fillOpacity: .95}).addTo(scLayer).bindTooltip(`School: ${fmtM(t[3][sk][1])}`, {permanent: true, direction: "top"});
+  if (scHome) leaflet.circleMarker(scHome, {radius: 7, color: "#191919", fillColor: "#ffd400", fillOpacity: 1}).addTo(scLayer).bindTooltip("Home");
+  scMap.fitBounds(leaflet.latLngBounds(line.concat(scHome ? [scHome] : [])).pad(0.1));
 }
 
 // ---------- telegram alerts
