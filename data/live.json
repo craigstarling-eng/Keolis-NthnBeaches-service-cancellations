@@ -1,24 +1,24 @@
 {
- "updated": "2026-11-27T05:28:18+11:00",
+ "updated": "2026-11-27T05:33:23+11:00",
  "status": "ok",
  "date": "2026-11-27",
  "scheduled": 3416,
- "count": 121,
- "cancel_pct": 3.5,
- "observed": 236,
+ "count": 122,
+ "cancel_pct": 3.6,
+ "observed": 250,
  "late": 0,
  "late_pct": 0.0,
  "avg_late_min": null,
- "ontime": 236,
+ "ontime": 250,
  "ontime_pct": 100.0,
- "anywhere_late_pct": 4.2,
+ "anywhere_late_pct": 4.4,
  "am": {
   "scheduled": 760,
   "cancelled": 61
  },
  "pm": {
   "scheduled": 748,
-  "cancelled": 18
+  "cancelled": 19
  },
  "gaps": [
   {
@@ -158,8 +158,20 @@
   {
    "route": "199",
    "headsign": "Manly",
+   "start_time": "05:12",
+   "late_min": 7
+  },
+  {
+   "route": "199",
+   "headsign": "Manly",
    "start_time": "04:35",
    "late_min": 7
+  },
+  {
+   "route": "280",
+   "headsign": "Chatswood",
+   "start_time": "05:22",
+   "late_min": 6
   },
   {
    "route": "144",
@@ -177,12 +189,6 @@
    "route": "144",
    "headsign": "Manly",
    "start_time": "04:30",
-   "late_min": 5
-  },
-  {
-   "route": "199",
-   "headsign": "Manly",
-   "start_time": "05:12",
    "late_min": 5
   },
   {
@@ -762,6 +768,11 @@
    "start_time": "16:50",
    "route": "144",
    "headsign": "Manly"
+  },
+  {
+   "start_time": "16:52",
+   "route": "100",
+   "headsign": "Taronga Zoo via City QVB"
   },
   {
    "start_time": "16:57",
