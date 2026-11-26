@@ -1,13 +1,13 @@
 {
- "updated": "2026-11-26T18:19:04+11:00",
+ "updated": "2026-11-26T18:24:09+11:00",
  "status": "ok",
  "date": "2026-11-26",
  "scheduled": 3456,
- "count": 108,
- "cancel_pct": 3.1,
- "observed": 1203,
- "late": 566,
- "late_pct": 47.0,
+ "count": 110,
+ "cancel_pct": 3.2,
+ "observed": 1220,
+ "late": 577,
+ "late_pct": 47.3,
  "avg_late_min": 11.1,
  "am": {
   "scheduled": 800,
@@ -73,6 +73,15 @@
    "cancelled_in_row": 1
   },
   {
+   "route": "166",
+   "headsign": "Frenchs Forest",
+   "from": "21:20",
+   "to": "22:20",
+   "gap_min": 60,
+   "normal_min": 20,
+   "cancelled_in_row": 1
+  },
+  {
    "route": "180",
    "headsign": "Warringah Mall",
    "from": "20:35",
@@ -116,15 +125,6 @@
    "gap_min": 50,
    "normal_min": 20.0,
    "cancelled_in_row": 1
-  },
-  {
-   "route": "166",
-   "headsign": "Manly",
-   "from": "18:47",
-   "to": "19:33",
-   "gap_min": 46,
-   "normal_min": 17,
-   "cancelled_in_row": 1
   }
  ],
  "late_trips": [
@@ -144,7 +144,7 @@
    "route": "B1",
    "headsign": "Mona Vale",
    "start_time": "17:40",
-   "late_min": 74
+   "late_min": 79
   },
   {
    "route": "263",
@@ -165,6 +165,12 @@
    "late_min": 57
   },
   {
+   "route": "100",
+   "headsign": "Taronga Zoo via City QVB",
+   "start_time": "17:28",
+   "late_min": 56
+  },
+  {
    "route": "230",
    "headsign": "Milsons Point",
    "start_time": "14:25",
@@ -174,12 +180,6 @@
    "route": "B1",
    "headsign": "City Wynyard",
    "start_time": "13:39",
-   "late_min": 51
-  },
-  {
-   "route": "100",
-   "headsign": "Taronga Zoo via City QVB",
-   "start_time": "17:28",
    "late_min": 51
   },
   {
@@ -759,6 +759,16 @@
    "start_time": "21:05",
    "route": "180",
    "headsign": "Warringah Mall"
+  },
+  {
+   "start_time": "21:50",
+   "route": "166",
+   "headsign": "Frenchs Forest"
+  },
+  {
+   "start_time": "22:49",
+   "route": "160X",
+   "headsign": "Chatswood"
   }
  ],
  "school_cancelled": []
