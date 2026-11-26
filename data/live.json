@@ -1,14 +1,14 @@
 {
- "updated": "2026-11-26T15:05:32+11:00",
+ "updated": "2026-11-26T15:10:37+11:00",
  "status": "ok",
  "date": "2026-11-26",
  "scheduled": 3456,
  "count": 99,
  "cancel_pct": 2.9,
- "observed": 451,
- "late": 101,
- "late_pct": 22.4,
- "avg_late_min": 11.7,
+ "observed": 472,
+ "late": 109,
+ "late_pct": 23.1,
+ "avg_late_min": 11.5,
  "am": {
   "scheduled": 800,
   "cancelled": 0
@@ -135,16 +135,16 @@
    "late_min": 86
   },
   {
+   "route": "B1",
+   "headsign": "Mona Vale",
+   "start_time": "14:45",
+   "late_min": 60
+  },
+  {
    "route": "263",
    "headsign": "City Gresham St",
    "start_time": "13:37",
    "late_min": 58
-  },
-  {
-   "route": "B1",
-   "headsign": "Mona Vale",
-   "start_time": "14:45",
-   "late_min": 55
   },
   {
    "route": "B1",
@@ -198,7 +198,13 @@
    "route": "114",
    "headsign": "RNS Hospital",
    "start_time": "14:39",
-   "late_min": 17
+   "late_min": 18
+  },
+  {
+   "route": "173X",
+   "headsign": "City Wynyard",
+   "start_time": "14:50",
+   "late_min": 15
   },
   {
    "route": "180",
@@ -210,12 +216,6 @@
    "route": "114",
    "headsign": "Balmoral Beach",
    "start_time": "14:03",
-   "late_min": 14
-  },
-  {
-   "route": "199",
-   "headsign": "Manly",
-   "start_time": "13:45",
    "late_min": 14
   }
  ],
