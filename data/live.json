@@ -1,17 +1,17 @@
 {
- "updated": "2026-11-27T08:26:40+11:00",
+ "updated": "2026-11-27T08:31:46+11:00",
  "status": "ok",
  "date": "2026-11-27",
  "scheduled": 3416,
  "count": 176,
  "cancel_pct": 5.2,
- "observed": 908,
+ "observed": 920,
  "late": 33,
  "late_pct": 3.6,
- "avg_late_min": 17.6,
- "ontime": 875,
+ "avg_late_min": 17.8,
+ "ontime": 887,
  "ontime_pct": 96.4,
- "anywhere_late_pct": 21.3,
+ "anywhere_late_pct": 22.4,
  "am": {
   "scheduled": 760,
   "cancelled": 76
@@ -150,16 +150,16 @@
    "late_min": 47
   },
   {
+   "route": "B1",
+   "headsign": "Mona Vale",
+   "start_time": "08:26",
+   "late_min": 41
+  },
+  {
    "route": "170X",
    "headsign": "City Wynyard",
    "start_time": "07:00",
    "late_min": 36
-  },
-  {
-   "route": "B1",
-   "headsign": "Mona Vale",
-   "start_time": "08:26",
-   "late_min": 35
   },
   {
    "route": "201",
