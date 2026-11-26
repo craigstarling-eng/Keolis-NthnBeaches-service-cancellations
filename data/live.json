@@ -1,24 +1,24 @@
 {
- "updated": "2026-11-27T07:15:18+11:00",
+ "updated": "2026-11-27T07:20:24+11:00",
  "status": "ok",
  "date": "2026-11-27",
  "scheduled": 3416,
- "count": 139,
- "cancel_pct": 4.1,
- "observed": 680,
- "late": 11,
- "late_pct": 1.6,
- "avg_late_min": 16.1,
- "ontime": 669,
- "ontime_pct": 98.4,
- "anywhere_late_pct": 12.4,
+ "count": 152,
+ "cancel_pct": 4.4,
+ "observed": 709,
+ "late": 12,
+ "late_pct": 1.7,
+ "avg_late_min": 15.7,
+ "ontime": 697,
+ "ontime_pct": 98.3,
+ "anywhere_late_pct": 12.6,
  "am": {
   "scheduled": 760,
-  "cancelled": 73
+  "cancelled": 74
  },
  "pm": {
   "scheduled": 748,
-  "cancelled": 22
+  "cancelled": 26
  },
  "gaps": [
   {
@@ -132,16 +132,16 @@
  ],
  "late_trips": [
   {
+   "route": "160X",
+   "headsign": "Dee Why",
+   "start_time": "06:30",
+   "late_min": 50
+  },
+  {
    "route": "100",
    "headsign": "Taronga Zoo via City QVB",
    "start_time": "07:18",
    "late_min": 47
-  },
-  {
-   "route": "160X",
-   "headsign": "Dee Why",
-   "start_time": "06:30",
-   "late_min": 45
   },
   {
    "route": "100",
@@ -564,6 +564,11 @@
    "headsign": "City Wynyard"
   },
   {
+   "start_time": "08:40",
+   "route": "B1",
+   "headsign": "Mona Vale"
+  },
+  {
    "start_time": "08:44",
    "route": "114",
    "headsign": "RNS Hospital"
@@ -669,6 +674,11 @@
    "headsign": "Warringah Mall"
   },
   {
+   "start_time": "13:25",
+   "route": "B1",
+   "headsign": "City Wynyard"
+  },
+  {
    "start_time": "13:38",
    "route": "144",
    "headsign": "Manly"
@@ -709,6 +719,11 @@
    "headsign": "Palm Beach"
   },
   {
+   "start_time": "14:36",
+   "route": "B1",
+   "headsign": "Mona Vale"
+  },
+  {
    "start_time": "14:41",
    "route": "166",
    "headsign": "Manly"
@@ -717,6 +732,11 @@
    "start_time": "14:43",
    "route": "114",
    "headsign": "Balmoral Beach"
+  },
+  {
+   "start_time": "14:45",
+   "route": "B1",
+   "headsign": "City Wynyard"
   },
   {
    "start_time": "14:50",
@@ -732,6 +752,11 @@
    "start_time": "14:53",
    "route": "160X",
    "headsign": "Chatswood"
+  },
+  {
+   "start_time": "14:58",
+   "route": "B1",
+   "headsign": "City Wynyard"
   },
   {
    "start_time": "14:59",
@@ -764,9 +789,24 @@
    "headsign": "Dee Why"
   },
   {
+   "start_time": "15:19",
+   "route": "114",
+   "headsign": "RNS Hospital"
+  },
+  {
    "start_time": "15:22",
    "route": "160X",
    "headsign": "Chatswood"
+  },
+  {
+   "start_time": "15:23",
+   "route": "B1",
+   "headsign": "City Wynyard"
+  },
+  {
+   "start_time": "15:25",
+   "route": "B1",
+   "headsign": "Mona Vale"
   },
   {
    "start_time": "15:30",
@@ -794,6 +834,11 @@
    "headsign": "Taronga Zoo via City QVB"
   },
   {
+   "start_time": "15:49",
+   "route": "B1",
+   "headsign": "City Wynyard"
+  },
+  {
    "start_time": "15:50",
    "route": "160X",
    "headsign": "Dee Why"
@@ -807,6 +852,11 @@
    "start_time": "15:57",
    "route": "114",
    "headsign": "Balmoral Beach"
+  },
+  {
+   "start_time": "16:00",
+   "route": "B1",
+   "headsign": "Mona Vale"
   },
   {
    "start_time": "16:01",
@@ -834,9 +884,19 @@
    "headsign": "Frenchs Forest"
   },
   {
+   "start_time": "16:15",
+   "route": "B1",
+   "headsign": "Mona Vale"
+  },
+  {
    "start_time": "16:21",
    "route": "199",
    "headsign": "Manly"
+  },
+  {
+   "start_time": "16:26",
+   "route": "B1",
+   "headsign": "City Wynyard"
   },
   {
    "start_time": "16:30",
@@ -852,6 +912,11 @@
    "start_time": "16:37",
    "route": "114",
    "headsign": "RNS Hospital"
+  },
+  {
+   "start_time": "16:40",
+   "route": "B1",
+   "headsign": "Mona Vale"
   },
   {
    "start_time": "16:42",
