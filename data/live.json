@@ -1,24 +1,24 @@
 {
- "updated": "2026-11-27T07:25:29+11:00",
+ "updated": "2026-11-27T07:30:35+11:00",
  "status": "ok",
  "date": "2026-11-27",
  "scheduled": 3416,
- "count": 163,
- "cancel_pct": 4.8,
- "observed": 721,
+ "count": 167,
+ "cancel_pct": 4.9,
+ "observed": 745,
  "late": 13,
- "late_pct": 1.8,
- "avg_late_min": 15.7,
- "ontime": 708,
- "ontime_pct": 98.2,
- "anywhere_late_pct": 12.9,
+ "late_pct": 1.7,
+ "avg_late_min": 16.2,
+ "ontime": 732,
+ "ontime_pct": 98.3,
+ "anywhere_late_pct": 13.7,
  "am": {
   "scheduled": 760,
   "cancelled": 75
  },
  "pm": {
   "scheduled": 748,
-  "cancelled": 32
+  "cancelled": 35
  },
  "gaps": [
   {
@@ -135,7 +135,7 @@
    "route": "160X",
    "headsign": "Dee Why",
    "start_time": "06:30",
-   "late_min": 55
+   "late_min": 60
   },
   {
    "route": "100",
@@ -171,6 +171,12 @@
    "route": "100",
    "headsign": "Taronga Zoo via City QVB",
    "start_time": "07:05",
+   "late_min": 14
+  },
+  {
+   "route": "B1",
+   "headsign": "City Wynyard",
+   "start_time": "07:17",
    "late_min": 14
   },
   {
@@ -213,12 +219,6 @@
    "route": "263",
    "headsign": "Neutral Bay Jn",
    "start_time": "07:00",
-   "late_min": 11
-  },
-  {
-   "route": "199",
-   "headsign": "Palm Beach",
-   "start_time": "06:00",
    "late_min": 11
   }
  ],
@@ -844,6 +844,11 @@
    "headsign": "Mona Vale"
   },
   {
+   "start_time": "15:38",
+   "route": "B1",
+   "headsign": "City Wynyard"
+  },
+  {
    "start_time": "15:40",
    "route": "160X",
    "headsign": "Dee Why"
@@ -969,6 +974,11 @@
    "headsign": "Taronga Zoo via City QVB"
   },
   {
+   "start_time": "16:55",
+   "route": "B1",
+   "headsign": "Mona Vale"
+  },
+  {
    "start_time": "16:57",
    "route": "114",
    "headsign": "RNS Hospital"
@@ -1029,6 +1039,11 @@
    "headsign": "Narraweena"
   },
   {
+   "start_time": "17:50",
+   "route": "B1",
+   "headsign": "City Wynyard"
+  },
+  {
    "start_time": "17:52",
    "route": "B1",
    "headsign": "Mona Vale"
@@ -1037,6 +1052,11 @@
    "start_time": "17:55",
    "route": "B1",
    "headsign": "City Wynyard"
+  },
+  {
+   "start_time": "17:57",
+   "route": "185",
+   "headsign": "Mona Vale"
   }
  ],
  "school_cancelled": []
