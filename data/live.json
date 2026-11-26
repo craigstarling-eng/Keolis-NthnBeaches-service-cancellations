@@ -1,13 +1,13 @@
 {
- "updated": "2026-11-26T19:04:52+11:00",
+ "updated": "2026-11-26T19:09:57+11:00",
  "status": "ok",
  "date": "2026-11-26",
  "scheduled": 3456,
- "count": 111,
+ "count": 112,
  "cancel_pct": 3.2,
- "observed": 1309,
- "late": 642,
- "late_pct": 49.0,
+ "observed": 1319,
+ "late": 644,
+ "late_pct": 48.8,
  "avg_late_min": 10.9,
  "am": {
   "scheduled": 800,
@@ -15,7 +15,7 @@
  },
  "pm": {
   "scheduled": 765,
-  "cancelled": 47
+  "cancelled": 48
  },
  "gaps": [
   {
@@ -684,6 +684,11 @@
    "start_time": "18:39",
    "route": "182",
    "headsign": "Powderworks Rd"
+  },
+  {
+   "start_time": "18:42",
+   "route": "230",
+   "headsign": "Milsons Point"
   },
   {
    "start_time": "18:43",
