@@ -1,13 +1,13 @@
 {
- "updated": "2026-11-26T16:32:06+11:00",
+ "updated": "2026-11-26T16:37:12+11:00",
  "status": "ok",
  "date": "2026-11-26",
  "scheduled": 3456,
  "count": 103,
  "cancel_pct": 3.0,
- "observed": 815,
- "late": 302,
- "late_pct": 37.1,
+ "observed": 839,
+ "late": 308,
+ "late_pct": 36.7,
  "avg_late_min": 11.3,
  "am": {
   "scheduled": 800,
@@ -177,16 +177,16 @@
    "late_min": 43
   },
   {
+   "route": "154X",
+   "headsign": "Dee Why",
+   "start_time": "15:55",
+   "late_min": 42
+  },
+  {
    "route": "173X",
    "headsign": "City Wynyard",
    "start_time": "14:50",
    "late_min": 40
-  },
-  {
-   "route": "154X",
-   "headsign": "Dee Why",
-   "start_time": "15:55",
-   "late_min": 37
   },
   {
    "route": "114",
