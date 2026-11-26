@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Northern Beaches Bus Tracker</title>
+<meta name="description" content="Independent daily tracking of cancelled and late Keolis Northern Beaches bus services, from Transport for NSW open data.">
+<style>
+.viz-root{color-scheme:light;--bg:#f6f6f4;--surface-1:#fff;--text-primary:#191919;--text-secondary:#666;--grid:#e6e6e6;--border:#e2e2e2;
+--series-1:#257de0;--muted:#c9c9c9;--critical:#d93636;--good:#008a17;--warn:#b86e00;--event:#f2a600}
+@media (prefers-color-scheme:dark){.viz-root{color-scheme:dark;--bg:#111;--surface-1:#191919;--text-primary:#efefef;--text-secondary:#9c9c9c;--grid:#2c2c2c;--border:#2e2e2e;
+--series-1:#338ced;--muted:#4a4a4a;--critical:#eb6263;--good:#0aac23;--warn:#e0a030;--event:#d28e05}}
+*{box-sizing:border-box}
+body{margin:0;font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+.viz-root{background:var(--bg);color:var(--text-primary);min-height:100vh;padding:16px;max-width:880px;margin:0 auto}
+h1{font-size:21px;margin:0 0 2px}
+h2{font-size:16px;margin:0 0 4px}
+.lede{font-size:13px;color:var(--text-secondary);margin:0 0 10px}
+.sub{color:var(--text-secondary);font-size:13px}
+.card{background:var(--surface-1);border:1px solid var(--border);border-radius:12px;padding:14px;margin-top:14px}
+.tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:14px}
+@media(min-width:680px){.tiles{grid-template-columns:repeat(4,1fr)}}
+.tile{background:var(--surface-1);border:1px solid var(--border);border-radius:12px;padding:12px}
+.tile .n{font-size:28px;font-weight:650;font-variant-numeric:tabular-nums;line-height:1.15}
+.tile .l{font-size:13px;color:var(--text-secondary)}
+.tile .s{font-size:12px;color:var(--text-secondary);margin-top:2px}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;flex:none;vertical-align:middle}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:2px 8px;border-radius:99px;border:1px solid var(--border)}
+.note{background:var(--surface-1);border:1px dashed var(--border);border-radius:10px;padding:8px 12px;font-size:13px;color:var(--text-secondary);margin-top:12px}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:7px 4px;border-bottom:1px solid var(--grid);font-size:14px;vertical-align:middle}
+th{color:var(--text-secondary);font-weight:500;font-size:12px}
+td.r,th.r{text-align:right}
+tr.home td{font-weight:650}
+.seg{display:flex;gap:6px;margin:8px 0 10px;flex-wrap:wrap}
+.seg button,.btn,select{font:inherit;font-size:13px;padding:5px 11px;border-radius:99px;border:1px solid var(--border);background:var(--surface-1);color:var(--text-primary);cursor:pointer}
+.seg button[aria-pressed=true],.btn.primary{background:var(--text-primary);color:var(--surface-1)}
+select{border-radius:8px;padding:6px 10px;min-width:140px}
+.chart{position:relative}
+.tip{position:absolute;pointer-events:none;background:var(--surface-1);border:1px solid var(--border);border-radius:8px;padding:6px 8px;font-size:12px;box-shadow:0 2px 8px #0002;display:none;white-space:nowrap;z-index:2}
+.scroll{max-height:340px;overflow:auto}
+.bar{height:8px;border-radius:0 4px 4px 0;display:inline-block;vertical-align:middle;background:var(--series-1)}
+.bar.muted{background:var(--muted)}
+.empty{color:var(--text-secondary);font-size:14px;padding:6px 0}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--text-secondary);flex-wrap:wrap;margin-bottom:4px}
+.legend span{display:flex;align-items:center;gap:6px}
+.grid2{display:grid;gap:14px}
+@media(min-width:680px){.grid2{grid-template-columns:1fr 1fr}}
+.share-out{margin-top:10px}
+.share-out canvas{max-width:100%;border-radius:10px;border:1px solid var(--border)}
+textarea{width:100%;font:inherit;font-size:13px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text-primary);padding:8px;min-height:84px}
+details summary{cursor:pointer;font-weight:600}
+a{color:var(--series-1)}
+.warn{color:var(--critical);font-weight:600}
+</style>
+</head>
+<body>
+<div class="viz-root">
+  <h1>Northern Beaches bus tracker</h1>
+  <p class="lede">Independent tracking of cancelled and late Keolis Northern Beaches (Region 8) bus services, built from Transport for NSW open data.</p>
+  <div class="sub"><span id="live" class="pill">Loading…</span> <span id="upd"></span></div>
+  <div id="history-note" class="note" hidden></div>
+
+  <div class="tiles" id="tiles"></div>
+
+  <!-- Share -->
+  <div class="card">
+    <h2>Share these numbers</h2>
+    <p class="lede">Make an image and a short post for Facebook, X or a community group.</p>
+    <div class="seg" id="shareSeg"></div>
+    <button class="btn primary" id="makeShare">Create image</button>
+    <div class="share-out" id="shareOut" hidden>
+      <canvas id="shareCanvas" width="1080" height="1080"></canvas>
+      <div style="display:flex;gap:8px;margin:8px 0;flex-wrap:wrap"><button class="btn" id="dlShare">Download image</button><button class="btn" id="copyShare">Copy text</button></div>
+      <textarea id="shareText" readonly></textarea>
+    </div>
+  </div>
+
+  <!-- Today -->
+  <div class="card">
+    <h2>Longest waits caused by cancellations today</h2>
+    <p class="lede">The time between the bus before and the bus after a cancelled service, measured at the start of the route.</p>
+    <table><thead><tr><th>Route</th><th>Towards</th><th>Gap</th><th class="r">Wait</th><th class="r">Usual</th></tr></thead><tbody id="gaps"></tbody></table>
+    <div id="gapsEmpty" class="empty" hidden>No gaps caused by cancellations yet today.</div>
+  </div>
+
+  <div class="grid2">
+    <div class="card" style="margin-top:14px">
+      <h2>Today's cancelled trips</h2>
+      <div class="scroll"><table><thead><tr><th>Time</th><th>Route</th><th>To</th></tr></thead><tbody id="today"></tbody></table></div>
+      <div id="todayEmpty" class="empty" hidden>No cancellations logged yet today.</div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <h2>Latest-running trips today</h2>
+      <div class="scroll"><table><thead><tr><th>Time</th><th>Route</th><th>To</th><th class="r">Late</th></tr></thead><tbody id="lateTrips"></tbody></table></div>
+      <div id="lateEmpty" class="empty" hidden>No trips more than 5 minutes late yet today.</div>
+    </div>
+  </div>
+
+  <!-- History -->
+  <div class="card">
+    <h2>Day by day</h2>
+    <div class="seg" id="metricSeg"></div>
+    <div class="seg" id="range" style="margin-top:-4px"></div>
+    <div class="legend" id="chartLegend"></div>
+    <div class="chart" id="chart"><div class="tip" id="tip"></div></div>
+  </div>
+
+  <div class="card">
+    <h2>Peak hour vs off peak</h2>
+    <p class="lede">Share of scheduled trips cancelled. Peaks are trips starting 6–9am and 4–7pm.</p>
+    <div class="seg" id="peakSeg"></div>
+    <table><tbody id="peak"></tbody></table>
+  </div>
+
+  <!-- Routes -->
+  <div class="card">
+    <h2>Look up your route</h2>
+    <select id="routeSel" aria-label="Choose a route"></select>
+    <div id="routeOut"></div>
+  </div>
+
+  <div class="card">
+    <h2>Worst routes (last 30 days)</h2>
+    <p class="lede">Routes with at least 50 scheduled trips, ranked by share of trips cancelled.</p>
+    <table><thead><tr><th>Route</th><th>Cancelled</th><th class="r">Rate</th><th class="r">Late</th></tr></thead><tbody id="league"></tbody></table>
+  </div>
+
+  <!-- Compare -->
+  <div class="card">
+    <h2>How the Northern Beaches compares</h2>
+    <p class="lede">Every Sydney bus contract region, measured the same way. Ranked by share of trips cancelled.</p>
+    <div class="seg" id="regSeg"></div>
+    <table><thead><tr><th>Operator</th><th>Cancelled</th><th class="r">Rate</th><th class="r">Late</th></tr></thead><tbody id="regions"></tbody></table>
+    <div id="regEmpty" class="empty" hidden>Other regions' timetables are still loading (this takes about an hour after setup).</div>
+  </div>
+
+  <div class="grid2">
+    <div class="card" style="margin-top:14px">
+      <h2>Cancellations by start hour</h2>
+      <div class="chart" id="hours"><div class="tip" id="tip2"></div></div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <h2>Average cancellations by weekday</h2>
+      <table><tbody id="wd"></tbody></table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Totals</h2>
+    <table><thead><tr><th></th><th class="r">7 days</th><th class="r">30 days</th><th class="r">All</th></tr></thead><tbody id="totals"></tbody></table>
+    <div class="sub" id="since" style="margin-top:6px"></div>
+  </div>
+
+  <div class="card" id="eventsCard" hidden>
+    <h2>Marked days</h2>
+    <table><tbody id="events"></tbody></table>
+  </div>
+
+  <div class="card">
+    <details>
+      <summary>How this is measured</summary>
+      <ul class="sub" style="padding-left:18px">
+        <li><b>Source.</b> Transport for NSW open data: the live bus trip-updates feed (GTFS-realtime) and the published timetables. The data is checked about every 10 minutes.</li>
+        <li><b>Cancelled.</b> A trip the live feed marks as cancelled. Each trip is counted once per day.</li>
+        <li><b>Cancellation rate.</b> Cancelled trips divided by trips scheduled that day in the published timetable.</li>
+        <li><b>Late.</b> A trip that was more than 5 minutes behind timetable at any point we checked it. This is not identical to the official Transport for NSW on-time measure, which uses departure from the first stop. Because checks are about 10 minutes apart, some short delays are missed.</li>
+        <li><b>Longest waits.</b> The gap between the scheduled start of the bus before and the bus after a cancelled trip on the same route and direction.</li>
+        <li><b>Comparisons.</b> Every Sydney contract region is measured with exactly the same method.</li>
+        <li><b>Limits.</b> If the live feed is down, nothing is recorded for that time. Tracking began on <span id="mStart"></span>. Marked days (strikes, storms) are shown on the charts so they can be read in context.</li>
+      </ul>
+      <p class="sub">This site is independent and not affiliated with Keolis or Transport for NSW. For official figures see <a href="https://www.transport.nsw.gov.au/data-and-research/data-and-insights/bus-performance-reports" target="_blank" rel="noopener">Transport for NSW bus performance reports</a>.</p>
+    </details>
+  </div>
+
+  <div class="card">
+    <h2>Download the data</h2>
+    <ul class="sub" style="padding-left:18px">
+      <li><a href="data/cancellations.csv" download>Every cancelled trip (CSV)</a></li>
+      <li><a href="data/history/r8_daily.csv" download>Daily Northern Beaches totals (CSV)</a></li>
+      <li><a href="data/history/r8_routes_daily.csv" download>Daily totals by route (CSV)</a></li>
+      <li><a href="data/history/regions_daily.csv" download>Daily totals for all Sydney regions (CSV)</a></li>
+    </ul>
+  </div>
+
+  <p class="sub">Source: Transport for NSW open data, licensed CC BY 4.0. Updates about every 10 minutes.</p>
+</div>
+
+<script>
+let S, L, R, G, E = [];
+let state = {metric: "rate", range: 30, peak: "30", reg: "d30", share: "today", route: null};
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const pc = v => v == null ? "–" : v.toFixed(1) + "%";
+const pct = (a, b) => b ? 100 * a / b : null;
+const nf = n => (n ?? 0).toLocaleString("en-AU");
+const dfmt = (d, o) => new Date(d + "T12:00:00").toLocaleDateString("en-AU", o || {weekday: "short", day: "numeric", month: "short"});
+
+async function j(path) { const r = await fetch(path + "?t=" + Date.now()); if (!r.ok) throw new Error(path); return r.json(); }
+async function load() {
+  try { [L, S] = await Promise.all([j("data/live.json"), j("data/summary.json")]); }
+  catch (e) { $("live").textContent = "No data yet"; return; }
+  R = await j("data/routes.json").catch(() => ({}));
+  G = await j("data/regions.json").catch(() => ({}));
+  E = (await j("events.json").catch(() => ({events: []}))).events || [];
+  render();
+}
+
+function seg(el, opts, cur, cb) {
+  el.innerHTML = opts.map(([v, l]) => `<button aria-pressed="${String(v) === String(cur)}" data-v="${v}">${l}</button>`).join("");
+  el.onclick = e => { const v = e.target.dataset.v; if (v !== undefined) cb(v); };
+}
+
+function render() {
+  const upd = new Date(L.updated), mins = Math.round((Date.now() - upd) / 60000), fresh = mins <= 30 && L.status === "ok";
+  $("live").innerHTML = `<span class="dot" style="background:var(${fresh ? "--good" : "--critical"})"></span>${fresh ? "Live" : "Delayed"}`;
+  $("upd").textContent = `Updated ${upd.toLocaleTimeString("en-AU", {hour: "numeric", minute: "2-digit", timeZone: "Australia/Sydney"})} (${mins} min ago)${L.status !== "ok" ? " · " + L.status : ""}`;
+  const days = S.days_tracked || 1;
+  $("history-note").hidden = days >= 7;
+  $("history-note").textContent = `Building history: ${days} day${days === 1 ? "" : "s"} tracked so far. Weekly and monthly figures become meaningful after the first week. Today's figures started part-way through the first day.`;
+
+  // headline tiles
+  const g0 = (L.gaps || []).find(g => g.gap_min);
+  const peakS = (L.am?.scheduled || 0) + (L.pm?.scheduled || 0), peakC = (L.am?.cancelled || 0) + (L.pm?.cancelled || 0);
+  $("tiles").innerHTML = [
+    ["Cancelled today", nf(L.count), L.scheduled ? `${pc(L.cancel_pct)} of ${nf(L.scheduled)} scheduled trips` : ""],
+    ["Late today (5+ min)", pc(L.late_pct), L.observed ? `${nf(L.late)} of ${nf(L.observed)} trips tracked` : "No running trips tracked yet"],
+    ["Peak-hour cancellations", nf(peakC), peakS ? `${pc(pct(peakC, peakS))} of peak trips` : ""],
+    ["Longest wait caused", g0 ? g0.gap_min + " min" : "–", g0 ? `Route ${esc(g0.route)}, ${g0.from}–${g0.to}` : "No gaps yet today"],
+  ].map(([l, n, s]) => `<div class="tile"><div class="l">${l}</div><div class="n">${n}</div><div class="s">${s}</div></div>`).join("");
+
+  // gaps
+  const gaps = (L.gaps || []).slice(0, 10);
+  $("gaps").innerHTML = gaps.map(g => `<tr><td><b>${esc(g.route)}</b></td><td>${esc(g.headsign)}</td><td>${g.from}–${esc(g.to)}${g.cancelled_in_row > 1 ? ` <span class="sub">(${g.cancelled_in_row} in a row)</span>` : ""}</td><td class="r ${g.gap_min && g.normal_min && g.gap_min >= 2 * g.normal_min ? "warn" : ""}">${g.gap_min ? g.gap_min + " min" : "last bus"}</td><td class="r">${g.normal_min ? Math.round(g.normal_min) + " min" : "–"}</td></tr>`).join("");
+  $("gapsEmpty").hidden = gaps.length > 0;
+
+  $("today").innerHTML = (L.trips || []).map(t => `<tr><td>${esc(t.start_time)}</td><td><b>${esc(t.route)}</b></td><td>${esc(t.headsign)}</td></tr>`).join("");
+  $("todayEmpty").hidden = (L.trips || []).length > 0;
+  $("lateTrips").innerHTML = (L.late_trips || []).map(t => `<tr><td>${esc(t.start_time)}</td><td><b>${esc(t.route)}</b></td><td>${esc(t.headsign)}</td><td class="r">${t.late_min} min</td></tr>`).join("");
+  $("lateEmpty").hidden = (L.late_trips || []).length > 0;
+
+  seg($("shareSeg"), [["today", "Today"], ["7", "Last 7 days"], ["30", "Last 30 days"]], state.share, v => { state.share = v; render(); });
+  seg($("metricSeg"), [["rate", "% cancelled"], ["count", "Number cancelled"], ["late", "% late"], ["gap", "Longest wait"]], state.metric, v => { state.metric = v; render(); });
+  seg($("range"), [[7, "7 days"], [30, "30 days"], [90, "90 days"], [365, "1 year"]], state.range, v => { state.range = +v; render(); });
+  dailyChart();
+
+  seg($("peakSeg"), [["7", "7 days"], ["30", "30 days"], ["all", "All time"]], state.peak, v => { state.peak = v; render(); });
+  const T = S.totals[state.peak], pmx = Math.max(1, T.am_pct || 0, T.pm_pct || 0, T.off_pct || 0);
+  $("peak").innerHTML = [["Morning peak (6–9am)", T.am_pct, T.am_cancelled], ["Evening peak (4–7pm)", T.pm_pct, T.pm_cancelled], ["Off peak", T.off_pct, T.cancelled - T.am_cancelled - T.pm_cancelled]]
+    .map(([l, v, n]) => `<tr><td style="width:42%">${l}</td><td><span class="bar" style="width:${Math.max(2, (v || 0) / pmx * 100)}%"></span></td><td class="r" style="width:70px"><b>${pc(v)}</b></td><td class="r sub" style="width:60px">${nf(n)}</td></tr>`).join("");
+
+  // route lookup
+  const names = Object.keys(R).sort((a, b) => a.localeCompare(b, "en", {numeric: true}));
+  if (!state.route || !R[state.route]) state.route = (S.league[0] && S.league[0].route) || names[0];
+  $("routeSel").innerHTML = names.map(n => `<option ${n === state.route ? "selected" : ""}>${esc(n)}</option>`).join("");
+  $("routeSel").onchange = e => { state.route = e.target.value; render(); };
+  routeDetail();
+
+  $("league").innerHTML = S.league.length ? S.league.slice(0, 10).map(r => `<tr><td><b>${esc(r.route)}</b></td><td>${nf(r.cancelled)} <span class="sub">of ${nf(r.scheduled)}</span></td><td class="r"><b>${pc(r.cancel_pct)}</b></td><td class="r">${pc(r.late_pct)}</td></tr>`).join("") : `<tr><td class="empty">Not enough data yet</td></tr>`;
+
+  seg($("regSeg"), [["today", "Today"], ["d7", "7 days"], ["d30", "30 days"]], state.reg, v => { state.reg = v; render(); });
+  const regs = (G[state.reg] || []), rmx = Math.max(1, ...regs.map(r => r.cancel_pct || 0));
+  $("regions").innerHTML = regs.map((r, i) => `<tr class="${r.home ? "home" : ""}"><td>${i + 1}. ${esc(r.name)}${r.home ? " ◀" : ""}</td><td>${nf(r.cancelled)} <span class="sub">of ${nf(r.scheduled)}</span></td><td class="r"><span class="bar ${r.home ? "" : "muted"}" style="width:${Math.max(4, (r.cancel_pct || 0) / rmx * 60)}px;margin-right:6px"></span>${pc(r.cancel_pct)}</td><td class="r">${pc(r.late_pct)}</td></tr>`).join("");
+  $("regEmpty").hidden = regs.filter(r => !r.home).length > 0;
+
+  hourChart();
+  const names7 = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"], wv = S.by_weekday_avg, wmx = Math.max(1, ...wv.map(v => v || 0));
+  $("wd").innerHTML = wv.map((v, i) => `<tr><td style="width:50px">${names7[i]}</td><td><span class="bar" style="width:${v == null ? 0 : Math.max(3, v / wmx * 100)}%"></span></td><td class="r" style="width:60px">${v == null ? "–" : v.toFixed(1)}</td></tr>`).join("");
+
+  const TT = S.totals, row = (l, f) => `<tr><td>${l}</td>${["7", "30", "all"].map(k => `<td class="r">${f(TT[k])}</td>`).join("")}</tr>`;
+  $("totals").innerHTML = row("Scheduled trips", t => nf(t.scheduled)) + row("Cancelled", t => `<b>${nf(t.cancelled)}</b>`) + row("Cancellation rate", t => pc(t.cancel_pct)) + row("Late 5+ min", t => pc(t.late_pct));
+  $("since").textContent = `Tracking since ${dfmt(S.first_date, {day: "numeric", month: "short", year: "numeric"})} (${days} day${days === 1 ? "" : "s"})`;
+  $("mStart").textContent = dfmt(S.first_date, {day: "numeric", month: "long", year: "numeric"});
+
+  $("eventsCard").hidden = !E.length;
+  $("events").innerHTML = E.map(e => `<tr><td style="width:120px">${dfmt(e.date)}</td><td>${esc(e.note)}</td></tr>`).join("");
+}
+
+function datesBack(n) { const out = [], end = new Date(L.date + "T12:00:00"); for (let i = n - 1; i >= 0; i--) out.push(new Date(end - i * 864e5).toISOString().slice(0, 10)); return out; }
+
+function bars(el, tip, labels, vals, tipText, every, opts = {}) {
+  const w = el.clientWidth || 600, h = 210, p = {l: 38, r: 6, t: 12, b: 24}, n = vals.length;
+  const vmax = Math.max(opts.minMax || 4, ...vals.map(v => v || 0));
+  const step = vmax <= 4 ? 1 : vmax <= 10 ? 2.5 : Math.pow(10, Math.floor(Math.log10(vmax))) / (vmax / Math.pow(10, Math.floor(Math.log10(vmax))) < 2.5 ? 2 : 1);
+  const yMax = Math.ceil(vmax / step) * step, bw = (w - p.l - p.r) / n, y = v => (h - p.t - p.b) * v / yMax;
+  let g = "";
+  for (let k = 0; k <= 4; k++) { const v = yMax * k / 4, yy = h - p.b - y(v); g += `<line x1="${p.l}" x2="${w - p.r}" y1="${yy}" y2="${yy}" stroke="var(--grid)"/><text x="${p.l - 6}" y="${yy + 4}" text-anchor="end" font-size="11" fill="var(--text-secondary)">${+v.toFixed(1)}${opts.unit || ""}</text>`; }
+  vals.forEach((v, i) => {
+    const gap = n > 60 ? 1 : 2, bwid = Math.max(1, Math.min(36, bw - gap)), x0 = p.l + i * bw + (bw - bwid) / 2, hh = y(v || 0), r = Math.min(4, bwid / 2), b = h - p.b;
+    if (opts.marks && opts.marks[i]) g += `<rect x="${x0}" y="${p.t}" width="${bwid}" height="${h - p.t - p.b}" fill="var(--event)" opacity=".18"/>`;
+    if (v > 0) g += `<path d="M${x0},${b}V${b - hh + r}Q${x0},${b - hh} ${x0 + r},${b - hh}H${x0 + bwid - r}Q${x0 + bwid},${b - hh} ${x0 + bwid},${b - hh + r}V${b}Z" fill="var(--series-1)"/>`;
+    if (i % every === 0) g += `<text x="${x0 + bwid / 2}" y="${h - 6}" text-anchor="middle" font-size="11" fill="var(--text-secondary)">${labels[i]}</text>`;
+    g += `<rect x="${p.l + i * bw}" y="0" width="${bw}" height="${h}" fill="transparent" data-i="${i}"/>`;
+  });
+  el.querySelector("svg")?.remove();
+  el.insertAdjacentHTML("afterbegin", `<svg width="${w}" height="${h}">${g}</svg>`);
+  const svg = el.querySelector("svg");
+  const show = e => { const t = document.elementFromPoint(e.clientX, e.clientY), i = t?.dataset?.i; if (i === undefined) return;
+    tip.innerHTML = tipText(+i); tip.style.display = "block"; tip.style.left = Math.min(p.l + i * bw + bw, w - 170) + "px"; tip.style.top = "8px"; };
+  svg.addEventListener("pointermove", show); svg.addEventListener("pointerdown", show);
+  svg.addEventListener("pointerleave", () => tip.style.display = "none");
+}
+
+function dailyChart() {
+  const ds = datesBack(state.range), byD = Object.fromEntries(S.daily.map(d => [d.date, d])), ev = Object.fromEntries(E.map(e => [e.date, e.note]));
+  const M = {
+    rate: [d => d && d.scheduled ? pct(d.cancelled, d.scheduled) : null, "%", "Share of scheduled trips cancelled"],
+    count: [d => d ? d.cancelled : null, "", "Trips cancelled"],
+    late: [d => d && d.observed ? pct(d.late, d.observed) : null, "%", "Share of tracked trips 5+ min late"],
+    gap: [d => d ? d.longest_gap_min || null : null, "m", "Longest wait caused by a cancellation (minutes)"],
+  }[state.metric];
+  const vals = ds.map(d => M[0](byD[d]));
+  $("chartLegend").innerHTML = `<span><span class="dot" style="background:var(--series-1)"></span>${M[2]}</span>` + (E.length ? `<span><span class="dot" style="background:var(--event)"></span>Marked day</span>` : "");
+  bars($("chart"), $("tip"), ds.map(d => { const x = new Date(d + "T12:00:00"); return x.getDate() + "/" + (x.getMonth() + 1); }), vals,
+    i => { const d = byD[ds[i]]; return `<b>${dfmt(ds[i])}</b><br>` + (d ? `${nf(d.cancelled)} cancelled of ${nf(d.scheduled)} (${pc(pct(d.cancelled, d.scheduled))})<br>Late 5+ min: ${pc(pct(d.late, d.observed))}${d.longest_gap_min ? `<br>Longest wait: ${d.longest_gap_min} min` : ""}` : "Not tracked") + (ev[ds[i]] ? `<br><i>${esc(ev[ds[i]])}</i>` : ""); },
+    Math.ceil(state.range / 6), {unit: M[1] === "%" ? "%" : "", marks: ds.map(d => !!ev[d])});
+}
+
+function hourChart() {
+  bars($("hours"), $("tip2"), [...Array(24)].map((_, i) => i), S.by_hour, i => `<b>${String(i).padStart(2, "0")}:00–${String(i).padStart(2, "0")}:59</b><br>${nf(S.by_hour[i])} cancelled`, 3);
+}
+
+function routeDetail() {
+  const r = R[state.route];
+  if (!r) { $("routeOut").innerHTML = `<p class="empty">No route data yet.</p>`; return; }
+  const t = r.d30;
+  $("routeOut").innerHTML = `<div class="tiles" style="margin-top:10px">
+    <div class="tile"><div class="l">Cancelled (30 days)</div><div class="n">${nf(t.cancelled)}</div><div class="s">of ${nf(t.scheduled)} scheduled</div></div>
+    <div class="tile"><div class="l">Cancellation rate</div><div class="n">${pc(t.cancel_pct)}</div><div class="s">All time: ${pc(r.all.cancel_pct)}</div></div>
+    <div class="tile"><div class="l">Late 5+ min</div><div class="n">${pc(t.late_pct)}</div><div class="s">${nf(t.late)} of ${nf(t.observed)} tracked</div></div>
+    <div class="tile"><div class="l">Days tracked</div><div class="n">${r.daily.length}</div><div class="s">for route ${esc(state.route)}</div></div></div>
+    <div class="chart" id="routeChart" style="margin-top:12px"><div class="tip" id="tip3"></div></div>
+    <h2 style="margin-top:12px">Recent cancellations on route ${esc(state.route)}</h2>
+    <div class="scroll" style="max-height:220px"><table><tbody>${r.recent.length ? r.recent.map(c => `<tr><td style="width:130px">${dfmt(c[0])}</td><td style="width:60px">${esc(c[1])}</td><td>${esc(c[2])}</td></tr>`).join("") : `<tr><td class="empty">None recorded</td></tr>`}</tbody></table></div>`;
+  const dd = r.daily.slice(-30);
+  bars($("routeChart"), $("tip3"), dd.map(d => { const x = new Date(d[0] + "T12:00:00"); return x.getDate() + "/" + (x.getMonth() + 1); }), dd.map(d => d[2]),
+    i => `<b>${dfmt(dd[i][0])}</b><br>${dd[i][2]} cancelled of ${dd[i][1]}<br>Late 5+ min: ${dd[i][4]} of ${dd[i][3]}`, Math.max(1, Math.ceil(dd.length / 6)));
+}
+
+// ---------- share card
+function shareData() {
+  if (state.share === "today") {
+    const g = (L.gaps || []).find(x => x.gap_min);
+    return {title: "Today", when: dfmt(L.date, {weekday: "long", day: "numeric", month: "long"}), cancelled: L.count, scheduled: L.scheduled, rate: L.cancel_pct, late: L.late_pct,
+      extra: g ? `Longest wait: ${g.gap_min} min on route ${g.route}` : ""};
+  }
+  const t = S.totals[state.share], days = Math.min(+state.share, S.days_tracked || 1), worst = S.league[0];
+  return {title: `Last ${state.share} days`, when: days < +state.share ? `${days} day${days === 1 ? "" : "s"} tracked` : `to ${dfmt(L.date, {day: "numeric", month: "long"})}`,
+    cancelled: t.cancelled, scheduled: t.scheduled, rate: t.cancel_pct, late: t.late_pct,
+    extra: worst ? `Worst route: ${worst.route} (${pc(worst.cancel_pct)} cancelled)` : ""};
+}
+function drawShare() {
+  const d = shareData(), c = $("shareCanvas"), x = c.getContext("2d");
+  x.fillStyle = "#0f2747"; x.fillRect(0, 0, 1080, 1080);
+  x.fillStyle = "#ffffff"; x.font = "600 46px system-ui, sans-serif"; x.fillText("Northern Beaches buses", 80, 130);
+  x.fillStyle = "#9fc3f0"; x.font = "36px system-ui, sans-serif"; x.fillText(`${d.title} · ${d.when}`, 80, 190);
+  x.fillStyle = "#ffffff"; x.font = "700 230px system-ui, sans-serif"; x.fillText(nf(d.cancelled), 70, 440);
+  x.font = "500 48px system-ui, sans-serif"; x.fillText("services cancelled", 80, 510);
+  x.fillStyle = "#cfe0f5"; x.font = "40px system-ui, sans-serif";
+  const lines = [d.scheduled ? `${pc(d.rate)} of ${nf(d.scheduled)} scheduled trips` : "", d.late != null ? `${pc(d.late)} of buses ran 5+ minutes late` : "", d.extra].filter(Boolean);
+  lines.forEach((l, i) => x.fillText(l, 80, 620 + i * 70));
+  x.fillStyle = "#6f8fb8"; x.font = "30px system-ui, sans-serif";
+  x.font = "28px system-ui, sans-serif";
+  x.fillText("Keolis Northern Beaches (Region 8) · Data: Transport for NSW", 80, 950);
+  x.fillText(location.host + location.pathname.replace(/index\.html$/, ""), 80, 995, 920);
+  $("shareText").value = `Northern Beaches buses, ${d.title.toLowerCase()} (${d.when}): ${nf(d.cancelled)} Keolis services cancelled${d.scheduled ? ` (${pc(d.rate)} of ${nf(d.scheduled)} scheduled trips)` : ""}${d.late != null ? `, and ${pc(d.late)} of buses ran 5+ minutes late` : ""}.${d.extra ? " " + d.extra + "." : ""} Data from Transport for NSW: ${location.href.split("?")[0]}`;
+  $("shareOut").hidden = false;
+}
+$("makeShare").onclick = drawShare;
+$("dlShare").onclick = () => { const a = document.createElement("a"); a.download = `nb-buses-${L.date}-${state.share}.png`; a.href = $("shareCanvas").toDataURL("image/png"); a.click(); };
+$("copyShare").onclick = async () => { try { await navigator.clipboard.writeText($("shareText").value); $("copyShare").textContent = "Copied"; setTimeout(() => $("copyShare").textContent = "Copy text", 1500); } catch (e) { $("shareText").select(); } };
+
+load(); setInterval(load, 120000);
+let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => S && render(), 150); });
+</script>
+</body>
+</html>
