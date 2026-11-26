@@ -1,14 +1,14 @@
 {
- "updated": "2026-11-26T14:29:49+11:00",
+ "updated": "2026-11-26T14:34:55+11:00",
  "status": "ok",
  "date": "2026-11-26",
  "scheduled": 3456,
  "count": 98,
  "cancel_pct": 2.8,
- "observed": 335,
- "late": 58,
- "late_pct": 17.3,
- "avg_late_min": 9.6,
+ "observed": 352,
+ "late": 63,
+ "late_pct": 17.9,
+ "avg_late_min": 11.0,
  "am": {
   "scheduled": 800,
   "cancelled": 0
@@ -132,7 +132,7 @@
    "route": "111",
    "headsign": "South Mosman Wharf",
    "start_time": "13:09",
-   "late_min": 76
+   "late_min": 86
   },
   {
    "route": "B1",
@@ -141,16 +141,34 @@
    "late_min": 51
   },
   {
+   "route": "179",
+   "headsign": "War Veterans Hm",
+   "start_time": "13:42",
+   "late_min": 43
+  },
+  {
+   "route": "177",
+   "headsign": "Dee Why",
+   "start_time": "14:35",
+   "late_min": 30
+  },
+  {
+   "route": "180",
+   "headsign": "Warringah Mall",
+   "start_time": "15:17",
+   "late_min": 30
+  },
+  {
    "route": "144",
    "headsign": "Manly",
    "start_time": "14:04",
-   "late_min": 26
+   "late_min": 28
   },
   {
    "route": "144",
    "headsign": "Chatswood",
    "start_time": "15:10",
-   "late_min": 15
+   "late_min": 16
   },
   {
    "route": "114",
@@ -159,9 +177,9 @@
    "late_min": 14
   },
   {
-   "route": "179",
-   "headsign": "War Veterans Hm",
-   "start_time": "13:42",
+   "route": "100",
+   "headsign": "Taronga Zoo via City QVB",
+   "start_time": "13:39",
    "late_min": 13
   },
   {
@@ -199,24 +217,6 @@
    "headsign": "Manly",
    "start_time": "12:45",
    "late_min": 10
-  },
-  {
-   "route": "100",
-   "headsign": "Taronga Zoo via City QVB",
-   "start_time": "13:39",
-   "late_min": 9
-  },
-  {
-   "route": "173X",
-   "headsign": "City Wynyard",
-   "start_time": "14:12",
-   "late_min": 9
-  },
-  {
-   "route": "179",
-   "headsign": "Warringah Mall",
-   "start_time": "14:17",
-   "late_min": 9
   }
  ],
  "trips": [
