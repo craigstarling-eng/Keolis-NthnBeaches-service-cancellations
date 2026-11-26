@@ -1,13 +1,13 @@
 {
- "updated": "2026-11-26T17:58:42+11:00",
+ "updated": "2026-11-26T18:03:48+11:00",
  "status": "ok",
  "date": "2026-11-26",
  "scheduled": 3456,
- "count": 107,
+ "count": 108,
  "cancel_pct": 3.1,
- "observed": 1146,
- "late": 530,
- "late_pct": 46.2,
+ "observed": 1160,
+ "late": 542,
+ "late_pct": 46.7,
  "avg_late_min": 11.0,
  "am": {
   "scheduled": 800,
@@ -15,7 +15,7 @@
  },
  "pm": {
   "scheduled": 765,
-  "cancelled": 45
+  "cancelled": 46
  },
  "gaps": [
   {
@@ -141,6 +141,12 @@
    "late_min": 86
   },
   {
+   "route": "B1",
+   "headsign": "Mona Vale",
+   "start_time": "17:40",
+   "late_min": 59
+  },
+  {
    "route": "263",
    "headsign": "City Gresham St",
    "start_time": "13:37",
@@ -163,12 +169,6 @@
    "headsign": "Milsons Point",
    "start_time": "14:25",
    "late_min": 56
-  },
-  {
-   "route": "B1",
-   "headsign": "Mona Vale",
-   "start_time": "17:40",
-   "late_min": 54
   },
   {
    "route": "B1",
@@ -614,6 +614,11 @@
    "start_time": "17:40",
    "route": "144",
    "headsign": "Chatswood"
+  },
+  {
+   "start_time": "17:46",
+   "route": "162",
+   "headsign": "Manly"
   },
   {
    "start_time": "17:52",
