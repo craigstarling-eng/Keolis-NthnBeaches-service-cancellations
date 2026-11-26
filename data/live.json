@@ -1,13 +1,13 @@
 {
- "updated": "2026-11-26T17:48:30+11:00",
+ "updated": "2026-11-26T17:53:36+11:00",
  "status": "ok",
  "date": "2026-11-26",
  "scheduled": 3456,
  "count": 107,
  "cancel_pct": 3.1,
- "observed": 1114,
- "late": 507,
- "late_pct": 45.5,
+ "observed": 1130,
+ "late": 522,
+ "late_pct": 46.2,
  "avg_late_min": 11.0,
  "am": {
   "scheduled": 800,
@@ -171,6 +171,12 @@
    "late_min": 51
   },
   {
+   "route": "B1",
+   "headsign": "Mona Vale",
+   "start_time": "17:40",
+   "late_min": 48
+  },
+  {
    "route": "230",
    "headsign": "Mosman Bay Wharf",
    "start_time": "15:26",
@@ -181,12 +187,6 @@
    "headsign": "RNS Hospital",
    "start_time": "14:39",
    "late_min": 45
-  },
-  {
-   "route": "B1",
-   "headsign": "Mona Vale",
-   "start_time": "17:40",
-   "late_min": 43
   },
   {
    "route": "179",
