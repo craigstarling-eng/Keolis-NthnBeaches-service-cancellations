@@ -1,14 +1,14 @@
 {
- "updated": "2026-11-26T18:24:09+11:00",
+ "updated": "2026-11-26T18:29:15+11:00",
  "status": "ok",
  "date": "2026-11-26",
  "scheduled": 3456,
  "count": 110,
  "cancel_pct": 3.2,
- "observed": 1220,
- "late": 577,
- "late_pct": 47.3,
- "avg_late_min": 11.1,
+ "observed": 1231,
+ "late": 591,
+ "late_pct": 48.0,
+ "avg_late_min": 11.0,
  "am": {
   "scheduled": 800,
   "cancelled": 0
@@ -144,7 +144,7 @@
    "route": "B1",
    "headsign": "Mona Vale",
    "start_time": "17:40",
-   "late_min": 79
+   "late_min": 84
   },
   {
    "route": "263",
