@@ -1,12 +1,13 @@
 name: collect
-# Each run keeps checking the live feed every 5 minutes for about 5 hours.
-# The hourly schedule queues the next run so there is no gap.
+# Each run keeps checking the live feed every 5 minutes for about 5 hours,
+# then starts the next run itself. The hourly schedule is only a backup.
 on:
   schedule:
     - cron: "7 * * * *"
   workflow_dispatch:
 permissions:
   contents: write
+  actions: write
 concurrency:
   group: collect
   cancel-in-progress: false
@@ -30,6 +31,7 @@ jobs:
         env:
           TFNSW_API_KEY: ${{ secrets.TFNSW_API_KEY }}
         run: |
+          echo "STARTED_AT=$(date +%s)" >> "$GITHUB_ENV"
           git config user.name tracker-bot
           git config user.email actions@users.noreply.github.com
           end=$(( $(date +%s) + 310*60 ))
@@ -49,3 +51,14 @@ jobs:
         with:
           path: cache
           key: tfnsw-${{ github.run_id }}
+      - name: Start the next run
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Only chain if this run lasted a while, so a broken run can't loop rapidly.
+          if [ $(( $(date +%s) - ${STARTED_AT:-0} )) -gt 1800 ]; then
+            gh workflow run collect.yml --ref main -R "${{ github.repository }}"
+          else
+            echo "Run ended early; not starting another automatically."
+          fi

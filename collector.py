@@ -40,6 +40,7 @@ HOME_MAX_AGE_DAYS = 3
 OTHER_MAX_AGE_DAYS = 7
 MAX_REGION_DOWNLOADS_PER_RUN = 3
 LATE_SECONDS = 300                        # "late" = more than 5 minutes behind
+EARLY_SECONDS = -60                       # TfNSW on-time window: no more than 1 min early, 5 min late
 AM_PEAK = range(6, 9)                     # trips starting 06:00-08:59
 PM_PEAK = range(16, 19)                   # trips starting 16:00-18:59
 SCHEDULE_DAYS_BACK, SCHEDULE_DAYS_AHEAD = 2, 14
@@ -58,11 +59,12 @@ R8_DAILY = os.path.join(HIST, "r8_daily.csv")
 R8_DAILY_FIELDS = ["date", "scheduled", "cancelled", "observed", "late",
                    "am_scheduled", "am_cancelled", "pm_scheduled", "pm_cancelled",
                    "longest_gap_min", "longest_gap_route",
-                   "am_observed", "am_late", "pm_observed", "pm_late", "late_minutes"]
+                   "am_observed", "am_late", "pm_observed", "pm_late", "late_minutes",
+                   "ontime", "anywhere_observed", "anywhere_late"]
 R8_ROUTES = os.path.join(HIST, "r8_routes_daily.csv")
-R8_ROUTES_FIELDS = ["date", "route", "scheduled", "cancelled", "observed", "late"]
+R8_ROUTES_FIELDS = ["date", "route", "scheduled", "cancelled", "observed", "late", "ontime"]
 REGIONS_DAILY = os.path.join(HIST, "regions_daily.csv")
-REGIONS_FIELDS = ["date", "code", "name", "scheduled", "cancelled", "observed", "late"]
+REGIONS_FIELDS = ["date", "code", "name", "scheduled", "cancelled", "observed", "late", "ontime"]
 
 
 # ---------------------------------------------------------------- helpers
@@ -286,6 +288,17 @@ def trip_delay(tu):
     return None
 
 
+def trip_start_delay(tu):
+    """Delay leaving the first stop (stop_sequence 1), as Transport for NSW measures on-time running."""
+    for stu in tu.stop_time_update:
+        if stu.stop_sequence == 1:
+            if stu.HasField("departure") and stu.departure.HasField("delay"):
+                return stu.departure.delay
+            if stu.HasField("arrival") and stu.arrival.HasField("delay"):
+                return stu.arrival.delay
+    return None
+
+
 def read_feed(hdr, prefix_to_code, home, school_routes):
     r = requests.get(f"{API}/realtime/buses", headers=hdr, timeout=120)
     r.raise_for_status()
@@ -315,6 +328,7 @@ def read_feed(hdr, prefix_to_code, home, school_routes):
             "cancelled": td.schedule_relationship == CANCELED,
             "school": rid in school_routes,
             "delay": trip_delay(tu),
+            "start_delay": trip_start_delay(tu),
             "start_time": (td.start_time or (info[2] if info else ""))[:5],
         })
     return seen
@@ -349,13 +363,18 @@ def apply_observations(seen):
             if s["school"]:
                 continue
             reg = st["regions"].setdefault(s["code"], {"cxl": [], "delay": {}})
+            start = reg.setdefault("start", {})
             if s["cancelled"]:
                 if s["trip_id"] not in reg["cxl"]:
                     reg["cxl"].append(s["trip_id"])
                 reg["delay"].pop(s["trip_id"], None)
-            elif s["delay"] is not None and s["trip_id"] not in reg["cxl"]:
-                prev = reg["delay"].get(s["trip_id"])
-                reg["delay"][s["trip_id"]] = s["delay"] if prev is None else max(prev, s["delay"])
+                start.pop(s["trip_id"], None)
+            elif s["trip_id"] not in reg["cxl"]:
+                if s["delay"] is not None:
+                    prev = reg["delay"].get(s["trip_id"])
+                    reg["delay"][s["trip_id"]] = s["delay"] if prev is None else max(prev, s["delay"])
+                if s["start_delay"] is not None:
+                    start[s["trip_id"]] = s["start_delay"]  # latest reading is closest to actual departure
         save_state(date, st)
         touched[date] = st
     return touched
@@ -422,8 +441,9 @@ def home_day(home, date, cxl_rows, state):
     cxl_today = [r for r in cxl_all if r["route"] not in school_names]
     school_cxl = [r for r in cxl_all if r["route"] in school_names]
     cancelled = {r["trip_id"] for r in cxl_today}
-    delays = state["regions"].get(HOME_CODE, {}).get("delay", {})
-    delays = {t: d for t, d in delays.items() if t not in cancelled}
+    home_state = state["regions"].get(HOME_CODE, {})
+    anywhere = {t: d for t, d in home_state.get("delay", {}).items() if t not in cancelled}
+    delays = {t: d for t, d in home_state.get("start", {}).items() if t not in cancelled}
 
     def is_peak(m, rng):
         return m is not None and (m // 60) % 24 in rng
@@ -441,20 +461,22 @@ def home_day(home, date, cxl_rows, state):
     trip_route = {t[0]: routes.get(t[1], t[1]) for t in sched}
     for tid, (rid, *_rest) in home["trips"].items():
         trip_route.setdefault(tid, routes.get(rid, rid))
-    r_obs, r_late = Counter(), Counter()
+    r_obs, r_late, r_on = Counter(), Counter(), Counter()
     for tid, d in delays.items():
         rn = trip_route.get(tid)
         if rn:
             r_obs[rn] += 1
             if d > LATE_SECONDS:
                 r_late[rn] += 1
+            elif d >= EARLY_SECONDS:
+                r_on[rn] += 1
     route_rows = []
     for rn in sorted(set(r_sched) | set(r_cxl) | set(r_obs)):
         route_rows.append({"date": date, "route": rn, "scheduled": r_sched[rn], "cancelled": r_cxl[rn],
-                           "observed": r_obs[rn], "late": r_late[rn]})
+                           "observed": r_obs[rn], "late": r_late[rn], "ontime": r_on[rn]})
 
     late_trips = []
-    for tid, d in sorted(delays.items(), key=lambda kv: -kv[1])[:15]:
+    for tid, d in sorted(anywhere.items(), key=lambda kv: -kv[1])[:15]:
         if d <= LATE_SECONDS:
             break
         info = home["trips"].get(tid)
@@ -474,7 +496,9 @@ def home_day(home, date, cxl_rows, state):
              "am_scheduled": len(am_s), "am_cancelled": am_c, "pm_scheduled": len(pm_s), "pm_cancelled": pm_c,
              "longest_gap_min": longest["gap_min"] if longest else "",
              "longest_gap_route": f'{longest["route"]} to {longest["headsign"]}' if longest else "",
-             "am_observed": am_o, "am_late": am_l, "pm_observed": pm_o, "pm_late": pm_l, "late_minutes": late_minutes}
+             "am_observed": am_o, "am_late": am_l, "pm_observed": pm_o, "pm_late": pm_l, "late_minutes": late_minutes,
+             "ontime": sum(1 for d in delays.values() if EARLY_SECONDS <= d <= LATE_SECONDS),
+             "anywhere_observed": len(anywhere), "anywhere_late": sum(1 for d in anywhere.values() if d > LATE_SECONDS)}
     return daily, route_rows, gaps[:12], late_trips, cxl_today, school_cxl
 
 
@@ -484,14 +508,15 @@ def region_rows(regions, date, state):
     for code in sorted(codes):
         reg = regions.get(code, {})
         st = state["regions"].get(code, {"cxl": [], "delay": {}})
-        delays = st.get("delay", {})
+        delays = st.get("start", {})
         sched = reg.get("scheduled_by_date", {}).get(date, 0)
-        if not sched and not st.get("cxl") and not delays:
+        if not sched and not st.get("cxl") and not st.get("delay"):
             continue
         rows.append({"date": date, "code": code,
                      "name": reg.get("name") or (code.replace("agency:", "Operator ") if code.startswith("agency:") else code),
                      "scheduled": sched, "cancelled": len(st.get("cxl", [])), "observed": len(delays),
-                     "late": sum(1 for d in delays.values() if d > LATE_SECONDS)})
+                     "late": sum(1 for d in delays.values() if d > LATE_SECONDS),
+                     "ontime": sum(1 for d in delays.values() if EARLY_SECONDS <= d <= LATE_SECONDS)})
     return rows
 
 
@@ -520,7 +545,8 @@ def build_outputs(today, live_extra, status):
         return [r for r in rows if start <= r["date"] <= tstr]
 
     F = ["scheduled", "cancelled", "observed", "late", "am_scheduled", "am_cancelled", "pm_scheduled", "pm_cancelled",
-         "am_observed", "am_late", "pm_observed", "pm_late", "late_minutes"]
+         "am_observed", "am_late", "pm_observed", "pm_late", "late_minutes",
+         "ontime", "anywhere_observed", "anywhere_late"]
     totals = {k: sum_rows(window(r8, n) if n else r8, F) for k, n in (("7", 7), ("30", 30), ("all", 0))}
     for t in totals.values():
         t["cancel_pct"] = pct(t["cancelled"], t["scheduled"])
@@ -534,11 +560,13 @@ def build_outputs(today, live_extra, status):
         t["pm_late_pct"] = pct(t["pm_late"], t["pm_observed"])
         t["off_late_pct"] = pct(t["late"] - t["am_late"] - t["pm_late"], t["observed"] - t["am_observed"] - t["pm_observed"])
         t["avg_late_min"] = round(t["late_minutes"] / t["late"], 1) if t["late"] else None
+        t["ontime_pct"] = pct(t["ontime"], t["observed"])
+        t["anywhere_late_pct"] = pct(t["anywhere_late"], t["anywhere_observed"])
 
     # league table (30 days)
     agg = defaultdict(lambda: Counter())
     for r in window(routes_hist, 30):
-        for f in ("scheduled", "cancelled", "observed", "late"):
+        for f in ("scheduled", "cancelled", "observed", "late", "ontime"):
             agg[r["route"]][f] += int(r[f] or 0)
     league = []
     for rn, c in agg.items():
@@ -566,7 +594,7 @@ def build_outputs(today, live_extra, status):
         "updated": now_syd().isoformat(timespec="seconds"),
         "first_date": r8[0]["date"] if r8 else tstr,
         "days_tracked": len(r8),
-        "daily": [{"date": r["date"], **{k: int(r[k] or 0) for k in ("scheduled", "cancelled", "observed", "late", "longest_gap_min")}} for r in r8],
+        "daily": [{"date": r["date"], **{k: int(r.get(k) or 0) for k in ("scheduled", "cancelled", "observed", "late", "ontime", "longest_gap_min")}} for r in r8],
         "totals": totals,
         "league": league[:15],
         "league_late": league_late[:15],
@@ -586,10 +614,10 @@ def build_outputs(today, live_extra, status):
     routes_out = {}
     for rn, rows in by_route.items():
         rows.sort(key=lambda r: r["date"])
-        t30 = sum_rows(window(rows, 30), ("scheduled", "cancelled", "observed", "late"))
-        tall = sum_rows(rows, ("scheduled", "cancelled", "observed", "late"))
+        t30 = sum_rows(window(rows, 30), ("scheduled", "cancelled", "observed", "late", "ontime"))
+        tall = sum_rows(rows, ("scheduled", "cancelled", "observed", "late", "ontime"))
         routes_out[rn] = {
-            "d30": {**t30, "cancel_pct": pct(t30["cancelled"], t30["scheduled"]), "late_pct": pct(t30["late"], t30["observed"])},
+            "d30": {**t30, "cancel_pct": pct(t30["cancelled"], t30["scheduled"]), "late_pct": pct(t30["late"], t30["observed"]), "ontime_pct": pct(t30["ontime"], t30["observed"])},
             "all": {**tall, "cancel_pct": pct(tall["cancelled"], tall["scheduled"]), "late_pct": pct(tall["late"], tall["observed"])},
             "daily": [[r["date"], int(r["scheduled"] or 0), int(r["cancelled"] or 0), int(r["observed"] or 0), int(r["late"] or 0)] for r in rows[-90:]],
             "recent": recent_cxl.get(rn, []),
@@ -600,9 +628,9 @@ def build_outputs(today, live_extra, status):
     def reg_table(rows):
         agg = {}
         for r in rows:
-            a = agg.setdefault(r["code"], {"code": r["code"], "name": r["name"], "scheduled": 0, "cancelled": 0, "observed": 0, "late": 0})
+            a = agg.setdefault(r["code"], {"code": r["code"], "name": r["name"], "scheduled": 0, "cancelled": 0, "observed": 0, "late": 0, "ontime": 0})
             a["name"] = r["name"] or a["name"]
-            for f in ("scheduled", "cancelled", "observed", "late"):
+            for f in ("scheduled", "cancelled", "observed", "late", "ontime"):
                 a[f] += int(r[f] or 0)
         out = []
         for a in agg.values():
@@ -610,6 +638,7 @@ def build_outputs(today, live_extra, status):
                 continue  # can't give a fair rate without the timetable
             a["cancel_pct"] = pct(a["cancelled"], a["scheduled"])
             a["late_pct"] = pct(a["late"], a["observed"])
+            a["ontime_pct"] = pct(a["ontime"], a["observed"])
             a["home"] = a["code"] == HOME_CODE
             out.append(a)
         out.sort(key=lambda a: -(a["cancel_pct"] or 0))
@@ -650,6 +679,25 @@ def migrate_school_exclusion(home):
             os.remove(os.path.join(STATE_DIR, f))
 
 
+def migrate_start_measure():
+    """One-off: lateness used to be 'late anywhere on the route'. It is now measured leaving the
+    first stop, like Transport for NSW. Clear the old lateness figures so they aren't mixed."""
+    if not os.path.exists(R8_DAILY):
+        return
+    with open(R8_DAILY) as f:
+        if "ontime" in f.readline():
+            return
+    print("Upgrading data: lateness now measured at the first stop")
+    clear = ("observed", "late", "am_observed", "am_late", "pm_observed", "pm_late", "late_minutes")
+    for path, fields in ((R8_DAILY, R8_DAILY_FIELDS), (R8_ROUTES, R8_ROUTES_FIELDS), (REGIONS_DAILY, REGIONS_FIELDS)):
+        rows = read_csv(path)
+        for r in rows:
+            for f in clear:
+                if f in r:
+                    r[f] = ""
+        write_csv(path, fields, rows)
+
+
 def main():
     os.makedirs(DATA, exist_ok=True)
     old = os.path.join(DATA, "static_r8.json")  # replaced by cache/
@@ -665,6 +713,7 @@ def main():
         school_routes.update(reg.get("school_routes", []))
 
     migrate_school_exclusion(home)
+    migrate_start_measure()
     SCHOOL_ROUTE_NAMES_CACHE.update(home["routes"].get(r, r) for r in home.get("school_routes", []))
     status = "ok"
     try:
@@ -702,16 +751,18 @@ def main():
         state = touched.get(date) or load_state(date)
         daily, route_rows, gaps, late_trips, cxl_today, school_cxl = home_day(home, date, cxl_rows, state)
         upsert_csv(R8_DAILY, R8_DAILY_FIELDS, [daily], ["date"],
-                   keep_max=("observed", "late", "am_observed", "am_late", "pm_observed", "pm_late", "late_minutes"))
-        upsert_csv(R8_ROUTES, R8_ROUTES_FIELDS, route_rows, ["date", "route"], keep_max=("observed", "late"))
+                   keep_max=())
+        upsert_csv(R8_ROUTES, R8_ROUTES_FIELDS, route_rows, ["date", "route"])
         upsert_csv(REGIONS_DAILY, REGIONS_FIELDS, region_rows(regions, date, state), ["date", "code"],
-                   keep_max=("cancelled", "observed", "late"))
+                   keep_max=("cancelled",))
         if date == iso(today):
             live_extra = {
                 "scheduled": daily["scheduled"], "count": daily["cancelled"],
                 "cancel_pct": pct(daily["cancelled"], daily["scheduled"]),
                 "observed": daily["observed"], "late": daily["late"], "late_pct": pct(daily["late"], daily["observed"]),
                 "avg_late_min": round(daily["late_minutes"] / daily["late"], 1) if daily["late"] else None,
+                "ontime": daily["ontime"], "ontime_pct": pct(daily["ontime"], daily["observed"]),
+                "anywhere_late_pct": pct(daily["anywhere_late"], daily["anywhere_observed"]),
                 "am": {"scheduled": daily["am_scheduled"], "cancelled": daily["am_cancelled"]},
                 "pm": {"scheduled": daily["pm_scheduled"], "cancelled": daily["pm_cancelled"]},
                 "gaps": gaps, "late_trips": late_trips,
