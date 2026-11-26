@@ -45,7 +45,7 @@ EARLY_SECONDS = -60                       # TfNSW on-time window: no more than 1
 AM_PEAK = range(6, 9)                     # trips starting 06:00-08:59
 PM_PEAK = range(16, 19)                   # trips starting 16:00-18:59
 SCHEDULE_DAYS_BACK, SCHEDULE_DAYS_AHEAD = 2, 14
-STATIC_VERSION = 3                        # bump to force timetables to reload
+STATIC_VERSION = 4                        # bump to force timetables to reload
 SCHOOL_ROUTE_TYPES = {"712"}              # GTFS extended type: school bus
 SCHOOL_NAME = re.compile(r"^\d+n$")        # TfNSW school services are numbered like 560n
 
@@ -201,6 +201,114 @@ def schedule_window():
     return [today + dt.timedelta(days=i) for i in range(-SCHEDULE_DAYS_BACK, SCHEDULE_DAYS_AHEAD + 1)]
 
 
+# ---------------------------------------------------------------- school bus finder data
+SCHOOL_FILE = os.path.join(DATA, "school.json")
+SCHOOL_WORDS = re.compile(r"\b(school|college|grammar|campus|high|public|primary|academy|anglican|catholic|"
+                          r"christian|steiner|montessori|ps|hs)\b", re.I)
+DAY_NAMES = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+
+
+def encode_polyline(points):
+    """Google encoded polyline (precision 5)."""
+    out, plat, plon = [], 0, 0
+    for lat, lon in points:
+        ilat, ilon = round(lat * 1e5), round(lon * 1e5)
+        for v in (ilat - plat, ilon - plon):
+            v = ~(v << 1) if v < 0 else v << 1
+            while v >= 0x20:
+                out.append(chr((0x20 | (v & 0x1f)) + 63))
+                v >>= 5
+            out.append(chr(v + 63))
+        plat, plon = ilat, ilon
+    return "".join(out)
+
+
+def thin(points, max_points=180):
+    if len(points) <= max_points:
+        return points
+    step = (len(points) - 1) / (max_points - 1)
+    return [points[round(i * step)] for i in range(max_points)]
+
+
+def school_key(name):
+    base = name.split(",")[0].strip()
+    return base if SCHOOL_WORDS.search(base) else None
+
+
+def build_school(z, school_routes, routes):
+    """All school services in the region, with stops, times and route shapes, for the School bus tab."""
+    if not school_routes:
+        return
+    trips, days_by_service = {}, {}
+    for c in zrows(z, "calendar.txt"):
+        days_by_service[c["service_id"]] = [d for d, k in zip(DAY_NAMES, ("monday", "tuesday", "wednesday", "thursday",
+                                                                            "friday", "saturday", "sunday")) if c.get(k) == "1"]
+    for t in zrows(z, "trips.txt"):
+        if t["route_id"] in school_routes:
+            trips[t["trip_id"]] = {"route": routes.get(t["route_id"], t["route_id"]), "headsign": t.get("trip_headsign", "").strip(),
+                                   "shape": t.get("shape_id", ""), "service": t["service_id"], "stops": []}
+    for st in zrows(z, "stop_times.txt"):
+        tr = trips.get(st["trip_id"])
+        if tr is None:
+            continue
+        m = hhmm_to_min((st.get("departure_time") or st.get("arrival_time") or "")[:5])
+        try:
+            tr["stops"].append((int(st["stop_sequence"]), st["stop_id"], m))
+        except ValueError:
+            pass
+    used_stops = {sid for tr in trips.values() for _, sid, _ in tr["stops"]}
+    stops = {}
+    for x in zrows(z, "stops.txt"):
+        if x["stop_id"] in used_stops:
+            try:
+                stops[x["stop_id"]] = [(x.get("stop_name") or "").strip(), round(float(x["stop_lat"]), 5), round(float(x["stop_lon"]), 5)]
+            except (ValueError, KeyError):
+                pass
+    stop_ids = sorted(stops)
+    sidx = {sid: i for i, sid in enumerate(stop_ids)}
+    shapes_wanted = {tr["shape"] for tr in trips.values() if tr["shape"]}
+    shape_pts = defaultdict(list)
+    for p in zrows(z, "shapes.txt"):
+        if p["shape_id"] in shapes_wanted:
+            try:
+                shape_pts[p["shape_id"]].append((int(p["shape_pt_sequence"]), float(p["shape_pt_lat"]), float(p["shape_pt_lon"])))
+            except (ValueError, KeyError):
+                pass
+    shape_list, shape_idx = [], {}
+    for sid_, pts in shape_pts.items():
+        pts.sort()
+        shape_idx[sid_] = len(shape_list)
+        shape_list.append(encode_polyline(thin([(a, b) for _, a, b in pts])))
+    # de-duplicate identical services (same route, stops and times) running on different days
+    unique = {}
+    for tr in trips.values():
+        tr["stops"].sort()
+        seq = tuple((sidx[sid], m) for _, sid, m in tr["stops"] if sid in sidx and m is not None)
+        if len(seq) < 2:
+            continue
+        key = (tr["route"], tr["headsign"], seq)
+        u = unique.setdefault(key, {"days": set(), "shape": shape_idx.get(tr["shape"], -1)})
+        u["days"].update(days_by_service.get(tr["service"], []))
+    out_trips = []
+    for (route, hs, seq), u in sorted(unique.items(), key=lambda kv: (kv[0][2][0][1], kv[0][0])):
+        days = [d for d in DAY_NAMES if d in u["days"]]
+        label = "School days" if days == DAY_NAMES[:5] or not days else " ".join(days)
+        out_trips.append([route, hs, u["shape"], [list(x) for x in seq], label])
+    # schools: stops whose names mention a school, plus each trip's school-end stop when the headsign names a school
+    schools = defaultdict(set)
+    for sid, (name, _, _) in stops.items():
+        k = school_key(name)
+        if k:
+            schools[k].add(sidx[sid])
+    for route, hs, _, seq, _ in out_trips:
+        if SCHOOL_WORDS.search(hs):  # headsign is the destination, so the school is the last stop
+            schools[hs.split(",")[0].strip()].add(seq[-1][0])
+    write_json(SCHOOL_FILE, {"built": iso(now_syd().date()), "stops": [stops[s] for s in stop_ids],
+                             "schools": {k: sorted(v) for k, v in sorted(schools.items())},
+                             "trips": out_trips, "shapes": shape_list})
+    print(f"  school finder: {len(out_trips)} school services, {len(schools)} schools")
+
+
 def build_region(hdr, code, detailed):
     print(f"Downloading timetable {code}{' (detailed)' if detailed else ''}...")
     z = gtfs_zip(hdr, code)
@@ -253,6 +361,10 @@ def build_region(hdr, code, detailed):
         out["routes"] = routes
         out["trips"] = trips
         out["services"] = {k: sorted(v) for k, v in active.items()}
+        try:
+            build_school(z, school_set, routes)
+        except Exception as exc:  # the school finder is a bonus; never break tracking
+            print("school data not built:", exc)
     print(f"  {out['name']}: {len(routes)} routes")
     return out
 
@@ -654,6 +766,9 @@ def build_outputs(today, live_extra, status):
         "league_late": league_late[:15],
         "by_hour": hours,
         "by_weekday_avg": [round(s / d, 1) if d else None for s, d in zip(wd_sum, wd_days)],
+        "school_cxl_30": dict(Counter(r["route"] for r in read_csv(CXL_LOG)
+                                      if r.get("school") and not r.get("reinstated")
+                                      and r["service_date"] >= iso(today - dt.timedelta(days=29)))),
     }
     write_json(os.path.join(DATA, "summary.json"), summary)
 

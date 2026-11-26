@@ -91,6 +91,7 @@ section[hidden]{display:none}
   <div class="sub"><span id="live" class="pill">Loading…</span> <span id="upd"></span></div>
   <nav class="tabs" role="tablist">
     <button role="tab" data-tab="mybus">My bus</button>
+    <button role="tab" data-tab="school">School bus</button>
     <button role="tab" data-tab="stats">Stats</button>
     <button role="tab" data-tab="report">Report</button>
     <button role="tab" data-tab="about">About</button>
@@ -127,6 +128,26 @@ section[hidden]{display:none}
     <p class="sub"><b>Android (Chrome):</b> tap ⋮ then <b>Install app</b> or <b>Add to Home screen</b>.<br><b>iPhone (Safari):</b> tap the Share button then <b>Add to Home Screen</b>.<br>It then opens straight to My bus, full screen, with its own icon.</p>
   </div>
   </section>
+  <section data-tab="school" hidden>
+  <div class="card">
+    <h2>Find your school bus</h2>
+    <p class="lede">For school services run by Keolis on the Northern Beaches and Lower North Shore. Choose the school, then your home, to see which bus to catch and where.</p>
+    <div class="form">
+      <label class="full">School<input id="scSchool" list="scSchools" placeholder="Start typing the school name" autocomplete="off"><datalist id="scSchools"></datalist></label>
+      <label class="full">Home address<input id="scAddr" placeholder="e.g. 12 Pittwater Rd, Manly" autocomplete="street-address"></label>
+    </div>
+    <div class="steps">
+      <button class="btn primary" id="scFind" type="button">Find buses</button>
+      <button class="btn" id="scLoc" type="button">Use my location</button>
+    </div>
+    <p class="sub" id="scMsg" style="margin-top:8px">You can also tap your home on the map.</p>
+    <div id="scMap" style="height:320px;border-radius:10px;margin-top:10px;border:1px solid var(--border)"></div>
+    <div id="scResults" style="margin-top:12px"></div>
+    <p class="sub" style="margin-top:10px">School services run on school days only and times are from the published timetable. To save the map, take a screenshot. Need a free or discounted school Opal card? See <a href="https://transportnsw.info/school-travel-apply" target="_blank" rel="noopener">school travel passes</a>. For regular (non-school) buses, use the <a href="https://transportnsw.info/trip" target="_blank" rel="noopener">Transport for NSW trip planner</a>.</p>
+    <p class="sub">Your address isn't stored. Looking it up sends it to OpenStreetMap's free address search; tap the map instead if you'd rather not.</p>
+  </div>
+  </section>
+
   <section data-tab="stats" hidden>
   <div id="history-note" class="note" hidden></div>
 
@@ -307,7 +328,7 @@ section[hidden]{display:none}
         <li><b>On time / late.</b> Measured when the bus leaves its first stop, the same point Transport for NSW uses for its official on-time running figures. On time means no more than 1 minute early or 5 minutes late. Late means more than 5 minutes late. This uses the live feed's latest reading for the first stop, checked every 5 minutes, so it's close to but not identical to the official figure.</li>
         <li><b>Late anywhere on the route.</b> Shown separately: a bus that was 5+ minutes behind timetable at any stop we checked. This is much higher than the first-stop figure, because delays build up along a route, so don't compare it with official on-time running.</li>
         <li><b>Longest waits.</b> The gap between the scheduled start of the bus before and the bus after a cancelled trip on the same route and direction.</li>
-        <li><b>Privacy.</b> This site has no logins and no tracking. "Save as my bus" is stored only on your own phone. Telegram alerts store your chat number and chosen buses, encrypted, only so the bot can message you; send /stop to delete them.</li>
+        <li><b>Privacy.</b> This site has no logins and no tracking. In the School bus tab, a home address you type is looked up with OpenStreetMap's free address search and never stored. "Save as my bus" is stored only on your own phone. Telegram alerts store your chat number and chosen buses, encrypted, only so the bot can message you; send /stop to delete them.</li>
         <li><b>Comparisons.</b> Every Sydney contract region is measured with exactly the same method. Operators may differ in how promptly they mark trips as cancelled in the live feed, so treat region comparisons alongside the official Transport for NSW figures.</li>
         <li><b>Limits.</b> If the live feed is down, nothing is recorded for that time. Tracking began on <span id="mStart"></span>. Marked days (strikes, storms) are shown on the charts so they can be read in context.</li>
       </ul>
@@ -534,17 +555,145 @@ function officialSection() {
 
 // ---------- tabs
 function showTab(name) {
-  const names = ["mybus", "stats", "report", "about"];
+  const names = ["mybus", "school", "stats", "report", "about"];
   if (!names.includes(name)) name = "mybus";
   document.querySelectorAll("section[data-tab]").forEach(sec => sec.hidden = sec.dataset.tab !== name);
   document.querySelectorAll(".tabs button").forEach(b => b.setAttribute("aria-selected", String(b.dataset.tab === name)));
   if (S) render();
+  if (name === "school") schoolInit();
 }
 function tabsInit() {
   document.querySelector(".tabs").onclick = e => { const t = e.target.dataset.tab; if (t) { history.replaceState(null, "", "#" + t); showTab(t); window.scrollTo(0, 0); } };
   addEventListener("hashchange", () => showTab(location.hash.slice(1)));
-  document.querySelectorAll('a[href="#stats"],a[href="#report"],a[href="#about"],a[href="#mybus"]').forEach(a => a.onclick = e => { e.preventDefault(); history.replaceState(null, "", a.getAttribute("href")); showTab(a.getAttribute("href").slice(1)); window.scrollTo(0, 0); });
+  document.querySelectorAll('a[href="#stats"],a[href="#report"],a[href="#about"],a[href="#mybus"],a[href="#school"]').forEach(a => a.onclick = e => { e.preventDefault(); history.replaceState(null, "", a.getAttribute("href")); showTab(a.getAttribute("href").slice(1)); window.scrollTo(0, 0); });
   showTab(location.hash.slice(1));
+}
+
+
+// ---------- school bus finder
+let SC = null, scMap = null, scLayer = null, scHome = null, scStarted = false;
+function loadLeaflet() {
+  if (window.L && window.L.map) return Promise.resolve();
+  return new Promise((ok, bad) => {
+    const css = document.createElement("link"); css.rel = "stylesheet"; css.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"; document.head.appendChild(css);
+    const js = document.createElement("script"); js.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"; js.onload = ok; js.onerror = bad; document.head.appendChild(js);
+  });
+}
+function decodePolyline(str) {
+  const pts = []; let i = 0, lat = 0, lon = 0;
+  while (i < str.length) {
+    for (const k of [0, 1]) {
+      let b, shift = 0, res = 0;
+      do { b = str.charCodeAt(i++) - 63; res |= (b & 0x1f) << shift; shift += 5; } while (b >= 0x20);
+      const d = res & 1 ? ~(res >> 1) : res >> 1;
+      if (k === 0) lat += d; else lon += d;
+    }
+    pts.push([lat / 1e5, lon / 1e5]);
+  }
+  return pts;
+}
+function distM(a, b) { const R = 6371000, r = Math.PI / 180, dLat = (b[0] - a[0]) * r, dLon = (b[1] - a[1]) * r; const x = Math.sin(dLat / 2) ** 2 + Math.cos(a[0] * r) * Math.cos(b[0] * r) * Math.sin(dLon / 2) ** 2; return 2 * R * Math.asin(Math.sqrt(x)); }
+const fmtM = m => `${String(Math.floor(m / 60) % 24).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
+async function schoolInit() {
+  if (scStarted) { if (scMap) setTimeout(() => scMap.invalidateSize(), 50); return; }
+  scStarted = true;
+  try { SC = await j("data/school.json"); } catch (e) { $("scMsg").textContent = "School bus information is still being prepared. Please check back in a little while."; return; }
+  $("scSchools").innerHTML = Object.keys(SC.schools).sort().map(n => `<option value="${esc(n)}">`).join("");
+  try { await loadLeaflet(); } catch (e) { $("scMap").innerHTML = `<p class="empty" style="padding:10px">The map couldn't load. Results still work.</p>`; }
+  if (window.L && window.L.map) {
+    scMap = L.map("scMap").setView([-33.75, 151.28], 11);
+    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {maxZoom: 19, attribution: "© OpenStreetMap contributors"}).addTo(scMap);
+    scLayer = L.layerGroup().addTo(scMap);
+    scMap.on("click", e => { scHome = [e.latlng.lat, e.latlng.lng]; $("scAddr").value = "Point on map"; schoolFind(); });
+  }
+  $("scFind").onclick = async () => {
+    const q = $("scAddr").value.trim();
+    if (q && q !== "Point on map" && q !== "My location") {
+      $("scMsg").textContent = "Looking up the address…";
+      try {
+        const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=au&viewbox=151.15,-33.55,151.36,-33.87&bounded=1&q=${encodeURIComponent(q)}`, {headers: {"Accept-Language": "en-AU"}});
+        const a = await r.json();
+        if (!a.length) { $("scMsg").textContent = "Couldn't find that address on the Northern Beaches or Lower North Shore. Try adding the suburb, or tap your home on the map."; return; }
+        scHome = [+a[0].lat, +a[0].lon];
+      } catch (e) { $("scMsg").textContent = "The address search isn't available right now. Tap your home on the map instead."; return; }
+    }
+    schoolFind();
+  };
+  $("scLoc").onclick = () => {
+    if (!navigator.geolocation) { $("scMsg").textContent = "Your browser can't share its location. Tap your home on the map instead."; return; }
+    $("scMsg").textContent = "Finding your location…";
+    navigator.geolocation.getCurrentPosition(p => { scHome = [p.coords.latitude, p.coords.longitude]; $("scAddr").value = "My location"; schoolFind(); },
+      () => { $("scMsg").textContent = "Couldn't get your location. Type your address or tap the map instead."; }, {timeout: 10000});
+  };
+  $("scSchool").onchange = () => { if (scHome) schoolFind(); else showSchool(); };
+}
+function schoolName() {
+  const v = $("scSchool").value.trim().toLowerCase();
+  return Object.keys(SC.schools).find(n => n.toLowerCase() === v) || Object.keys(SC.schools).find(n => n.toLowerCase().includes(v) && v.length > 2);
+}
+function showSchool() {
+  const n = schoolName(); if (!n || !scMap) return;
+  scLayer.clearLayers();
+  const pts = SC.schools[n].map(i => [SC.stops[i][1], SC.stops[i][2]]);
+  pts.forEach(p => L.circleMarker(p, {radius: 8, color: "#d93636", fillOpacity: .9}).addTo(scLayer).bindTooltip(n));
+  scMap.fitBounds(L.latLngBounds(pts).pad(0.5));
+}
+function schoolFind() {
+  if (!SC) return;
+  const name = schoolName();
+  if (!name) { $("scMsg").textContent = "Choose the school from the list first."; return; }
+  if (!scHome) { $("scMsg").textContent = "Now enter your home address, use your location, or tap your home on the map."; showSchool(); return; }
+  const sset = new Set(SC.schools[name]), stopPt = i => [SC.stops[i][1], SC.stops[i][2]];
+  let found = [];
+  for (const radius of [800, 1500]) {
+    found = [];
+    SC.trips.forEach((t, ti) => {
+      const seq = t[3], schoolPos = seq.map((s, k) => sset.has(s[0]) ? k : -1).filter(k => k >= 0);
+      if (!schoolPos.length) return;
+      let best = null;
+      seq.forEach((s, k) => {
+        if (sset.has(s[0])) return;
+        const d = distM(scHome, stopPt(s[0])); if (d > radius) return;
+        const toSchool = schoolPos.some(p => p > k), fromSchool = schoolPos.some(p => p < k);
+        if (!toSchool && !fromSchool) return;
+        if (!best || d < best.d) best = {d, k, dir: toSchool ? "am" : "pm", sk: toSchool ? schoolPos.find(p => p > k) : [...schoolPos].reverse().find(p => p < k)};
+      });
+      if (best) found.push({ti, t, ...best});
+    });
+    if (found.length) break;
+  }
+  const seen = new Set();
+  found = found.sort((a, b) => a.d - b.d).filter(f => { const key = f.t[0] + f.t[3][f.k][1] + f.dir; if (seen.has(key)) return false; seen.add(key); return true; });
+  const am = found.filter(f => f.dir === "am").sort((a, b) => a.t[3][a.k][1] - b.t[3][b.k][1]).slice(0, 6);
+  const pm = found.filter(f => f.dir === "pm").sort((a, b) => a.t[3][a.k][1] - b.t[3][b.k][1]).slice(0, 6);
+  const cx = (S && S.school_cxl_30) || {};
+  const row = f => {
+    const board = f.t[3][f.k], sch = f.t[3][f.sk], walk = Math.round(f.d * 1.3 / 10) * 10, c = cx[f.t[0]] || 0;
+    const times = f.dir === "am" ? `Catch at <b>${fmtM(board[1])}</b> · arrives school ${fmtM(sch[1])}` : `Leaves school <b>${fmtM(sch[1])}</b> · gets to your stop ${fmtM(board[1])}`;
+    return `<div class="trip"><div class="t">${esc(f.t[0])}</div><div>${times}
+      <div class="meta">${f.dir === "am" ? "Board at" : "Get off at"}: ${esc(SC.stops[board[0]][0])} (about ${walk} m walk) · ${esc(f.t[4])}</div>
+      <div class="meta">${c ? `<span class="warn">Cancelled ${c} time${c === 1 ? "" : "s"} in the last 30 days</span>` : "No cancellations recorded in the last 30 days"}</div>
+      <div class="meta"><a href="#" data-show="${f.ti}|${f.k}|${f.sk}">Show on map</a></div></div></div>`;
+  };
+  $("scResults").innerHTML = (am.length || pm.length) ? `<h2>To ${esc(name)} (morning)</h2>${am.length ? am.map(row).join("") : `<p class="empty">No morning school bus stops near your home.</p>`}
+    <h2 style="margin-top:14px">Home from school (afternoon)</h2>${pm.length ? pm.map(row).join("") : `<p class="empty">No afternoon school bus stops near your home.</p>`}`
+    : `<p class="empty">No ${esc(name)} school bus stops within 1.5 km of your home. Your child may need a regular route bus. Try the <a href="https://transportnsw.info/trip" target="_blank" rel="noopener">Transport for NSW trip planner</a>.</p>`;
+  $("scMsg").textContent = found.length ? "" : "";
+  $("scResults").querySelectorAll("a[data-show]").forEach(a => a.onclick = e => { e.preventDefault(); const [ti, k, sk] = a.dataset.show.split("|").map(Number); drawTrip(ti, k, sk); $("scMap").scrollIntoView({behavior: "smooth", block: "center"}); });
+  const first = am[0] || pm[0];
+  if (first) drawTrip(first.ti, first.k, first.sk); else showSchool();
+}
+function drawTrip(ti, k, sk) {
+  if (!scMap) return;
+  const t = SC.trips[ti], pts = t[3].map(s => [SC.stops[s[0]][1], SC.stops[s[0]][2]]);
+  scLayer.clearLayers();
+  const line = t[2] >= 0 && SC.shapes[t[2]] ? decodePolyline(SC.shapes[t[2]]) : pts;
+  L.polyline(line, {color: "#257de0", weight: 5, opacity: .85}).addTo(scLayer);
+  t[3].forEach((s, i) => { if (i !== k && i !== sk) L.circleMarker(pts[i], {radius: 4, color: "#257de0", fillColor: "#fff", fillOpacity: 1, weight: 2}).addTo(scLayer).bindTooltip(`${fmtM(s[1])} ${SC.stops[s[0]][0]}`); });
+  L.circleMarker(pts[k], {radius: 9, color: "#008a17", fillOpacity: .95}).addTo(scLayer).bindTooltip(`Bus stop: ${SC.stops[t[3][k][0]][0]} (${fmtM(t[3][k][1])})`, {permanent: true, direction: "top"});
+  L.circleMarker(pts[sk], {radius: 9, color: "#d93636", fillOpacity: .95}).addTo(scLayer).bindTooltip(`School: ${fmtM(t[3][sk][1])}`, {permanent: true, direction: "top"});
+  if (scHome) L.circleMarker(scHome, {radius: 7, color: "#191919", fillColor: "#ffd400", fillOpacity: 1}).addTo(scLayer).bindTooltip("Home");
+  scMap.fitBounds(L.latLngBounds(line.concat(scHome ? [scHome] : [])).pad(0.1));
 }
 
 // ---------- telegram alerts
