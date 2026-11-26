@@ -26,6 +26,7 @@ STATE = os.path.join(OUT_DIR, "posted.json")
 SITE = "https://craigstarling-eng.github.io/Keolis-NthnBeaches-service-cancellations/"
 SYD = ZoneInfo("Australia/Sydney")
 FB_API = "https://graph.facebook.com/v26.0"
+PAGE_ID = "1455302057670675"   # Northern Beaches Bus Watch (public)
 POST_AT = (17, 0)        # 5:00 pm, after the school run and as the evening peak starts
 MAX_TRIES = 3
 
@@ -129,7 +130,7 @@ def draw_card(f, path):
 
 
 def post_facebook(text, image_path):
-    page, token = os.environ.get("FB_PAGE_ID", "").strip(), os.environ.get("FB_PAGE_TOKEN", "").strip()
+    page, token = (os.environ.get("FB_PAGE_ID", "").strip() or PAGE_ID), os.environ.get("FB_PAGE_TOKEN", "").strip()
     with open(image_path, "rb") as fh:
         r = requests.post(f"{FB_API}/{page}/photos", data={"caption": text, "access_token": token},
                           files={"source": ("card.png", fh, "image/png")}, timeout=60)
@@ -141,7 +142,7 @@ def post_facebook(text, image_path):
 
 
 def configured():
-    return bool(os.environ.get("FB_PAGE_ID", "").strip() and os.environ.get("FB_PAGE_TOKEN", "").strip())
+    return bool((os.environ.get("FB_PAGE_ID", "").strip() or PAGE_ID) and os.environ.get("FB_PAGE_TOKEN", "").strip())
 
 
 def publish(dry=False):
