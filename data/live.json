@@ -1,14 +1,14 @@
 {
- "updated": "2026-11-26T15:31:00+11:00",
+ "updated": "2026-11-26T15:36:06+11:00",
  "status": "ok",
  "date": "2026-11-26",
  "scheduled": 3456,
  "count": 100,
  "cancel_pct": 2.9,
- "observed": 550,
- "late": 166,
- "late_pct": 30.2,
- "avg_late_min": 11.4,
+ "observed": 566,
+ "late": 182,
+ "late_pct": 32.2,
+ "avg_late_min": 11.5,
  "am": {
   "scheduled": 800,
   "cancelled": 0
@@ -129,16 +129,16 @@
  ],
  "late_trips": [
   {
+   "route": "B1",
+   "headsign": "Mona Vale",
+   "start_time": "14:45",
+   "late_min": 86
+  },
+  {
    "route": "111",
    "headsign": "South Mosman Wharf",
    "start_time": "13:09",
    "late_min": 86
-  },
-  {
-   "route": "B1",
-   "headsign": "Mona Vale",
-   "start_time": "14:45",
-   "late_min": 81
   },
   {
    "route": "263",
@@ -174,7 +174,13 @@
    "route": "173X",
    "headsign": "City Wynyard",
    "start_time": "14:50",
-   "late_min": 35
+   "late_min": 40
+  },
+  {
+   "route": "114",
+   "headsign": "RNS Hospital",
+   "start_time": "14:39",
+   "late_min": 31
   },
   {
    "route": "177",
@@ -195,28 +201,22 @@
    "late_min": 30
   },
   {
-   "route": "114",
-   "headsign": "RNS Hospital",
-   "start_time": "14:39",
-   "late_min": 26
+   "route": "154X",
+   "headsign": "Dee Why",
+   "start_time": "15:55",
+   "late_min": 29
   },
   {
    "route": "199",
    "headsign": "Manly",
    "start_time": "14:56",
-   "late_min": 26
+   "late_min": 27
   },
   {
-   "route": "154X",
-   "headsign": "Dee Why",
-   "start_time": "15:55",
-   "late_min": 25
-  },
-  {
-   "route": "280",
-   "headsign": "Chatswood",
-   "start_time": "14:20",
-   "late_min": 19
+   "route": "114",
+   "headsign": "Balmoral Beach",
+   "start_time": "15:18",
+   "late_min": 22
   }
  ],
  "trips": [
