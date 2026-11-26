@@ -1,13 +1,13 @@
 {
- "updated": "2026-11-26T18:13:59+11:00",
+ "updated": "2026-11-26T18:19:04+11:00",
  "status": "ok",
  "date": "2026-11-26",
  "scheduled": 3456,
  "count": 108,
  "cancel_pct": 3.1,
- "observed": 1197,
- "late": 560,
- "late_pct": 46.8,
+ "observed": 1203,
+ "late": 566,
+ "late_pct": 47.0,
  "avg_late_min": 11.1,
  "am": {
   "scheduled": 800,
@@ -144,7 +144,7 @@
    "route": "B1",
    "headsign": "Mona Vale",
    "start_time": "17:40",
-   "late_min": 69
+   "late_min": 74
   },
   {
    "route": "263",
@@ -177,16 +177,16 @@
    "late_min": 51
   },
   {
+   "route": "100",
+   "headsign": "Taronga Zoo via City QVB",
+   "start_time": "17:28",
+   "late_min": 51
+  },
+  {
    "route": "230",
    "headsign": "Mosman Bay Wharf",
    "start_time": "15:26",
    "late_min": 47
-  },
-  {
-   "route": "100",
-   "headsign": "Taronga Zoo via City QVB",
-   "start_time": "17:28",
-   "late_min": 46
   },
   {
    "route": "114",
