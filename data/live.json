@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-27T01:54:37+11:00",
+ "updated": "2026-11-27T01:59:41+11:00",
  "status": "ok",
  "date": "2026-11-27",
  "scheduled": 3416,
@@ -11,7 +11,7 @@
  "avg_late_min": null,
  "ontime": 48,
  "ontime_pct": 100.0,
- "anywhere_late_pct": 10.4,
+ "anywhere_late_pct": 12.5,
  "am": {
   "scheduled": 760,
   "cancelled": 0
@@ -82,6 +82,12 @@
    "headsign": "Taronga Zoo via City QVB",
    "start_time": "24:09",
    "late_min": 12
+  },
+  {
+   "route": "144",
+   "headsign": "Chatswood",
+   "start_time": "25:50",
+   "late_min": 10
   },
   {
    "route": "100",
