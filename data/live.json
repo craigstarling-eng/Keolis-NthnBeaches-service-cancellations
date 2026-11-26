@@ -1,17 +1,17 @@
 {
- "updated": "2026-11-27T01:08:55+11:00",
+ "updated": "2026-11-27T01:14:00+11:00",
  "status": "ok",
  "date": "2026-11-27",
  "scheduled": 3416,
  "count": 6,
  "cancel_pct": 0.2,
- "observed": 41,
+ "observed": 43,
  "late": 0,
  "late_pct": 0.0,
  "avg_late_min": null,
- "ontime": 41,
+ "ontime": 43,
  "ontime_pct": 100.0,
- "anywhere_late_pct": 9.8,
+ "anywhere_late_pct": 9.3,
  "am": {
   "scheduled": 760,
   "cancelled": 0
