@@ -1,20 +1,20 @@
 {
- "updated": "2026-11-27T05:58:51+11:00",
+ "updated": "2026-11-27T06:03:57+11:00",
  "status": "ok",
  "date": "2026-11-27",
  "scheduled": 3416,
- "count": 124,
- "cancel_pct": 3.6,
- "observed": 342,
+ "count": 128,
+ "cancel_pct": 3.7,
+ "observed": 363,
  "late": 0,
  "late_pct": 0.0,
  "avg_late_min": null,
- "ontime": 342,
+ "ontime": 363,
  "ontime_pct": 100.0,
- "anywhere_late_pct": 5.6,
+ "anywhere_late_pct": 5.2,
  "am": {
   "scheduled": 760,
-  "cancelled": 61
+  "cancelled": 64
  },
  "pm": {
   "scheduled": 748,
@@ -76,6 +76,15 @@
    "cancelled_in_row": 1
   },
   {
+   "route": "180",
+   "headsign": "Collaroy Plateau",
+   "from": "06:02",
+   "to": "07:02",
+   "gap_min": 60,
+   "normal_min": 20.0,
+   "cancelled_in_row": 1
+  },
+  {
    "route": "144",
    "headsign": "Chatswood",
    "from": "02:20",
@@ -119,15 +128,6 @@
    "gap_min": 43,
    "normal_min": 20.0,
    "cancelled_in_row": 1
-  },
-  {
-   "route": "280",
-   "headsign": "Warringah Mall",
-   "from": "08:05",
-   "to": "08:46",
-   "gap_min": 41,
-   "normal_min": 21.0,
-   "cancelled_in_row": 1
   }
  ],
  "late_trips": [
@@ -138,16 +138,16 @@
    "late_min": 12
   },
   {
+   "route": "199",
+   "headsign": "Manly",
+   "start_time": "05:12",
+   "late_min": 10
+  },
+  {
    "route": "144",
    "headsign": "Chatswood",
    "start_time": "25:50",
    "late_min": 10
-  },
-  {
-   "route": "199",
-   "headsign": "Manly",
-   "start_time": "05:12",
-   "late_min": 9
   },
   {
    "route": "100",
@@ -156,15 +156,15 @@
    "late_min": 8
   },
   {
-   "route": "B1",
-   "headsign": "Mona Vale",
-   "start_time": "24:05",
-   "late_min": 7
-  },
-  {
    "route": "144",
    "headsign": "Manly",
    "start_time": "05:30",
+   "late_min": 8
+  },
+  {
+   "route": "B1",
+   "headsign": "Mona Vale",
+   "start_time": "24:05",
    "late_min": 7
   },
   {
@@ -279,6 +279,11 @@
    "headsign": "Chatswood"
   },
   {
+   "start_time": "06:27",
+   "route": "180",
+   "headsign": "Collaroy Plateau"
+  },
+  {
    "start_time": "06:35",
    "route": "177",
    "headsign": "Warringah Mall"
@@ -302,6 +307,11 @@
    "start_time": "06:50",
    "route": "280",
    "headsign": "Chatswood"
+  },
+  {
+   "start_time": "06:56",
+   "route": "180X",
+   "headsign": "City Wynyard"
   },
   {
    "start_time": "07:00",
@@ -534,6 +544,11 @@
    "headsign": "Taronga Zoo via City QVB"
   },
   {
+   "start_time": "08:40",
+   "route": "170X",
+   "headsign": "City Wynyard"
+  },
+  {
    "start_time": "08:44",
    "route": "114",
    "headsign": "RNS Hospital"
@@ -606,6 +621,11 @@
   {
    "start_time": "09:20",
    "route": "177",
+   "headsign": "Warringah Mall"
+  },
+  {
+   "start_time": "09:20",
+   "route": "173X",
    "headsign": "Warringah Mall"
   },
   {
