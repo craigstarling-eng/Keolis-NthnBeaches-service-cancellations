@@ -1,21 +1,21 @@
 {
- "updated": "2026-11-26T17:38:19+11:00",
+ "updated": "2026-11-26T17:43:25+11:00",
  "status": "ok",
  "date": "2026-11-26",
  "scheduled": 3456,
- "count": 106,
+ "count": 107,
  "cancel_pct": 3.1,
- "observed": 1084,
- "late": 480,
- "late_pct": 44.3,
- "avg_late_min": 10.9,
+ "observed": 1101,
+ "late": 495,
+ "late_pct": 45.0,
+ "avg_late_min": 11.0,
  "am": {
   "scheduled": 800,
   "cancelled": 0
  },
  "pm": {
   "scheduled": 765,
-  "cancelled": 44
+  "cancelled": 45
  },
  "gaps": [
   {
@@ -153,16 +153,16 @@
    "late_min": 58
   },
   {
+   "route": "180X",
+   "headsign": "Collaroy Plateau",
+   "start_time": "16:46",
+   "late_min": 57
+  },
+  {
    "route": "230",
    "headsign": "Milsons Point",
    "start_time": "14:25",
    "late_min": 56
-  },
-  {
-   "route": "180X",
-   "headsign": "Collaroy Plateau",
-   "start_time": "16:46",
-   "late_min": 52
   },
   {
    "route": "B1",
@@ -213,10 +213,10 @@
    "late_min": 38
   },
   {
-   "route": "114",
-   "headsign": "Balmoral Beach",
-   "start_time": "15:18",
-   "late_min": 33
+   "route": "B1",
+   "headsign": "Mona Vale",
+   "start_time": "17:40",
+   "late_min": 38
   }
  ],
  "trips": [
@@ -609,6 +609,11 @@
    "start_time": "17:40",
    "route": "199",
    "headsign": "Palm Beach"
+  },
+  {
+   "start_time": "17:40",
+   "route": "144",
+   "headsign": "Chatswood"
   },
   {
    "start_time": "17:52",
