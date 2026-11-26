@@ -1,26 +1,35 @@
 {
- "updated": "2026-11-27T03:20:57+11:00",
+ "updated": "2026-11-27T03:26:01+11:00",
  "status": "ok",
  "date": "2026-11-27",
  "scheduled": 3416,
- "count": 6,
- "cancel_pct": 0.2,
- "observed": 60,
+ "count": 19,
+ "cancel_pct": 0.6,
+ "observed": 61,
  "late": 0,
  "late_pct": 0.0,
  "avg_late_min": null,
- "ontime": 60,
+ "ontime": 61,
  "ontime_pct": 100.0,
- "anywhere_late_pct": 11.7,
+ "anywhere_late_pct": 11.5,
  "am": {
   "scheduled": 760,
-  "cancelled": 0
+  "cancelled": 10
  },
  "pm": {
   "scheduled": 748,
   "cancelled": 0
  },
  "gaps": [
+  {
+   "route": "114",
+   "headsign": "Balmoral Beach",
+   "from": "09:03",
+   "to": "10:03",
+   "gap_min": 60,
+   "normal_min": 19,
+   "cancelled_in_row": 2
+  },
   {
    "route": "199",
    "headsign": "Manly",
@@ -40,6 +49,15 @@
    "cancelled_in_row": 1
   },
   {
+   "route": "170X",
+   "headsign": "City Wynyard",
+   "from": "06:00",
+   "to": "06:40",
+   "gap_min": 40,
+   "normal_min": 14.0,
+   "cancelled_in_row": 1
+  },
+  {
    "route": "199",
    "headsign": "Palm Beach",
    "from": "00:05",
@@ -49,30 +67,66 @@
    "cancelled_in_row": 1
   },
   {
-   "route": "173X",
-   "headsign": "Warringah Mall",
-   "from": "23:40",
-   "to": "end of day",
-   "gap_min": null,
-   "normal_min": 20.0,
+   "route": "114",
+   "headsign": "Balmoral Beach",
+   "from": "07:43",
+   "to": "08:13",
+   "gap_min": 30,
+   "normal_min": 19,
    "cancelled_in_row": 1
   },
   {
-   "route": "144",
-   "headsign": "Manly",
-   "from": "03:00",
-   "to": "end of day",
-   "gap_min": null,
+   "route": "114",
+   "headsign": "RNS Hospital",
+   "from": "08:31",
+   "to": "08:54",
+   "gap_min": 23,
+   "normal_min": 15.0,
+   "cancelled_in_row": 1
+  },
+  {
+   "route": "114",
+   "headsign": "RNS Hospital",
+   "from": "08:54",
+   "to": "09:16",
+   "gap_min": 22,
+   "normal_min": 15.0,
+   "cancelled_in_row": 1
+  },
+  {
+   "route": "180X",
+   "headsign": "City Wynyard",
+   "from": "06:05",
+   "to": "06:26",
+   "gap_min": 21,
    "normal_min": 10,
    "cancelled_in_row": 1
   },
   {
-   "route": "230",
-   "headsign": "Mosman Bay Wharf",
-   "from": "23:56",
-   "to": "end of day",
-   "gap_min": null,
-   "normal_min": 15.0,
+   "route": "160X",
+   "headsign": "Dee Why",
+   "from": "06:50",
+   "to": "07:10",
+   "gap_min": 20,
+   "normal_min": 10.0,
+   "cancelled_in_row": 1
+  },
+  {
+   "route": "165X",
+   "headsign": "City Wynyard",
+   "from": "07:35",
+   "to": "07:55",
+   "gap_min": 20,
+   "normal_min": 15,
+   "cancelled_in_row": 1
+  },
+  {
+   "route": "160X",
+   "headsign": "Chatswood",
+   "from": "06:14",
+   "to": "06:31",
+   "gap_min": 17,
+   "normal_min": 10.0,
    "cancelled_in_row": 1
   }
  ],
@@ -150,6 +204,71 @@
    "start_time": "03:30",
    "route": "144",
    "headsign": "Manly"
+  },
+  {
+   "start_time": "06:16",
+   "route": "180X",
+   "headsign": "City Wynyard"
+  },
+  {
+   "start_time": "06:20",
+   "route": "170X",
+   "headsign": "City Wynyard"
+  },
+  {
+   "start_time": "06:23",
+   "route": "160X",
+   "headsign": "Chatswood"
+  },
+  {
+   "start_time": "07:00",
+   "route": "160X",
+   "headsign": "Dee Why"
+  },
+  {
+   "start_time": "07:18",
+   "route": "114",
+   "headsign": "RNS Hospital"
+  },
+  {
+   "start_time": "07:41",
+   "route": "114",
+   "headsign": "RNS Hospital"
+  },
+  {
+   "start_time": "07:45",
+   "route": "165X",
+   "headsign": "City Wynyard"
+  },
+  {
+   "start_time": "08:03",
+   "route": "114",
+   "headsign": "Balmoral Beach"
+  },
+  {
+   "start_time": "08:23",
+   "route": "114",
+   "headsign": "Balmoral Beach"
+  },
+  {
+   "start_time": "08:44",
+   "route": "114",
+   "headsign": "RNS Hospital"
+  },
+  {
+   "start_time": "09:04",
+   "route": "114",
+   "headsign": "RNS Hospital"
+  },
+  {
+   "start_time": "09:23",
+   "route": "114",
+   "headsign": "Balmoral Beach"
+  },
+  {
+   "start_time": "09:43",
+   "route": "114",
+   "headsign": "Balmoral Beach"
   }
  ],
  "school_cancelled": []
