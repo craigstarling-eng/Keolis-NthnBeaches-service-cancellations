@@ -54,7 +54,10 @@ def is_school_route(route):
     return route.get("route_type", "") in SCHOOL_ROUTE_TYPES or bool(SCHOOL_NAME.match(route.get("route_short_name", "").strip()))
 
 CXL_LOG = os.path.join(DATA, "cancellations.csv")
-CXL_FIELDS = ["service_date", "trip_id", "route", "start_time", "headsign", "first_seen", "school"]
+CXL_FIELDS = ["service_date", "trip_id", "route", "start_time", "headsign", "first_seen", "school", "reinstated"]
+# Days when tracking began part-way through: only trips starting after this time are counted,
+# so the rate isn't diluted by trips we never had the chance to see.
+PARTIAL_DAYS = {"2026-11-26": "12:28"}
 R8_DAILY = os.path.join(HIST, "r8_daily.csv")
 R8_DAILY_FIELDS = ["date", "scheduled", "cancelled", "observed", "late",
                    "am_scheduled", "am_cancelled", "pm_scheduled", "pm_cancelled",
@@ -320,6 +323,14 @@ def read_feed(hdr, prefix_to_code, home, school_routes):
         if not code:
             continue
         sdate = td.start_date or today
+        # After-midnight trips (timetabled as 24:xx/25:xx) belong to the previous day's
+        # service. The feed sometimes labels them with the calendar date instead.
+        static_start = info[2] if info else ""
+        feed_hour = int(td.start_time[:2]) if td.start_time[:2].isdigit() else None
+        if static_start[:2].isdigit() and int(static_start[:2]) >= 24 and (
+                (feed_hour is not None and feed_hour < 4) or
+                (feed_hour is None and sdate == today and now_syd().hour < 8)):
+            sdate = (dt.datetime.strptime(sdate, "%Y%m%d") - dt.timedelta(days=1)).strftime("%Y%m%d")
         seen.append({
             "code": code,
             "date": f"{sdate[:4]}-{sdate[4:6]}-{sdate[6:8]}",
@@ -329,7 +340,7 @@ def read_feed(hdr, prefix_to_code, home, school_routes):
             "school": rid in school_routes,
             "delay": trip_delay(tu),
             "start_delay": trip_start_delay(tu),
-            "start_time": (td.start_time or (info[2] if info else ""))[:5],
+            "start_time": (static_start or td.start_time)[:5],
         })
     return seen
 
@@ -436,7 +447,10 @@ def home_day(home, date, cxl_rows, state):
     for rid, nm in routes.items():
         name_to_rid.setdefault(nm, rid)
     sched = home_scheduled(home, date)
-    cxl_all = [r for r in cxl_rows if r["service_date"] == date]
+    cutoff = hhmm_to_min(PARTIAL_DAYS.get(date, "00:00"))
+    sched = [t for t in sched if t[3] is None or t[3] >= cutoff]
+    cxl_all = [r for r in cxl_rows if r["service_date"] == date and not r.get("reinstated")
+               and (hhmm_to_min(r["start_time"]) is None or hhmm_to_min(r["start_time"]) >= cutoff)]
     school_names = {routes.get(rid, rid) for rid in home.get("school_routes", [])}
     cxl_today = [r for r in cxl_all if r["route"] not in school_names]
     school_cxl = [r for r in cxl_all if r["route"] in school_names]
@@ -537,7 +551,8 @@ def build_outputs(today, live_extra, status):
     r8 = read_csv(R8_DAILY)
     routes_hist = [r for r in read_csv(R8_ROUTES) if r["route"] not in school_names and not SCHOOL_NAME.match(r["route"])]
     regions_hist = read_csv(REGIONS_DAILY)
-    cxl = [r for r in read_csv(CXL_LOG) if r["route"] not in school_names and not SCHOOL_NAME.match(r["route"])]
+    cxl = [r for r in read_csv(CXL_LOG) if r["route"] not in school_names and not SCHOOL_NAME.match(r["route"])
+           and not r.get("reinstated")]
     tstr = iso(today)
 
     def window(rows, days):
@@ -679,6 +694,20 @@ def migrate_school_exclusion(home):
             os.remove(os.path.join(STATE_DIR, f))
 
 
+def fix_after_midnight(rows, home):
+    """Move after-midnight trips that were logged under the calendar date back to their service day."""
+    changed = False
+    for r in rows:
+        info = home["trips"].get(r["trip_id"])
+        static_start = info[2] if info else ""
+        if (static_start[:2].isdigit() and int(static_start[:2]) >= 24 and r["start_time"][:2].isdigit()
+                and int(r["start_time"][:2]) < 4):
+            d = dt.date.fromisoformat(r["service_date"]) - dt.timedelta(days=1)
+            r["service_date"], r["start_time"] = iso(d), static_start[:5]
+            changed = True
+    return changed
+
+
 def migrate_start_measure():
     """One-off: lateness used to be 'late anywhere on the route'. It is now measured leaving the
     first stop, like Transport for NSW. Clear the old lateness figures so they aren't mixed."""
@@ -737,14 +766,23 @@ def main():
                         "start_time": s["start_time"] or (info[2] if info else ""),
                         "headsign": info[1] if info else "", "first_seen": stamp,
                         "school": "yes" if s["school"] else ""})
+    # A trip marked cancelled that later shows up running was reinstated: stop counting it.
+    running = {(s["date"], s["trip_id"]) for s in seen
+               if s["code"] == HOME_CODE and not s["cancelled"] and (s["delay"] is not None or s["start_delay"] is not None)}
+    changed = False
+    for r in cxl_rows:
+        if not r.get("reinstated") and (r["service_date"], r["trip_id"]) in running:
+            r["reinstated"] = stamp
+            changed = True
     if new:
         cxl_rows.extend(new)
+    if new or changed or fix_after_midnight(cxl_rows, home):
         write_csv(CXL_LOG, CXL_FIELDS, cxl_rows)
     print(f"Feed trips: {len(seen)}; new home cancellations: {len(new)}")
 
     touched = apply_observations(seen)
     today = now_syd().date()
-    dates = sorted(set(touched) | {iso(today)})
+    dates = sorted(set(touched) | {iso(today), iso(today - dt.timedelta(days=1))})
     dates = [d for d in dates if d >= iso(today - dt.timedelta(days=1))]
     live_extra = {}
     for date in dates:
