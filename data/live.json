@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-26T23:17:05+11:00",
+ "updated": "2026-11-26T23:22:10+11:00",
  "status": "ok",
  "date": "2026-11-26",
  "scheduled": 3456,
@@ -8,10 +8,10 @@
  "observed": 116,
  "late": 13,
  "late_pct": 11.2,
- "avg_late_min": 13.1,
+ "avg_late_min": 13.2,
  "ontime": 103,
  "ontime_pct": 88.8,
- "anywhere_late_pct": 47.8,
+ "anywhere_late_pct": 47.9,
  "am": {
   "scheduled": 800,
   "cancelled": 0
