@@ -1,17 +1,17 @@
 {
- "updated": "2026-11-27T05:48:40+11:00",
+ "updated": "2026-11-27T05:53:45+11:00",
  "status": "ok",
  "date": "2026-11-27",
  "scheduled": 3416,
  "count": 124,
  "cancel_pct": 3.6,
- "observed": 301,
+ "observed": 318,
  "late": 0,
  "late_pct": 0.0,
  "avg_late_min": null,
- "ontime": 301,
+ "ontime": 318,
  "ontime_pct": 100.0,
- "anywhere_late_pct": 5.0,
+ "anywhere_late_pct": 5.3,
  "am": {
   "scheduled": 760,
   "cancelled": 61
@@ -144,21 +144,27 @@
    "late_min": 10
   },
   {
+   "route": "199",
+   "headsign": "Manly",
+   "start_time": "05:12",
+   "late_min": 9
+  },
+  {
    "route": "100",
    "headsign": "Taronga Zoo via City QVB",
    "start_time": "24:29",
    "late_min": 8
   },
   {
-   "route": "199",
-   "headsign": "Manly",
-   "start_time": "05:12",
-   "late_min": 7
-  },
-  {
    "route": "B1",
    "headsign": "Mona Vale",
    "start_time": "24:05",
+   "late_min": 7
+  },
+  {
+   "route": "144",
+   "headsign": "Manly",
+   "start_time": "05:30",
    "late_min": 7
   },
   {
@@ -186,6 +192,18 @@
    "late_min": 6
   },
   {
+   "route": "199",
+   "headsign": "Manly",
+   "start_time": "05:30",
+   "late_min": 6
+  },
+  {
+   "route": "100",
+   "headsign": "Taronga Zoo via City QVB",
+   "start_time": "05:47",
+   "late_min": 6
+  },
+  {
    "route": "144",
    "headsign": "Manly",
    "start_time": "26:30",
@@ -198,27 +216,9 @@
    "late_min": 5
   },
   {
-   "route": "144",
-   "headsign": "Manly",
-   "start_time": "05:30",
-   "late_min": 5
-  },
-  {
-   "route": "199",
-   "headsign": "Manly",
-   "start_time": "05:30",
-   "late_min": 5
-  },
-  {
-   "route": "185",
-   "headsign": "Narrabeen",
-   "start_time": "05:37",
-   "late_min": 5
-  },
-  {
-   "route": "144",
-   "headsign": "Manly",
-   "start_time": "25:30",
+   "route": "178",
+   "headsign": "Warringah Mall",
+   "start_time": "05:45",
    "late_min": 5
   }
  ],
