@@ -1,28 +1,28 @@
 date,code,name,scheduled,cancelled,observed,late
-2026-11-26,GSBC001,Busways R1,3724,0,531,160
-2026-11-26,GSBC002,Transit Systems NSW SW,2356,0,354,114
-2026-11-26,GSBC003,Transit Systems NSW,2811,1,469,108
-2026-11-26,GSBC004,CDC NSW R4,3622,3,505,62
-2026-11-26,GSBC007,Busways North West,3006,0,394,79
-2026-11-26,GSBC008,Keolis Downer Northern Beaches,3456,98,438,99
-2026-11-26,GSBC009,Transdev John Holland Buses,4731,3,615,113
-2026-11-26,GSBC010,U-Go Mobility,2633,0,391,84
-2026-11-26,agency:2447,Operator 2447,0,0,69,12
-2026-11-26,agency:2448,Operator 2448,0,29,265,15
-2026-11-26,agency:2449,Operator 2449,0,0,57,6
-2026-11-26,agency:2450,Operator 2450,0,0,191,22
-2026-11-26,agency:2454,Operator 2454,0,0,142,12
-2026-11-26,agency:2455,Operator 2455,0,0,32,1
-2026-11-26,agency:2456,Operator 2456,0,0,334,41
-2026-11-26,agency:2457,Operator 2457,0,0,15,0
-2026-11-26,agency:2458,Operator 2458,0,0,42,2
-2026-11-26,agency:2459,Operator 2459,0,2,999,196
+2026-11-26,GSBC001,Busways R1,3724,0,549,172
+2026-11-26,GSBC002,Transit Systems NSW SW,2356,0,372,125
+2026-11-26,GSBC003,Transit Systems NSW,2811,1,486,115
+2026-11-26,GSBC004,CDC NSW R4,3622,3,530,71
+2026-11-26,GSBC007,Busways North West,3006,0,407,86
+2026-11-26,GSBC008,Keolis Downer Northern Beaches,3456,99,451,101
+2026-11-26,GSBC009,Transdev John Holland Buses,4731,3,639,126
+2026-11-26,GSBC010,U-Go Mobility,2633,0,406,92
+2026-11-26,agency:2447,Operator 2447,0,0,69,13
+2026-11-26,agency:2448,Operator 2448,0,29,267,19
+2026-11-26,agency:2449,Operator 2449,0,0,58,6
+2026-11-26,agency:2450,Operator 2450,0,0,197,27
+2026-11-26,agency:2454,Operator 2454,0,0,145,15
+2026-11-26,agency:2455,Operator 2455,0,0,33,1
+2026-11-26,agency:2456,Operator 2456,0,0,337,47
+2026-11-26,agency:2457,Operator 2457,0,0,16,0
+2026-11-26,agency:2458,Operator 2458,0,0,43,3
+2026-11-26,agency:2459,Operator 2459,0,3,1031,213
 2026-11-26,agency:2504,Operator 2504,0,0,421,14
 2026-11-26,agency:2507,Operator 2507,0,0,340,28
 2026-11-26,agency:2509,Operator 2509,0,3,491,56
 2026-11-26,agency:2510,Operator 2510,0,0,423,36
-2026-11-26,agency:2514,Operator 2514,0,0,380,31
-2026-11-26,agency:2606,Operator 2606,0,0,370,71
-2026-11-26,agency:2607,Operator 2607,0,1,196,32
-2026-11-26,agency:3000,Operator 3000,0,0,338,41
+2026-11-26,agency:2514,Operator 2514,0,0,388,36
+2026-11-26,agency:2606,Operator 2606,0,0,376,80
+2026-11-26,agency:2607,Operator 2607,0,1,200,34
+2026-11-26,agency:3000,Operator 3000,0,0,346,48
 2026-11-26,agency:700003,Operator 700003,0,0,4,3
