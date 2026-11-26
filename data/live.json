@@ -1,17 +1,17 @@
 {
- "updated": "2026-11-27T06:54:54+11:00",
+ "updated": "2026-11-27T07:00:00+11:00",
  "status": "ok",
  "date": "2026-11-27",
  "scheduled": 3416,
  "count": 124,
  "cancel_pct": 3.6,
- "observed": 594,
- "late": 6,
- "late_pct": 1.0,
- "avg_late_min": 10.5,
- "ontime": 588,
- "ontime_pct": 99.0,
- "anywhere_late_pct": 10.3,
+ "observed": 614,
+ "late": 5,
+ "late_pct": 0.8,
+ "avg_late_min": 10.8,
+ "ontime": 609,
+ "ontime_pct": 99.2,
+ "anywhere_late_pct": 10.4,
  "am": {
   "scheduled": 760,
   "cancelled": 64
@@ -164,6 +164,12 @@
   {
    "route": "100",
    "headsign": "Taronga Zoo via City QVB",
+   "start_time": "07:48",
+   "late_min": 14
+  },
+  {
+   "route": "100",
+   "headsign": "Taronga Zoo via City QVB",
    "start_time": "24:09",
    "late_min": 12
   },
@@ -183,12 +189,6 @@
    "route": "185",
    "headsign": "Narrabeen",
    "start_time": "06:16",
-   "late_min": 11
-  },
-  {
-   "route": "100",
-   "headsign": "Taronga Zoo via City QVB",
-   "start_time": "07:48",
    "late_min": 11
   },
   {
