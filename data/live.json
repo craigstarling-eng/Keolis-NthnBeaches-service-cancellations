@@ -1,14 +1,14 @@
 {
- "updated": "2026-11-26T15:10:37+11:00",
+ "updated": "2026-11-26T15:15:43+11:00",
  "status": "ok",
  "date": "2026-11-26",
  "scheduled": 3456,
  "count": 99,
  "cancel_pct": 2.9,
- "observed": 472,
- "late": 109,
- "late_pct": 23.1,
- "avg_late_min": 11.5,
+ "observed": 487,
+ "late": 121,
+ "late_pct": 24.8,
+ "avg_late_min": 11.3,
  "am": {
   "scheduled": 800,
   "cancelled": 0
@@ -138,7 +138,7 @@
    "route": "B1",
    "headsign": "Mona Vale",
    "start_time": "14:45",
-   "late_min": 60
+   "late_min": 66
   },
   {
    "route": "263",
@@ -183,6 +183,18 @@
    "late_min": 30
   },
   {
+   "route": "173X",
+   "headsign": "City Wynyard",
+   "start_time": "14:50",
+   "late_min": 20
+  },
+  {
+   "route": "114",
+   "headsign": "RNS Hospital",
+   "start_time": "14:39",
+   "late_min": 20
+  },
+  {
    "route": "280",
    "headsign": "Chatswood",
    "start_time": "14:20",
@@ -195,28 +207,16 @@
    "late_min": 19
   },
   {
-   "route": "114",
-   "headsign": "RNS Hospital",
-   "start_time": "14:39",
-   "late_min": 18
-  },
-  {
-   "route": "173X",
-   "headsign": "City Wynyard",
-   "start_time": "14:50",
+   "route": "199",
+   "headsign": "Manly",
+   "start_time": "14:41",
    "late_min": 15
   },
   {
-   "route": "180",
-   "headsign": "Collaroy Plateau",
-   "start_time": "14:47",
-   "late_min": 14
-  },
-  {
-   "route": "114",
-   "headsign": "Balmoral Beach",
-   "start_time": "14:03",
-   "late_min": 14
+   "route": "162",
+   "headsign": "Seaforth",
+   "start_time": "14:40",
+   "late_min": 15
   }
  ],
  "trips": [
