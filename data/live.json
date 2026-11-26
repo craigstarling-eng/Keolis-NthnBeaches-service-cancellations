@@ -1,14 +1,14 @@
 {
- "updated": "2026-11-26T14:45:07+11:00",
+ "updated": "2026-11-26T14:50:12+11:00",
  "status": "ok",
  "date": "2026-11-26",
  "scheduled": 3456,
  "count": 98,
  "cancel_pct": 2.8,
- "observed": 386,
- "late": 77,
- "late_pct": 19.9,
- "avg_late_min": 11.1,
+ "observed": 398,
+ "late": 84,
+ "late_pct": 21.1,
+ "avg_late_min": 12.0,
  "am": {
   "scheduled": 800,
   "cancelled": 0
@@ -135,10 +135,22 @@
    "late_min": 86
   },
   {
+   "route": "263",
+   "headsign": "City Gresham St",
+   "start_time": "13:37",
+   "late_min": 58
+  },
+  {
    "route": "B1",
    "headsign": "City Wynyard",
    "start_time": "13:39",
    "late_min": 51
+  },
+  {
+   "route": "230",
+   "headsign": "Mosman Bay Wharf",
+   "start_time": "15:26",
+   "late_min": 44
   },
   {
    "route": "179",
@@ -150,7 +162,7 @@
    "route": "B1",
    "headsign": "Mona Vale",
    "start_time": "14:45",
-   "late_min": 35
+   "late_min": 40
   },
   {
    "route": "177",
@@ -171,15 +183,15 @@
    "late_min": 30
   },
   {
-   "route": "280",
-   "headsign": "Chatswood",
-   "start_time": "14:20",
-   "late_min": 18
-  },
-  {
    "route": "144",
    "headsign": "Chatswood",
    "start_time": "15:10",
+   "late_min": 19
+  },
+  {
+   "route": "280",
+   "headsign": "Chatswood",
+   "start_time": "14:20",
    "late_min": 18
   },
   {
@@ -201,22 +213,10 @@
    "late_min": 13
   },
   {
-   "route": "167",
-   "headsign": "Warringah Mall",
-   "start_time": "13:58",
-   "late_min": 11
-  },
-  {
-   "route": "280",
-   "headsign": "Warringah Mall",
-   "start_time": "15:14",
-   "late_min": 11
-  },
-  {
    "route": "199",
    "headsign": "Manly",
    "start_time": "13:45",
-   "late_min": 10
+   "late_min": 12
   }
  ],
  "trips": [
