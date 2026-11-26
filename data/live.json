@@ -1,17 +1,17 @@
 {
- "updated": "2026-11-27T08:11:22+11:00",
+ "updated": "2026-11-27T08:16:28+11:00",
  "status": "ok",
  "date": "2026-11-27",
  "scheduled": 3416,
  "count": 174,
  "cancel_pct": 5.1,
- "observed": 871,
+ "observed": 886,
  "late": 26,
- "late_pct": 3.0,
- "avg_late_min": 17.6,
- "ontime": 845,
- "ontime_pct": 97.0,
- "anywhere_late_pct": 19.2,
+ "late_pct": 2.9,
+ "avg_late_min": 18.3,
+ "ontime": 860,
+ "ontime_pct": 97.1,
+ "anywhere_late_pct": 19.6,
  "am": {
   "scheduled": 760,
   "cancelled": 76
@@ -135,13 +135,13 @@
    "route": "160X",
    "headsign": "Dee Why",
    "start_time": "06:30",
-   "late_min": 101
+   "late_min": 106
   },
   {
    "route": "B1",
    "headsign": "City Wynyard",
    "start_time": "07:17",
-   "late_min": 55
+   "late_min": 60
   },
   {
    "route": "100",
@@ -165,13 +165,13 @@
    "route": "172X",
    "headsign": "Warringah Mall",
    "start_time": "07:40",
-   "late_min": 26
+   "late_min": 28
   },
   {
    "route": "174X",
    "headsign": "City Wynyard",
    "start_time": "07:35",
-   "late_min": 22
+   "late_min": 24
   },
   {
    "route": "100",
@@ -192,6 +192,18 @@
    "late_min": 16
   },
   {
+   "route": "100",
+   "headsign": "Taronga Zoo via City QVB",
+   "start_time": "08:00",
+   "late_min": 16
+  },
+  {
+   "route": "172X",
+   "headsign": "City Wynyard",
+   "start_time": "07:58",
+   "late_min": 15
+  },
+  {
    "route": "166",
    "headsign": "Frenchs Forest",
    "start_time": "06:50",
@@ -207,18 +219,6 @@
    "route": "167",
    "headsign": "Manly",
    "start_time": "06:24",
-   "late_min": 14
-  },
-  {
-   "route": "100",
-   "headsign": "Taronga Zoo via City QVB",
-   "start_time": "07:48",
-   "late_min": 14
-  },
-  {
-   "route": "243",
-   "headsign": "City Wynyard",
-   "start_time": "07:40",
    "late_min": 14
   }
  ],
