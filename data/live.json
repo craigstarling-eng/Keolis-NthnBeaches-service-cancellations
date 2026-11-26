@@ -1,13 +1,13 @@
 {
- "updated": "2026-11-26T17:33:14+11:00",
+ "updated": "2026-11-26T17:38:19+11:00",
  "status": "ok",
  "date": "2026-11-26",
  "scheduled": 3456,
  "count": 106,
  "cancel_pct": 3.1,
- "observed": 1068,
- "late": 459,
- "late_pct": 43.0,
+ "observed": 1084,
+ "late": 480,
+ "late_pct": 44.3,
  "avg_late_min": 10.9,
  "am": {
   "scheduled": 800,
@@ -159,16 +159,16 @@
    "late_min": 56
   },
   {
+   "route": "180X",
+   "headsign": "Collaroy Plateau",
+   "start_time": "16:46",
+   "late_min": 52
+  },
+  {
    "route": "B1",
    "headsign": "City Wynyard",
    "start_time": "13:39",
    "late_min": 51
-  },
-  {
-   "route": "180X",
-   "headsign": "Collaroy Plateau",
-   "start_time": "16:46",
-   "late_min": 47
   },
   {
    "route": "230",
