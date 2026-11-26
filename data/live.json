@@ -1,17 +1,17 @@
 {
- "updated": "2026-11-27T05:43:35+11:00",
+ "updated": "2026-11-27T05:48:40+11:00",
  "status": "ok",
  "date": "2026-11-27",
  "scheduled": 3416,
  "count": 124,
  "cancel_pct": 3.6,
- "observed": 287,
+ "observed": 301,
  "late": 0,
  "late_pct": 0.0,
  "avg_late_min": null,
- "ontime": 287,
+ "ontime": 301,
  "ontime_pct": 100.0,
- "anywhere_late_pct": 4.5,
+ "anywhere_late_pct": 5.0,
  "am": {
   "scheduled": 760,
   "cancelled": 61
@@ -164,6 +164,12 @@
   {
    "route": "199",
    "headsign": "Manly",
+   "start_time": "04:57",
+   "late_min": 7
+  },
+  {
+   "route": "199",
+   "headsign": "Manly",
    "start_time": "04:35",
    "late_min": 7
   },
@@ -192,9 +198,15 @@
    "late_min": 5
   },
   {
+   "route": "144",
+   "headsign": "Manly",
+   "start_time": "05:30",
+   "late_min": 5
+  },
+  {
    "route": "199",
    "headsign": "Manly",
-   "start_time": "04:57",
+   "start_time": "05:30",
    "late_min": 5
   },
   {
