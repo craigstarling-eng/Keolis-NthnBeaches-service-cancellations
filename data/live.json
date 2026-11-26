@@ -1,17 +1,17 @@
 {
- "updated": "2026-11-27T06:39:37+11:00",
+ "updated": "2026-11-27T06:44:43+11:00",
  "status": "ok",
  "date": "2026-11-27",
  "scheduled": 3416,
  "count": 124,
  "cancel_pct": 3.6,
- "observed": 525,
- "late": 6,
- "late_pct": 1.1,
- "avg_late_min": 9.3,
- "ontime": 519,
- "ontime_pct": 98.9,
- "anywhere_late_pct": 7.6,
+ "observed": 553,
+ "late": 5,
+ "late_pct": 0.9,
+ "avg_late_min": 9.2,
+ "ontime": 548,
+ "ontime_pct": 99.1,
+ "anywhere_late_pct": 7.8,
  "am": {
   "scheduled": 760,
   "cancelled": 64
@@ -141,7 +141,7 @@
    "route": "167",
    "headsign": "Manly",
    "start_time": "06:24",
-   "late_min": 13
+   "late_min": 14
   },
   {
    "route": "100",
@@ -192,10 +192,16 @@
    "late_min": 10
   },
   {
+   "route": "100",
+   "headsign": "Taronga Zoo via City QVB",
+   "start_time": "06:34",
+   "late_min": 10
+  },
+  {
    "route": "B1",
    "headsign": "Mona Vale",
    "start_time": "06:01",
-   "late_min": 9
+   "late_min": 10
   },
   {
    "route": "167",
@@ -204,21 +210,15 @@
    "late_min": 9
   },
   {
+   "route": "100",
+   "headsign": "Taronga Zoo via City QVB",
+   "start_time": "05:56",
+   "late_min": 9
+  },
+  {
    "route": "280",
    "headsign": "Chatswood",
    "start_time": "06:32",
-   "late_min": 8
-  },
-  {
-   "route": "100",
-   "headsign": "Taronga Zoo via City QVB",
-   "start_time": "24:29",
-   "late_min": 8
-  },
-  {
-   "route": "172X",
-   "headsign": "City Wynyard",
-   "start_time": "06:05",
    "late_min": 8
   }
  ],
