@@ -654,9 +654,10 @@ function schoolFind() {
       seq.forEach((s, k) => {
         if (sset.has(s[0])) return;
         const d = distM(scHome, stopPt(s[0])); if (d > radius) return;
-        const toSchool = schoolPos.some(p => p > k), fromSchool = schoolPos.some(p => p < k);
+        // morning buses take kids to school, afternoon buses bring them home (a 3pm bus passing the school again isn't a morning option)
+        const toSchool = s[1] < 720 && schoolPos.some(p => p > k), fromSchool = schoolPos.some(p => p < k && seq[p][1] >= 720);
         if (!toSchool && !fromSchool) return;
-        if (!best || d < best.d) best = {d, k, dir: toSchool ? "am" : "pm", sk: toSchool ? schoolPos.find(p => p > k) : [...schoolPos].reverse().find(p => p < k)};
+        if (!best || d < best.d) best = {d, k, dir: toSchool ? "am" : "pm", sk: toSchool ? schoolPos.find(p => p > k) : [...schoolPos].reverse().find(p => p < k && seq[p][1] >= 720)};
       });
       if (best) found.push({ti, t, ...best});
     });
