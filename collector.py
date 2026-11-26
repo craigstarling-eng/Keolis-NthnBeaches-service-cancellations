@@ -45,7 +45,7 @@ EARLY_SECONDS = -60                       # TfNSW on-time window: no more than 1
 AM_PEAK = range(6, 9)                     # trips starting 06:00-08:59
 PM_PEAK = range(16, 19)                   # trips starting 16:00-18:59
 SCHEDULE_DAYS_BACK, SCHEDULE_DAYS_AHEAD = 2, 14
-STATIC_VERSION = 4                        # bump to force timetables to reload
+STATIC_VERSION = 5                        # bump to force timetables to reload
 SCHOOL_ROUTE_TYPES = {"712"}              # GTFS extended type: school bus
 SCHOOL_NAME = re.compile(r"^\d+n$")        # TfNSW school services are numbered like 560n
 
@@ -203,8 +203,8 @@ def schedule_window():
 
 # ---------------------------------------------------------------- school bus finder data
 SCHOOL_FILE = os.path.join(DATA, "school.json")
-SCHOOL_WORDS = re.compile(r"\b(school|college|grammar|campus|high|public|primary|academy|anglican|catholic|"
-                          r"christian|steiner|montessori|ps|hs)\b", re.I)
+SCHOOL_WORDS = re.compile(r"\b(school|college|grammar|campus|high|ps|hs|nbsc|academy|steiner|montessori|"
+                          r"(public|primary|catholic|anglican|christian)\s+(school|primary|college))\b|\bprimary$|\bhigh$", re.I)
 DAY_NAMES = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 
 
@@ -231,8 +231,45 @@ def thin(points, max_points=180):
 
 
 def school_key(name):
-    base = name.split(",")[0].strip()
-    return base if SCHOOL_WORDS.search(base) else None
+    """School name from a stop or headsign, e.g. 'Military Rd opp Mosman High School, Mosman' -> 'Mosman High School'."""
+    base = re.split(r"\s+(?:opp|at|near|before|after|outside|nr)\s+", name.split(",")[0].strip())[-1].strip()
+    if not SCHOOL_WORDS.search(base) or re.search(r"\b(st|rd|ave|street|road|church)$", base, re.I):
+        return None
+    return base
+
+
+def school_canon(name):
+    """Comparison key that treats 'Dee Why PS', 'Dee Why Public School' and 'St. Kevins Primary' style variants as one."""
+    k = re.sub(r"['.]", "", name.lower())
+    k = re.sub(r"\s*(&|-)\s*infants$", "", k)
+    k = re.sub(r"\bps$", "public school", k)
+    k = re.sub(r"\bhs$", "high school", k)
+    k = re.sub(r"\b(high|primary|grammar)$", r"\1 school", k)
+    k = k.replace("narabeen", "narrabeen")
+    k = {"north curl curl public school": "curl curl north public school",
+         "north narrabeen public school": "narrabeen north public school"}.get(k, k)
+    return re.sub(r"\s+", " ", k).strip()
+
+
+def tidy_schools(raw):
+    """Merge name variants; show the fullest spelling."""
+    groups = defaultdict(lambda: {"names": [], "stops": set()})
+    for n, st in raw.items():
+        g = groups[school_canon(n)]
+        g["names"].append(n)
+        g["stops"] |= st
+    for k in list(groups):  # 'X Primary School' with no other match joins 'X Public School'
+        if k.endswith(" primary school"):
+            alt = k[:-len("primary school")] + "public school"
+            if alt in groups and k in groups:
+                groups[alt]["names"] += groups[k]["names"]
+                groups[alt]["stops"] |= groups.pop(k)["stops"]
+    out = {}
+    for k, g in groups.items():
+        best = max(g["names"], key=lambda n: (not re.search(r"\b(PS|HS|Ps)\b", n), "School" in n or "College" in n, len(n)))
+        best = re.sub(r"\bPS$", "Public School", re.sub(r"\bHS$", "High School", best)).replace("Narabeen", "Narrabeen")
+        out[best] = g["stops"]
+    return out
 
 
 def build_school(z, school_routes, routes):
@@ -301,8 +338,10 @@ def build_school(z, school_routes, routes):
         if k:
             schools[k].add(sidx[sid])
     for route, hs, _, seq, _ in out_trips:
-        if SCHOOL_WORDS.search(hs):  # headsign is the destination, so the school is the last stop
-            schools[hs.split(",")[0].strip()].add(seq[-1][0])
+        k = school_key(hs)  # headsign is the destination, so the school is the last stop
+        if k:
+            schools[k].add(seq[-1][0])
+    schools = tidy_schools(schools)
     write_json(SCHOOL_FILE, {"built": iso(now_syd().date()), "stops": [stops[s] for s in stop_ids],
                              "schools": {k: sorted(v) for k, v in sorted(schools.items())},
                              "trips": out_trips, "shapes": shape_list})
