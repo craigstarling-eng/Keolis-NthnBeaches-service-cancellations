@@ -1,14 +1,14 @@
 {
- "updated": "2026-11-26T14:55:18+11:00",
+ "updated": "2026-11-26T15:00:26+11:00",
  "status": "ok",
  "date": "2026-11-26",
  "scheduled": 3456,
  "count": 98,
  "cancel_pct": 2.8,
- "observed": 417,
- "late": 92,
- "late_pct": 22.1,
- "avg_late_min": 11.7,
+ "observed": 438,
+ "late": 99,
+ "late_pct": 22.6,
+ "avg_late_min": 11.6,
  "am": {
   "scheduled": 800,
   "cancelled": 0
@@ -147,16 +147,16 @@
    "late_min": 51
   },
   {
+   "route": "B1",
+   "headsign": "Mona Vale",
+   "start_time": "14:45",
+   "late_min": 50
+  },
+  {
    "route": "230",
    "headsign": "Mosman Bay Wharf",
    "start_time": "15:26",
    "late_min": 47
-  },
-  {
-   "route": "B1",
-   "headsign": "Mona Vale",
-   "start_time": "14:45",
-   "late_min": 45
   },
   {
    "route": "179",
@@ -196,6 +196,12 @@
   },
   {
    "route": "114",
+   "headsign": "RNS Hospital",
+   "start_time": "14:39",
+   "late_min": 17
+  },
+  {
+   "route": "114",
    "headsign": "Balmoral Beach",
    "start_time": "14:03",
    "late_min": 14
@@ -207,15 +213,9 @@
    "late_min": 14
   },
   {
-   "route": "100",
-   "headsign": "Taronga Zoo via City QVB",
-   "start_time": "13:39",
-   "late_min": 13
-  },
-  {
-   "route": "100",
-   "headsign": "Taronga Zoo via City QVB",
-   "start_time": "13:29",
+   "route": "180",
+   "headsign": "Collaroy Plateau",
+   "start_time": "14:47",
    "late_min": 13
   }
  ],
