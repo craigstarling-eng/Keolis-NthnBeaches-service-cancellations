@@ -1,20 +1,20 @@
 {
- "updated": "2026-11-27T08:01:10+11:00",
+ "updated": "2026-11-27T08:06:16+11:00",
  "status": "ok",
  "date": "2026-11-27",
  "scheduled": 3416,
- "count": 173,
+ "count": 174,
  "cancel_pct": 5.1,
- "observed": 847,
- "late": 22,
- "late_pct": 2.6,
- "avg_late_min": 18.0,
- "ontime": 825,
- "ontime_pct": 97.4,
- "anywhere_late_pct": 17.7,
+ "observed": 857,
+ "late": 24,
+ "late_pct": 2.8,
+ "avg_late_min": 17.8,
+ "ontime": 833,
+ "ontime_pct": 97.2,
+ "anywhere_late_pct": 18.2,
  "am": {
   "scheduled": 760,
-  "cancelled": 75
+  "cancelled": 76
  },
  "pm": {
   "scheduled": 748,
@@ -135,19 +135,19 @@
    "route": "160X",
    "headsign": "Dee Why",
    "start_time": "06:30",
-   "late_min": 91
+   "late_min": 96
+  },
+  {
+   "route": "B1",
+   "headsign": "City Wynyard",
+   "start_time": "07:17",
+   "late_min": 50
   },
   {
    "route": "100",
    "headsign": "Taronga Zoo via City QVB",
    "start_time": "07:18",
    "late_min": 47
-  },
-  {
-   "route": "B1",
-   "headsign": "City Wynyard",
-   "start_time": "07:17",
-   "late_min": 45
   },
   {
    "route": "170X",
@@ -165,7 +165,7 @@
    "route": "172X",
    "headsign": "Warringah Mall",
    "start_time": "07:40",
-   "late_min": 24
+   "late_min": 26
   },
   {
    "route": "174X",
@@ -219,7 +219,7 @@
    "route": "154X",
    "headsign": "Milsons Point",
    "start_time": "07:48",
-   "late_min": 12
+   "late_min": 13
   }
  ],
  "trips": [
@@ -437,6 +437,11 @@
    "start_time": "07:45",
    "route": "181X",
    "headsign": "City Wynyard"
+  },
+  {
+   "start_time": "07:48",
+   "route": "100",
+   "headsign": "Taronga Zoo via City QVB"
   },
   {
    "start_time": "07:51",
