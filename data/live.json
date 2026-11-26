@@ -1,24 +1,24 @@
 {
- "updated": "2026-11-27T03:36:11+11:00",
+ "updated": "2026-11-27T03:41:16+11:00",
  "status": "ok",
  "date": "2026-11-27",
  "scheduled": 3416,
- "count": 40,
- "cancel_pct": 1.2,
- "observed": 65,
+ "count": 54,
+ "cancel_pct": 1.6,
+ "observed": 66,
  "late": 0,
  "late_pct": 0.0,
  "avg_late_min": null,
- "ontime": 65,
+ "ontime": 66,
  "ontime_pct": 100.0,
- "anywhere_late_pct": 10.8,
+ "anywhere_late_pct": 10.6,
  "am": {
   "scheduled": 760,
-  "cancelled": 26
+  "cancelled": 29
  },
  "pm": {
   "scheduled": 748,
-  "cancelled": 0
+  "cancelled": 4
  },
  "gaps": [
   {
@@ -206,6 +206,11 @@
    "headsign": "Manly"
   },
   {
+   "start_time": "06:15",
+   "route": "100",
+   "headsign": "Taronga Zoo via City QVB"
+  },
+  {
    "start_time": "06:16",
    "route": "180X",
    "headsign": "City Wynyard"
@@ -214,6 +219,11 @@
    "start_time": "06:20",
    "route": "170X",
    "headsign": "City Wynyard"
+  },
+  {
+   "start_time": "06:20",
+   "route": "144",
+   "headsign": "Chatswood"
   },
   {
    "start_time": "06:23",
@@ -259,6 +269,11 @@
    "start_time": "07:19",
    "route": "167",
    "headsign": "Manly"
+  },
+  {
+   "start_time": "07:25",
+   "route": "100",
+   "headsign": "Taronga Zoo via City QVB"
   },
   {
    "start_time": "07:34",
@@ -374,6 +389,61 @@
    "start_time": "11:18",
    "route": "167",
    "headsign": "Warringah Mall"
+  },
+  {
+   "start_time": "13:38",
+   "route": "144",
+   "headsign": "Manly"
+  },
+  {
+   "start_time": "14:24",
+   "route": "144",
+   "headsign": "Manly"
+  },
+  {
+   "start_time": "14:30",
+   "route": "199",
+   "headsign": "Palm Beach"
+  },
+  {
+   "start_time": "14:50",
+   "route": "144",
+   "headsign": "Chatswood"
+  },
+  {
+   "start_time": "14:59",
+   "route": "144",
+   "headsign": "Manly"
+  },
+  {
+   "start_time": "15:04",
+   "route": "230",
+   "headsign": "Milsons Point"
+  },
+  {
+   "start_time": "15:30",
+   "route": "144",
+   "headsign": "Chatswood"
+  },
+  {
+   "start_time": "16:01",
+   "route": "144",
+   "headsign": "Manly"
+  },
+  {
+   "start_time": "16:10",
+   "route": "144",
+   "headsign": "Chatswood"
+  },
+  {
+   "start_time": "16:50",
+   "route": "144",
+   "headsign": "Manly"
+  },
+  {
+   "start_time": "17:21",
+   "route": "144",
+   "headsign": "Manly"
   }
  ],
  "school_cancelled": []
