@@ -1,13 +1,13 @@
 {
- "updated": "2026-11-26T17:43:25+11:00",
+ "updated": "2026-11-26T17:48:30+11:00",
  "status": "ok",
  "date": "2026-11-26",
  "scheduled": 3456,
  "count": 107,
  "cancel_pct": 3.1,
- "observed": 1101,
- "late": 495,
- "late_pct": 45.0,
+ "observed": 1114,
+ "late": 507,
+ "late_pct": 45.5,
  "avg_late_min": 11.0,
  "am": {
   "scheduled": 800,
@@ -183,6 +183,12 @@
    "late_min": 45
   },
   {
+   "route": "B1",
+   "headsign": "Mona Vale",
+   "start_time": "17:40",
+   "late_min": 43
+  },
+  {
    "route": "179",
    "headsign": "War Veterans Hm",
    "start_time": "13:42",
@@ -210,12 +216,6 @@
    "route": "263",
    "headsign": "Neutral Bay Jn",
    "start_time": "16:10",
-   "late_min": 38
-  },
-  {
-   "route": "B1",
-   "headsign": "Mona Vale",
-   "start_time": "17:40",
    "late_min": 38
   }
  ],
