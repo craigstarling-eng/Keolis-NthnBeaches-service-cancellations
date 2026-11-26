@@ -26,7 +26,7 @@ jobs:
           path: cache
           key: tfnsw-${{ github.run_id }}
           restore-keys: tfnsw-
-      - run: pip install requests gtfs-realtime-bindings pillow
+      - run: pip install requests gtfs-realtime-bindings pillow cryptography
       - name: Collect every 5 minutes
         env:
           TFNSW_API_KEY: ${{ secrets.TFNSW_API_KEY }}
@@ -34,21 +34,31 @@ jobs:
           BLUESKY_APP_PASSWORD: ${{ secrets.BLUESKY_APP_PASSWORD }}
           FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
           FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
         run: |
           echo "STARTED_AT=$(date +%s)" >> "$GITHUB_ENV"
           git config user.name tracker-bot
           git config user.email actions@users.noreply.github.com
-          end=$(( $(date +%s) + 310*60 ))
-          while [ "$(date +%s)" -lt "$end" ]; do
-            python collector.py || echo "collector reported a problem"
-            python tools/post_social.py auto || echo "social posting reported a problem"
+          publish() {
             git add -A data
             if ! git diff --cached --quiet; then
               git commit -q -m "update data"
               git pull -q --rebase -X theirs || true
               git push -q || echo "push failed, will retry next time"
             fi
-            sleep 300
+          }
+          end=$(( $(date +%s) + 310*60 ))
+          while [ "$(date +%s)" -lt "$end" ]; do
+            python collector.py || echo "collector reported a problem"
+            python tools/post_social.py auto || echo "social posting reported a problem"
+            python tools/telegram_bot.py alerts || echo "telegram alerts reported a problem"
+            publish
+            # Answer Telegram messages every 30 seconds until the next data update.
+            for i in 1 2 3 4 5 6 7 8 9; do
+              sleep 30
+              python tools/telegram_bot.py replies || true
+            done
+            publish
           done
       - name: Save working cache
         if: always()

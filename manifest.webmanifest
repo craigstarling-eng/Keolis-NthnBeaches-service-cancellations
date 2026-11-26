@@ -1,0 +1,15 @@
+{
+  "name": "Northern Beaches Bus Tracker",
+  "short_name": "NB Buses",
+  "description": "Is my bus running? Live cancellations, lateness and reliability for Northern Beaches buses.",
+  "start_url": "./#mybus",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0f2747",
+  "theme_color": "#0f2747",
+  "icons": [
+    {"src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png"},
+    {"src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}

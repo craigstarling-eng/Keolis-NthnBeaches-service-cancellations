@@ -3,6 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0f2747">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="NB Buses">
 <title>Northern Beaches Bus Tracker</title>
 <meta name="description" content="Independent daily tracking of cancelled and late Keolis Northern Beaches bus services, from Transport for NSW open data.">
 <style>
@@ -112,7 +119,12 @@ section[hidden]{display:none}
 
   <div class="card">
     <h2>Cancellation alerts</h2>
-    <p class="sub">Coming soon: get a free Telegram message when your usual bus is cancelled, often hours before it's due.</p>
+    <div id="tgCard"><p class="sub">Coming soon: get a free Telegram message when your usual bus is cancelled, often hours before it's due.</p></div>
+  </div>
+
+  <div class="card">
+    <h2>Use it like an app</h2>
+    <p class="sub"><b>Android (Chrome):</b> tap ⋮ then <b>Install app</b> or <b>Add to Home screen</b>.<br><b>iPhone (Safari):</b> tap the Share button then <b>Add to Home Screen</b>.<br>It then opens straight to My bus, full screen, with its own icon.</p>
   </div>
   </section>
   <section data-tab="stats" hidden>
@@ -295,6 +307,7 @@ section[hidden]{display:none}
         <li><b>On time / late.</b> Measured when the bus leaves its first stop, the same point Transport for NSW uses for its official on-time running figures. On time means no more than 1 minute early or 5 minutes late. Late means more than 5 minutes late. This uses the live feed's latest reading for the first stop, checked every 5 minutes, so it's close to but not identical to the official figure.</li>
         <li><b>Late anywhere on the route.</b> Shown separately: a bus that was 5+ minutes behind timetable at any stop we checked. This is much higher than the first-stop figure, because delays build up along a route, so don't compare it with official on-time running.</li>
         <li><b>Longest waits.</b> The gap between the scheduled start of the bus before and the bus after a cancelled trip on the same route and direction.</li>
+        <li><b>Privacy.</b> This site has no logins and no tracking. "Save as my bus" is stored only on your own phone. Telegram alerts store your chat number and chosen buses, encrypted, only so the bot can message you; send /stop to delete them.</li>
         <li><b>Comparisons.</b> Every Sydney contract region is measured with exactly the same method. Operators may differ in how promptly they mark trips as cancelled in the live feed, so treat region comparisons alongside the official Transport for NSW figures.</li>
         <li><b>Limits.</b> If the live feed is down, nothing is recorded for that time. Tracking began on <span id="mStart"></span>. Marked days (strikes, storms) are shown on the charts so they can be read in context.</li>
       </ul>
@@ -315,7 +328,7 @@ section[hidden]{display:none}
   <p class="sub">Source: Transport for NSW open data, licensed CC BY 4.0. Updates about every 5 minutes.</p>
 </div>
 <script>
-let S, L, R, G, O, TT, TS, E = [];
+let S, L, R, G, O, TT, TS, E = [], BOT = null;
 let state = {off: 60, metric: "rate", range: 30, peak: "30", reg: "d30", share: "today", route: null, league: "cxl"};
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -334,6 +347,7 @@ async function load() {
   O = await j("data/official/official.json").catch(() => null);
   if (!TT || TT.date !== L.date) TT = await j("data/timetable_today.json").catch(() => null);
   if (!TS) TS = await j("data/trip_stats.json").catch(() => null);
+  if (BOT === null) BOT = ((await j("data/telegram.json").catch(() => ({}))) || {}).bot || "";
   render();
 }
 
@@ -533,6 +547,20 @@ function tabsInit() {
   showTab(location.hash.slice(1));
 }
 
+// ---------- telegram alerts
+function alertLink(route, time, dir) {
+  if (!BOT) return "";
+  const b64 = btoa(unescape(encodeURIComponent(dir))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  const p = `${route}_${fmtT(time).replace(":", "")}_${b64}`;
+  return `https://t.me/${BOT}` + (/^[A-Za-z0-9_-]{1,64}$/.test(p) ? `?start=${p}` : "");
+}
+function tgCard() {
+  if (!BOT) return;
+  $("tgCard").innerHTML = `<p class="sub">Get a free Telegram message when your usual bus is cancelled, often hours before it's due. Tap <b>🔔 Alert me</b> under any bus above, or open the bot and send your route and time, e.g. <b>199 7:30</b> or <b>B1 17:15 Mona Vale</b>.</p>
+    <a class="btn primary" href="https://t.me/${BOT}" target="_blank" rel="noopener" style="margin-top:6px">Open the alerts bot</a>
+    <p class="sub" style="margin-top:8px">You'll need the free Telegram app. Send /list to see your alerts or /stop to turn them all off.</p>`;
+}
+
 // ---------- my bus
 const OCC = ["Empty", "Plenty of seats", "Few seats left", "Standing room only", "Very crowded", "Full", "Not taking passengers"];
 let mb = null;
@@ -540,6 +568,7 @@ function nowMin() { const p = new Date().toLocaleTimeString("en-GB", {timeZone: 
 const hm = t => { const [h, m] = (t || "").split(":"); return h === undefined || m === undefined ? null : +h * 60 + +m; };
 const fmtT = t => { const m = hm(t); return m == null ? t : `${String(Math.floor(m / 60) % 24).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`; };
 function myBus() {
+  tgCard();
   const cx = L.trips || [], sumEl = $("todayStrip");
   sumEl.innerHTML = `Today so far: <b>${nf(L.count)}</b> Northern Beaches services cancelled${L.scheduled ? ` (${pc(L.cancel_pct)} of scheduled trips)` : ""}${L.ontime_pct != null ? ` · <b>${pc(L.ontime_pct)}</b> left their first stop on time` : ""}. <a href="#stats">See all stats</a>`;
   sumEl.querySelector("a").onclick = e => { e.preventDefault(); history.replaceState(null, "", "#stats"); showTab("stats"); window.scrollTo(0, 0); };
@@ -582,8 +611,8 @@ function myBus() {
       badges = m > now ? `<span class="badge">Scheduled</span>` : `<span class="badge">No live data</span>`;
     }
     if (a && a[2] != null) badges += `<span class="badge ${a[2] >= 3 ? "warn" : ""}">${OCC[a[2]] || ""}</span>`;
-    const r = rel(t);
-    return `<div class="trip"><div class="t ${past ? "past" : ""}">${fmtT(t[1])}</div><div>${badges}<div class="meta">To ${esc(t[2])}${t[3] ? ` · from ${esc(t[3])}` : ""}</div>${extra ? `<div class="meta"><b>${extra}</b></div>` : ""}${r ? `<div class="meta">${r}</div>` : ""}</div></div>`;
+    const r = rel(t), al = alertLink(mb.route, t[1], t[2]);
+    return `<div class="trip"><div class="t ${past ? "past" : ""}">${fmtT(t[1])}</div><div>${badges}<div class="meta">To ${esc(t[2])}${t[3] ? ` · from ${esc(t[3])}` : ""}</div>${extra ? `<div class="meta"><b>${extra}</b></div>` : ""}${r ? `<div class="meta">${r}</div>` : ""}${al ? `<div class="meta"><a href="${al}" target="_blank" rel="noopener">🔔 Alert me if this bus is cancelled</a></div>` : ""}</div></div>`;
   }).join("") : `<p class="empty">No ${esc(mb.route)} buses in this direction around that time today.</p>`;
 
   // best bets
@@ -669,6 +698,7 @@ $("makeShare").onclick = drawShare;
 $("dlShare").onclick = () => { const a = document.createElement("a"); a.download = `nb-buses-${L.date}-${state.share}.png`; a.href = $("shareCanvas").toDataURL("image/png"); a.click(); };
 $("copyShare").onclick = async () => { try { await navigator.clipboard.writeText($("shareText").value); $("copyShare").textContent = "Copied"; setTimeout(() => $("copyShare").textContent = "Copy text", 1500); } catch (e) { $("shareText").select(); } };
 
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 reportInit();
 tabsInit();
 load(); setInterval(load, 120000);
