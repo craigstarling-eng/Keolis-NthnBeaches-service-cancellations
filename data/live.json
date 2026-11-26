@@ -1,24 +1,24 @@
 {
- "updated": "2026-11-27T04:17:03+11:00",
+ "updated": "2026-11-27T04:22:08+11:00",
  "status": "ok",
  "date": "2026-11-27",
  "scheduled": 3416,
- "count": 100,
- "cancel_pct": 2.9,
- "observed": 88,
+ "count": 101,
+ "cancel_pct": 3.0,
+ "observed": 94,
  "late": 0,
  "late_pct": 0.0,
  "avg_late_min": null,
- "ontime": 88,
+ "ontime": 94,
  "ontime_pct": 100.0,
- "anywhere_late_pct": 8.0,
+ "anywhere_late_pct": 7.4,
  "am": {
   "scheduled": 760,
   "cancelled": 61
  },
  "pm": {
   "scheduled": 748,
-  "cancelled": 6
+  "cancelled": 7
  },
  "gaps": [
   {
@@ -664,6 +664,11 @@
    "start_time": "16:10",
    "route": "199",
    "headsign": "Palm Beach"
+  },
+  {
+   "start_time": "16:21",
+   "route": "199",
+   "headsign": "Manly"
   },
   {
    "start_time": "16:50",
