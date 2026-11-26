@@ -1,20 +1,20 @@
 {
- "updated": "2026-11-27T07:05:06+11:00",
+ "updated": "2026-11-27T07:10:12+11:00",
  "status": "ok",
  "date": "2026-11-27",
  "scheduled": 3416,
- "count": 124,
- "cancel_pct": 3.6,
- "observed": 637,
- "late": 6,
- "late_pct": 0.9,
- "avg_late_min": 10.8,
- "ontime": 631,
- "ontime_pct": 99.1,
- "anywhere_late_pct": 11.3,
+ "count": 129,
+ "cancel_pct": 3.8,
+ "observed": 669,
+ "late": 10,
+ "late_pct": 1.5,
+ "avg_late_min": 16.5,
+ "ontime": 659,
+ "ontime_pct": 98.5,
+ "anywhere_late_pct": 11.8,
  "am": {
   "scheduled": 760,
-  "cancelled": 64
+  "cancelled": 69
  },
  "pm": {
   "scheduled": 748,
@@ -134,6 +134,18 @@
   {
    "route": "100",
    "headsign": "Taronga Zoo via City QVB",
+   "start_time": "07:18",
+   "late_min": 47
+  },
+  {
+   "route": "160X",
+   "headsign": "Dee Why",
+   "start_time": "06:30",
+   "late_min": 40
+  },
+  {
+   "route": "100",
+   "headsign": "Taronga Zoo via City QVB",
    "start_time": "06:34",
    "late_min": 20
   },
@@ -198,27 +210,15 @@
    "late_min": 11
   },
   {
+   "route": "199",
+   "headsign": "Palm Beach",
+   "start_time": "06:00",
+   "late_min": 11
+  },
+  {
    "route": "144",
    "headsign": "Manly",
    "start_time": "05:30",
-   "late_min": 10
-  },
-  {
-   "route": "167",
-   "headsign": "Warringah Mall",
-   "start_time": "06:58",
-   "late_min": 10
-  },
-  {
-   "route": "100",
-   "headsign": "Taronga Zoo via City QVB",
-   "start_time": "07:18",
-   "late_min": 10
-  },
-  {
-   "route": "192",
-   "headsign": "Avalon Beach via Stokes Point",
-   "start_time": "06:55",
    "late_min": 10
   }
  ],
@@ -259,6 +259,11 @@
    "headsign": "Warringah Mall"
   },
   {
+   "start_time": "06:38",
+   "route": "199",
+   "headsign": "Manly"
+  },
+  {
    "start_time": "06:40",
    "route": "170X",
    "headsign": "City Wynyard"
@@ -277,6 +282,11 @@
    "start_time": "06:50",
    "route": "280",
    "headsign": "Chatswood"
+  },
+  {
+   "start_time": "06:52",
+   "route": "B1",
+   "headsign": "City Wynyard"
   },
   {
    "start_time": "06:56",
@@ -314,6 +324,11 @@
    "headsign": "City Wynyard"
   },
   {
+   "start_time": "07:12",
+   "route": "185",
+   "headsign": "Narrabeen"
+  },
+  {
    "start_time": "07:16",
    "route": "171X",
    "headsign": "City Wynyard"
@@ -339,6 +354,11 @@
    "headsign": "Manly"
   },
   {
+   "start_time": "07:21",
+   "route": "B1",
+   "headsign": "City Wynyard"
+  },
+  {
    "start_time": "07:23",
    "route": "174X",
    "headsign": "City Wynyard"
@@ -357,6 +377,11 @@
    "start_time": "07:32",
    "route": "100",
    "headsign": "Taronga Zoo via City QVB"
+  },
+  {
+   "start_time": "07:33",
+   "route": "B1",
+   "headsign": "City Wynyard"
   },
   {
    "start_time": "07:34",
