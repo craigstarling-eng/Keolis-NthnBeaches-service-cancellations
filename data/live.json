@@ -1,24 +1,24 @@
 {
- "updated": "2026-11-27T03:41:16+11:00",
+ "updated": "2026-11-27T03:46:34+11:00",
  "status": "ok",
  "date": "2026-11-27",
  "scheduled": 3416,
- "count": 54,
- "cancel_pct": 1.6,
- "observed": 66,
+ "count": 86,
+ "cancel_pct": 2.5,
+ "observed": 67,
  "late": 0,
  "late_pct": 0.0,
  "avg_late_min": null,
- "ontime": 66,
+ "ontime": 67,
  "ontime_pct": 100.0,
- "anywhere_late_pct": 10.6,
+ "anywhere_late_pct": 10.4,
  "am": {
   "scheduled": 760,
-  "cancelled": 29
+  "cancelled": 51
  },
  "pm": {
   "scheduled": 748,
-  "cancelled": 4
+  "cancelled": 5
  },
  "gaps": [
   {
@@ -28,6 +28,24 @@
    "to": "08:30",
    "gap_min": 130,
    "normal_min": 60,
+   "cancelled_in_row": 1
+  },
+  {
+   "route": "177",
+   "headsign": "Warringah Mall",
+   "from": "08:50",
+   "to": "10:22",
+   "gap_min": 92,
+   "normal_min": 60,
+   "cancelled_in_row": 1
+  },
+  {
+   "route": "263",
+   "headsign": "City Gresham St",
+   "from": "08:41",
+   "to": "09:43",
+   "gap_min": 62,
+   "normal_min": 23,
    "cancelled_in_row": 1
   },
   {
@@ -67,6 +85,24 @@
    "cancelled_in_row": 1
   },
   {
+   "route": "165X",
+   "headsign": "City Wynyard",
+   "from": "06:20",
+   "to": "07:15",
+   "gap_min": 55,
+   "normal_min": 15,
+   "cancelled_in_row": 2
+  },
+  {
+   "route": "174X",
+   "headsign": "City Wynyard",
+   "from": "06:55",
+   "to": "07:35",
+   "gap_min": 40,
+   "normal_min": 14.0,
+   "cancelled_in_row": 2
+  },
+  {
    "route": "166",
    "headsign": "Frenchs Forest",
    "from": "09:00",
@@ -85,48 +121,12 @@
    "cancelled_in_row": 1
   },
   {
-   "route": "167",
+   "route": "173X",
    "headsign": "Warringah Mall",
-   "from": "10:58",
-   "to": "11:38",
+   "from": "08:00",
+   "to": "08:40",
    "gap_min": 40,
    "normal_min": 20.0,
-   "cancelled_in_row": 1
-  },
-  {
-   "route": "165X",
-   "headsign": "City Wynyard",
-   "from": "07:25",
-   "to": "07:55",
-   "gap_min": 30,
-   "normal_min": 15,
-   "cancelled_in_row": 2
-  },
-  {
-   "route": "199",
-   "headsign": "Palm Beach",
-   "from": "00:05",
-   "to": "00:35",
-   "gap_min": 30,
-   "normal_min": 10.0,
-   "cancelled_in_row": 1
-  },
-  {
-   "route": "114",
-   "headsign": "Balmoral Beach",
-   "from": "07:43",
-   "to": "08:13",
-   "gap_min": 30,
-   "normal_min": 19,
-   "cancelled_in_row": 1
-  },
-  {
-   "route": "174X",
-   "headsign": "City Wynyard",
-   "from": "07:47",
-   "to": "08:15",
-   "gap_min": 28,
-   "normal_min": 14.0,
    "cancelled_in_row": 1
   }
  ],
@@ -246,6 +246,11 @@
    "headsign": "City Wynyard"
   },
   {
+   "start_time": "06:50",
+   "route": "165X",
+   "headsign": "City Wynyard"
+  },
+  {
    "start_time": "07:00",
    "route": "160X",
    "headsign": "Dee Why"
@@ -261,9 +266,34 @@
    "headsign": "City Wynyard"
   },
   {
+   "start_time": "07:10",
+   "route": "177X",
+   "headsign": "City Wynyard"
+  },
+  {
+   "start_time": "07:10",
+   "route": "174X",
+   "headsign": "City Wynyard"
+  },
+  {
+   "start_time": "07:10",
+   "route": "172X",
+   "headsign": "City Wynyard"
+  },
+  {
+   "start_time": "07:16",
+   "route": "171X",
+   "headsign": "City Wynyard"
+  },
+  {
    "start_time": "07:18",
    "route": "114",
    "headsign": "RNS Hospital"
+  },
+  {
+   "start_time": "07:18",
+   "route": "144",
+   "headsign": "Manly"
   },
   {
    "start_time": "07:19",
@@ -271,7 +301,22 @@
    "headsign": "Manly"
   },
   {
+   "start_time": "07:23",
+   "route": "174X",
+   "headsign": "City Wynyard"
+  },
+  {
    "start_time": "07:25",
+   "route": "100",
+   "headsign": "Taronga Zoo via City QVB"
+  },
+  {
+   "start_time": "07:25",
+   "route": "100",
+   "headsign": "Taronga Zoo via City QVB"
+  },
+  {
+   "start_time": "07:32",
    "route": "100",
    "headsign": "Taronga Zoo via City QVB"
   },
@@ -311,6 +356,11 @@
    "headsign": "City Wynyard"
   },
   {
+   "start_time": "07:55",
+   "route": "100",
+   "headsign": "Taronga Zoo via City QVB"
+  },
+  {
    "start_time": "08:00",
    "route": "199",
    "headsign": "Palm Beach"
@@ -326,9 +376,19 @@
    "headsign": "Balmoral Beach"
   },
   {
+   "start_time": "08:09",
+   "route": "100",
+   "headsign": "Taronga Zoo via City QVB"
+  },
+  {
    "start_time": "08:14",
    "route": "230",
    "headsign": "North Sydney"
+  },
+  {
+   "start_time": "08:16",
+   "route": "160X",
+   "headsign": "Chatswood"
   },
   {
    "start_time": "08:18",
@@ -336,9 +396,34 @@
    "headsign": "Manly"
   },
   {
+   "start_time": "08:18",
+   "route": "114",
+   "headsign": "Balmoral Beach"
+  },
+  {
+   "start_time": "08:20",
+   "route": "173X",
+   "headsign": "Warringah Mall"
+  },
+  {
+   "start_time": "08:21",
+   "route": "100",
+   "headsign": "Taronga Zoo via City QVB"
+  },
+  {
    "start_time": "08:23",
    "route": "114",
    "headsign": "Balmoral Beach"
+  },
+  {
+   "start_time": "08:29",
+   "route": "230",
+   "headsign": "North Sydney"
+  },
+  {
+   "start_time": "08:30",
+   "route": "144",
+   "headsign": "Chatswood"
   },
   {
    "start_time": "08:36",
@@ -346,14 +431,54 @@
    "headsign": "Chatswood"
   },
   {
+   "start_time": "08:36",
+   "route": "168X",
+   "headsign": "City Wynyard"
+  },
+  {
+   "start_time": "08:39",
+   "route": "100",
+   "headsign": "Taronga Zoo via City QVB"
+  },
+  {
    "start_time": "08:44",
    "route": "114",
    "headsign": "RNS Hospital"
   },
   {
+   "start_time": "08:47",
+   "route": "172X",
+   "headsign": "City Wynyard"
+  },
+  {
+   "start_time": "08:50",
+   "route": "144",
+   "headsign": "Chatswood"
+  },
+  {
+   "start_time": "08:53",
+   "route": "100",
+   "headsign": "Taronga Zoo via City QVB"
+  },
+  {
+   "start_time": "09:00",
+   "route": "160X",
+   "headsign": "Dee Why"
+  },
+  {
+   "start_time": "09:00",
+   "route": "199",
+   "headsign": "Palm Beach"
+  },
+  {
    "start_time": "09:04",
    "route": "114",
    "headsign": "RNS Hospital"
+  },
+  {
+   "start_time": "09:05",
+   "route": "100",
+   "headsign": "Taronga Zoo via City QVB"
   },
   {
    "start_time": "09:10",
@@ -371,6 +496,16 @@
    "headsign": "Frenchs Forest"
   },
   {
+   "start_time": "09:20",
+   "route": "263",
+   "headsign": "City Gresham St"
+  },
+  {
+   "start_time": "09:20",
+   "route": "177",
+   "headsign": "Warringah Mall"
+  },
+  {
    "start_time": "09:23",
    "route": "114",
    "headsign": "Balmoral Beach"
@@ -386,6 +521,11 @@
    "headsign": "Manly"
   },
   {
+   "start_time": "09:57",
+   "route": "144",
+   "headsign": "Manly"
+  },
+  {
    "start_time": "11:18",
    "route": "167",
    "headsign": "Warringah Mall"
@@ -394,6 +534,16 @@
    "start_time": "13:38",
    "route": "144",
    "headsign": "Manly"
+  },
+  {
+   "start_time": "13:42",
+   "route": "160X",
+   "headsign": "Chatswood"
+  },
+  {
+   "start_time": "14:20",
+   "route": "160X",
+   "headsign": "Dee Why"
   },
   {
    "start_time": "14:24",
@@ -421,6 +571,11 @@
    "headsign": "Milsons Point"
   },
   {
+   "start_time": "15:22",
+   "route": "160X",
+   "headsign": "Chatswood"
+  },
+  {
    "start_time": "15:30",
    "route": "144",
    "headsign": "Chatswood"
@@ -434,6 +589,11 @@
    "start_time": "16:10",
    "route": "144",
    "headsign": "Chatswood"
+  },
+  {
+   "start_time": "16:10",
+   "route": "160X",
+   "headsign": "Dee Why"
   },
   {
    "start_time": "16:50",
