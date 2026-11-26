@@ -1,24 +1,24 @@
 {
- "updated": "2026-11-27T05:23:11+11:00",
+ "updated": "2026-11-27T05:28:18+11:00",
  "status": "ok",
  "date": "2026-11-27",
  "scheduled": 3416,
- "count": 114,
- "cancel_pct": 3.3,
- "observed": 220,
+ "count": 121,
+ "cancel_pct": 3.5,
+ "observed": 236,
  "late": 0,
  "late_pct": 0.0,
  "avg_late_min": null,
- "ontime": 220,
+ "ontime": 236,
  "ontime_pct": 100.0,
- "anywhere_late_pct": 4.1,
+ "anywhere_late_pct": 4.2,
  "am": {
   "scheduled": 760,
   "cancelled": 61
  },
  "pm": {
   "scheduled": 748,
-  "cancelled": 14
+  "cancelled": 18
  },
  "gaps": [
   {
@@ -177,6 +177,12 @@
    "route": "144",
    "headsign": "Manly",
    "start_time": "04:30",
+   "late_min": 5
+  },
+  {
+   "route": "199",
+   "headsign": "Manly",
+   "start_time": "05:12",
    "late_min": 5
   },
   {
@@ -633,6 +639,11 @@
    "headsign": "Chatswood"
   },
   {
+   "start_time": "14:53",
+   "route": "160X",
+   "headsign": "Chatswood"
+  },
+  {
    "start_time": "14:59",
    "route": "144",
    "headsign": "Manly"
@@ -678,6 +689,11 @@
    "headsign": "Taronga Zoo via City QVB"
   },
   {
+   "start_time": "15:40",
+   "route": "160X",
+   "headsign": "Dee Why"
+  },
+  {
    "start_time": "15:46",
    "route": "100",
    "headsign": "Taronga Zoo via City QVB"
@@ -686,6 +702,11 @@
    "start_time": "15:50",
    "route": "160X",
    "headsign": "Dee Why"
+  },
+  {
+   "start_time": "15:57",
+   "route": "114",
+   "headsign": "Balmoral Beach"
   },
   {
    "start_time": "16:01",
@@ -723,6 +744,16 @@
    "headsign": "Palm Beach"
   },
   {
+   "start_time": "16:34",
+   "route": "160X",
+   "headsign": "Chatswood"
+  },
+  {
+   "start_time": "16:37",
+   "route": "114",
+   "headsign": "RNS Hospital"
+  },
+  {
    "start_time": "16:42",
    "route": "160X",
    "headsign": "Chatswood"
@@ -738,6 +769,11 @@
    "headsign": "RNS Hospital"
   },
   {
+   "start_time": "17:17",
+   "route": "114",
+   "headsign": "Balmoral Beach"
+  },
+  {
    "start_time": "17:21",
    "route": "144",
    "headsign": "Manly"
@@ -750,6 +786,11 @@
   {
    "start_time": "17:30",
    "route": "160X",
+   "headsign": "Dee Why"
+  },
+  {
+   "start_time": "17:40",
+   "route": "176X",
    "headsign": "Dee Why"
   },
   {
