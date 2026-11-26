@@ -1,8 +1,223 @@
 {
- "updated": "2026-11-26T12:28:18+11:00",
+ "updated": "2026-11-26T13:11:55+11:00",
  "status": "ok",
  "date": "2026-11-26",
- "count": 83,
+ "scheduled": 3725,
+ "count": 85,
+ "cancel_pct": 2.3,
+ "observed": 256,
+ "late": 20,
+ "late_pct": 7.8,
+ "am": {
+  "scheduled": 893,
+  "cancelled": 0
+ },
+ "pm": {
+  "scheduled": 765,
+  "cancelled": 35
+ },
+ "gaps": [
+  {
+   "route": "182",
+   "headsign": "Powderworks Rd",
+   "from": "18:19",
+   "to": "21:57",
+   "gap_min": 218,
+   "normal_min": 31.0,
+   "cancelled_in_row": 1
+  },
+  {
+   "route": "172X",
+   "headsign": "Warringah Mall",
+   "from": "17:38",
+   "to": "18:47",
+   "gap_min": 69,
+   "normal_min": 28.0,
+   "cancelled_in_row": 2
+  },
+  {
+   "route": "180",
+   "headsign": "Warringah Mall",
+   "from": "19:34",
+   "to": "20:35",
+   "gap_min": 61,
+   "normal_min": 20,
+   "cancelled_in_row": 1
+  },
+  {
+   "route": "180",
+   "headsign": "Warringah Mall",
+   "from": "20:35",
+   "to": "21:35",
+   "gap_min": 60,
+   "normal_min": 20,
+   "cancelled_in_row": 1
+  },
+  {
+   "route": "180",
+   "headsign": "Collaroy Plateau",
+   "from": "20:02",
+   "to": "21:02",
+   "gap_min": 60,
+   "normal_min": 20.0,
+   "cancelled_in_row": 1
+  },
+  {
+   "route": "180",
+   "headsign": "Warringah Mall",
+   "from": "18:05",
+   "to": "19:04",
+   "gap_min": 59,
+   "normal_min": 20,
+   "cancelled_in_row": 1
+  },
+  {
+   "route": "177",
+   "headsign": "Dee Why",
+   "from": "15:17",
+   "to": "16:09",
+   "gap_min": 52,
+   "normal_min": 42,
+   "cancelled_in_row": 1
+  },
+  {
+   "route": "150X",
+   "headsign": "Manly",
+   "from": "17:40",
+   "to": "18:30",
+   "gap_min": 50,
+   "normal_min": 20.0,
+   "cancelled_in_row": 1
+  },
+  {
+   "route": "166",
+   "headsign": "Manly",
+   "from": "18:47",
+   "to": "19:33",
+   "gap_min": 46,
+   "normal_min": 17,
+   "cancelled_in_row": 1
+  },
+  {
+   "route": "162",
+   "headsign": "Manly",
+   "from": "15:03",
+   "to": "15:46",
+   "gap_min": 43,
+   "normal_min": 21.0,
+   "cancelled_in_row": 1
+  },
+  {
+   "route": "172X",
+   "headsign": "Warringah Mall",
+   "from": "18:47",
+   "to": "19:30",
+   "gap_min": 43,
+   "normal_min": 28.0,
+   "cancelled_in_row": 1
+  },
+  {
+   "route": "280",
+   "headsign": "Chatswood",
+   "from": "14:57",
+   "to": "15:40",
+   "gap_min": 43,
+   "normal_min": 23.5,
+   "cancelled_in_row": 1
+  }
+ ],
+ "late_trips": [
+  {
+   "route": "199",
+   "headsign": "Palm Beach",
+   "start_time": "12:10",
+   "late_min": 10
+  },
+  {
+   "route": "100",
+   "headsign": "Taronga Zoo via City QVB",
+   "start_time": "13:29",
+   "late_min": 9
+  },
+  {
+   "route": "199",
+   "headsign": "Manly",
+   "start_time": "12:25",
+   "late_min": 9
+  },
+  {
+   "route": "B1",
+   "headsign": "Mona Vale",
+   "start_time": "12:59",
+   "late_min": 8
+  },
+  {
+   "route": "100",
+   "headsign": "Taronga Zoo via City QVB",
+   "start_time": "12:19",
+   "late_min": 7
+  },
+  {
+   "route": "177",
+   "headsign": "Dee Why",
+   "start_time": "12:55",
+   "late_min": 7
+  },
+  {
+   "route": "167",
+   "headsign": "Manly",
+   "start_time": "12:36",
+   "late_min": 7
+  },
+  {
+   "route": "144",
+   "headsign": "Chatswood",
+   "start_time": "12:50",
+   "late_min": 7
+  },
+  {
+   "route": "263",
+   "headsign": "City Gresham St",
+   "start_time": "12:52",
+   "late_min": 7
+  },
+  {
+   "route": "100",
+   "headsign": "Taronga Zoo via City QVB",
+   "start_time": "12:59",
+   "late_min": 7
+  },
+  {
+   "route": "230",
+   "headsign": "Milsons Point",
+   "start_time": "12:55",
+   "late_min": 7
+  },
+  {
+   "route": "144",
+   "headsign": "Chatswood",
+   "start_time": "12:30",
+   "late_min": 7
+  },
+  {
+   "route": "199",
+   "headsign": "Manly",
+   "start_time": "12:15",
+   "late_min": 6
+  },
+  {
+   "route": "167",
+   "headsign": "Manly",
+   "start_time": "12:56",
+   "late_min": 6
+  },
+  {
+   "route": "160X",
+   "headsign": "Dee Why",
+   "start_time": "12:40",
+   "late_min": 6
+  }
+ ],
  "trips": [
   {
    "start_time": "12:50",
@@ -230,6 +445,11 @@
    "headsign": "Warringah Mall"
   },
   {
+   "start_time": "16:21",
+   "route": "166",
+   "headsign": "Manly"
+  },
+  {
    "start_time": "16:26",
    "route": "162",
    "headsign": "Manly"
@@ -283,6 +503,11 @@
    "start_time": "17:20",
    "route": "150X",
    "headsign": "Manly"
+  },
+  {
+   "start_time": "17:20",
+   "route": "166",
+   "headsign": "Frenchs Forest"
   },
   {
    "start_time": "17:23",

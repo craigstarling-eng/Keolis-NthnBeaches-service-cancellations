@@ -1,0 +1,2 @@
+date,scheduled,cancelled,observed,late,am_scheduled,am_cancelled,pm_scheduled,pm_cancelled,longest_gap_min,longest_gap_route
+2026-11-26,3725,85,256,20,893,0,765,35,218,182 to Powderworks Rd
