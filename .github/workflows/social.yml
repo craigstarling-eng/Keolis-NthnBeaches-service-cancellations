@@ -1,0 +1,25 @@
+name: social-post-now
+# Run this by hand to send a post straight away (for testing). Normal posting is automatic.
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Which post"
+        type: choice
+        options: [daily, weekly]
+        default: daily
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests pillow
+      - run: python tools/post_social.py ${{ inputs.mode }}
+        env:
+          BLUESKY_HANDLE: ${{ secrets.BLUESKY_HANDLE }}
+          BLUESKY_APP_PASSWORD: ${{ secrets.BLUESKY_APP_PASSWORD }}
+          FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
+          FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}

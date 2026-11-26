@@ -26,10 +26,14 @@ jobs:
           path: cache
           key: tfnsw-${{ github.run_id }}
           restore-keys: tfnsw-
-      - run: pip install requests gtfs-realtime-bindings
+      - run: pip install requests gtfs-realtime-bindings pillow
       - name: Collect every 5 minutes
         env:
           TFNSW_API_KEY: ${{ secrets.TFNSW_API_KEY }}
+          BLUESKY_HANDLE: ${{ secrets.BLUESKY_HANDLE }}
+          BLUESKY_APP_PASSWORD: ${{ secrets.BLUESKY_APP_PASSWORD }}
+          FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
+          FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
         run: |
           echo "STARTED_AT=$(date +%s)" >> "$GITHUB_ENV"
           git config user.name tracker-bot
@@ -37,6 +41,7 @@ jobs:
           end=$(( $(date +%s) + 310*60 ))
           while [ "$(date +%s)" -lt "$end" ]; do
             python collector.py || echo "collector reported a problem"
+            python tools/post_social.py auto || echo "social posting reported a problem"
             git add -A data
             if ! git diff --cached --quiet; then
               git commit -q -m "update data"
