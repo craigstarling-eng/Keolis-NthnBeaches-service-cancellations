@@ -1,12 +1,12 @@
 date,code,name,scheduled,cancelled,observed,late,ontime
-2026-11-26,GSBC001,Busways R1,3724,20,75,5,70
+2026-11-26,GSBC001,Busways R1,3724,20,75,6,69
 2026-11-26,GSBC002,Transit Systems NSW SW,2356,1,16,0,16
-2026-11-26,GSBC003,Transit Systems NSW,2811,6,38,3,35
+2026-11-26,GSBC003,Transit Systems NSW,2811,6,38,2,36
 2026-11-26,GSBC004,CDC NSW R4,3622,13,80,17,63
 2026-11-26,GSBC007,Busways North West,3006,8,74,13,61
-2026-11-26,GSBC008,Keolis Downer Northern Beaches,3456,117,116,15,101
-2026-11-26,GSBC009,Transdev John Holland Buses,4731,23,180,36,144
-2026-11-26,GSBC010,U-Go Mobility,2633,16,37,3,34
+2026-11-26,GSBC008,Keolis Downer Northern Beaches,3456,117,116,13,103
+2026-11-26,GSBC009,Transdev John Holland Buses,4731,23,180,38,142
+2026-11-26,GSBC010,U-Go Mobility,2633,16,37,2,35
 2026-11-26,agency:2447,Operator 2447,0,0,0,0,0
 2026-11-26,agency:2448,Operator 2448,0,29,0,0,0
 2026-11-26,agency:2449,Operator 2449,0,0,1,1,0
@@ -16,7 +16,7 @@ date,code,name,scheduled,cancelled,observed,late,ontime
 2026-11-26,agency:2456,Operator 2456,0,0,3,0,3
 2026-11-26,agency:2457,Operator 2457,0,0,0,0,0
 2026-11-26,agency:2458,Operator 2458,0,0,1,0,1
-2026-11-26,agency:2459,Operator 2459,0,12,170,14,156
+2026-11-26,agency:2459,Operator 2459,0,12,170,15,155
 2026-11-26,agency:2504,Operator 2504,0,0,0,0,0
 2026-11-26,agency:2507,Operator 2507,0,0,0,0,0
 2026-11-26,agency:2509,Operator 2509,0,3,0,0,0
@@ -29,14 +29,15 @@ date,code,name,scheduled,cancelled,observed,late,ontime
 2026-11-26,agency:700077,Operator 700077,0,0,0,0,0
 2026-11-26,agency:7054,Operator 7054,0,0,35,1,34
 2026-11-26,agency:7066,Operator 7066,0,0,17,0,17
-2026-11-27,GSBC001,Busways R1,3733,0,3,0,3
+2026-11-27,GSBC001,Busways R1,3733,0,7,0,7
 2026-11-27,GSBC002,Transit Systems NSW SW,2360,0,0,0,0
-2026-11-27,GSBC003,Transit Systems NSW,2810,0,0,0,0
-2026-11-27,GSBC004,CDC NSW R4,3669,0,1,0,1
+2026-11-27,GSBC003,Transit Systems NSW,2810,0,1,0,1
+2026-11-27,GSBC004,CDC NSW R4,3669,0,5,0,5
 2026-11-27,GSBC007,Busways North West,3022,0,4,0,4
-2026-11-27,GSBC008,Keolis Downer Northern Beaches,3416,6,1,0,1
-2026-11-27,GSBC009,Transdev John Holland Buses,4669,0,3,0,3
+2026-11-27,GSBC008,Keolis Downer Northern Beaches,3416,6,8,0,8
+2026-11-27,GSBC009,Transdev John Holland Buses,4669,0,14,3,11
 2026-11-27,GSBC010,U-Go Mobility,2640,0,4,0,4
-2026-11-27,agency:2459,Operator 2459,0,0,4,0,4
-2026-11-27,agency:7054,Operator 7054,0,0,1,0,1
-2026-11-27,agency:7066,Operator 7066,0,0,1,0,1
+2026-11-27,agency:2459,Operator 2459,0,0,11,1,10
+2026-11-27,agency:3000,Operator 3000,0,0,1,0,1
+2026-11-27,agency:7054,Operator 7054,0,0,3,0,3
+2026-11-27,agency:7066,Operator 7066,0,0,2,0,2
