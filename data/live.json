@@ -1,17 +1,17 @@
 {
- "updated": "2026-11-27T07:30:35+11:00",
+ "updated": "2026-11-27T07:35:41+11:00",
  "status": "ok",
  "date": "2026-11-27",
  "scheduled": 3416,
  "count": 167,
  "cancel_pct": 4.9,
- "observed": 745,
- "late": 13,
- "late_pct": 1.7,
- "avg_late_min": 16.2,
- "ontime": 732,
- "ontime_pct": 98.3,
- "anywhere_late_pct": 13.7,
+ "observed": 756,
+ "late": 14,
+ "late_pct": 1.9,
+ "avg_late_min": 18.1,
+ "ontime": 742,
+ "ontime_pct": 98.1,
+ "anywhere_late_pct": 14.4,
  "am": {
   "scheduled": 760,
   "cancelled": 75
@@ -135,7 +135,7 @@
    "route": "160X",
    "headsign": "Dee Why",
    "start_time": "06:30",
-   "late_min": 60
+   "late_min": 66
   },
   {
    "route": "100",
@@ -144,10 +144,22 @@
    "late_min": 47
   },
   {
+   "route": "170X",
+   "headsign": "City Wynyard",
+   "start_time": "07:00",
+   "late_min": 36
+  },
+  {
    "route": "100",
    "headsign": "Taronga Zoo via City QVB",
    "start_time": "06:34",
    "late_min": 20
+  },
+  {
+   "route": "B1",
+   "headsign": "City Wynyard",
+   "start_time": "07:17",
+   "late_min": 19
   },
   {
    "route": "100",
@@ -171,12 +183,6 @@
    "route": "100",
    "headsign": "Taronga Zoo via City QVB",
    "start_time": "07:05",
-   "late_min": 14
-  },
-  {
-   "route": "B1",
-   "headsign": "City Wynyard",
-   "start_time": "07:17",
    "late_min": 14
   },
   {
@@ -213,12 +219,6 @@
    "route": "185",
    "headsign": "Narrabeen",
    "start_time": "06:16",
-   "late_min": 11
-  },
-  {
-   "route": "263",
-   "headsign": "Neutral Bay Jn",
-   "start_time": "07:00",
    "late_min": 11
   }
  ],
