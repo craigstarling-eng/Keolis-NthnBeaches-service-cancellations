@@ -1,17 +1,17 @@
 {
- "updated": "2026-11-26T22:56:44+11:00",
+ "updated": "2026-11-26T23:01:50+11:00",
  "status": "ok",
  "date": "2026-11-26",
  "scheduled": 3456,
  "count": 117,
  "cancel_pct": 3.4,
  "observed": 116,
- "late": 12,
- "late_pct": 10.3,
- "avg_late_min": 12.2,
- "ontime": 104,
- "ontime_pct": 89.7,
- "anywhere_late_pct": 47.1,
+ "late": 15,
+ "late_pct": 12.9,
+ "avg_late_min": 12.3,
+ "ontime": 101,
+ "ontime_pct": 87.1,
+ "anywhere_late_pct": 47.4,
  "am": {
   "scheduled": 800,
   "cancelled": 0
@@ -168,6 +168,12 @@
    "late_min": 57
   },
   {
+   "route": "199",
+   "headsign": "Palm Beach",
+   "start_time": "22:05",
+   "late_min": 57
+  },
+  {
    "route": "100",
    "headsign": "Taronga Zoo via City QVB",
    "start_time": "17:28",
@@ -178,12 +184,6 @@
    "headsign": "Milsons Point",
    "start_time": "14:25",
    "late_min": 56
-  },
-  {
-   "route": "199",
-   "headsign": "Palm Beach",
-   "start_time": "22:05",
-   "late_min": 52
   },
   {
    "route": "B1",
