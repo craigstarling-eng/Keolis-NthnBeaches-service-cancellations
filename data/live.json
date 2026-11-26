@@ -1,17 +1,17 @@
 {
- "updated": "2026-11-27T06:29:25+11:00",
+ "updated": "2026-11-27T06:34:31+11:00",
  "status": "ok",
  "date": "2026-11-27",
  "scheduled": 3416,
- "count": 128,
- "cancel_pct": 3.7,
- "observed": 482,
- "late": 2,
- "late_pct": 0.4,
- "avg_late_min": 5.5,
- "ontime": 480,
- "ontime_pct": 99.6,
- "anywhere_late_pct": 6.2,
+ "count": 130,
+ "cancel_pct": 3.8,
+ "observed": 501,
+ "late": 4,
+ "late_pct": 0.8,
+ "avg_late_min": 7.5,
+ "ontime": 497,
+ "ontime_pct": 99.2,
+ "anywhere_late_pct": 6.8,
  "am": {
   "scheduled": 760,
   "cancelled": 64
@@ -144,9 +144,21 @@
    "late_min": 12
   },
   {
+   "route": "185",
+   "headsign": "Narrabeen",
+   "start_time": "06:16",
+   "late_min": 11
+  },
+  {
    "route": "144",
    "headsign": "Manly",
    "start_time": "05:30",
+   "late_min": 10
+  },
+  {
+   "route": "167",
+   "headsign": "Manly",
+   "start_time": "06:24",
    "late_min": 10
   },
   {
@@ -156,15 +168,21 @@
    "late_min": 10
   },
   {
-   "route": "185",
-   "headsign": "Narrabeen",
-   "start_time": "06:16",
-   "late_min": 8
+   "route": "191",
+   "headsign": "Avalon Beach via Taylors Point",
+   "start_time": "07:22",
+   "late_min": 9
   },
   {
    "route": "100",
    "headsign": "Taronga Zoo via City QVB",
    "start_time": "24:29",
+   "late_min": 8
+  },
+  {
+   "route": "B1",
+   "headsign": "Mona Vale",
+   "start_time": "06:01",
    "late_min": 8
   },
   {
@@ -201,24 +219,6 @@
    "route": "280",
    "headsign": "Chatswood",
    "start_time": "05:22",
-   "late_min": 6
-  },
-  {
-   "route": "B1",
-   "headsign": "Mona Vale",
-   "start_time": "06:01",
-   "late_min": 6
-  },
-  {
-   "route": "199",
-   "headsign": "Palm Beach",
-   "start_time": "06:00",
-   "late_min": 6
-  },
-  {
-   "route": "100",
-   "headsign": "Taronga Zoo via City QVB",
-   "start_time": "05:47",
    "late_min": 6
   }
  ],
@@ -664,6 +664,11 @@
    "headsign": "Chatswood"
   },
   {
+   "start_time": "14:06",
+   "route": "114",
+   "headsign": "RNS Hospital"
+  },
+  {
    "start_time": "14:20",
    "route": "160X",
    "headsign": "Dee Why"
@@ -702,6 +707,11 @@
    "start_time": "15:02",
    "route": "160X",
    "headsign": "Chatswood"
+  },
+  {
+   "start_time": "15:02",
+   "route": "173X",
+   "headsign": "Warringah Mall"
   },
   {
    "start_time": "15:04",
