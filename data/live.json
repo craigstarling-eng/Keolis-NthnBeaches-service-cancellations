@@ -1,17 +1,17 @@
 {
- "updated": "2026-11-27T06:24:20+11:00",
+ "updated": "2026-11-27T06:29:25+11:00",
  "status": "ok",
  "date": "2026-11-27",
  "scheduled": 3416,
  "count": 128,
  "cancel_pct": 3.7,
- "observed": 456,
- "late": 1,
- "late_pct": 0.2,
- "avg_late_min": 5.0,
- "ontime": 455,
- "ontime_pct": 99.8,
- "anywhere_late_pct": 5.3,
+ "observed": 482,
+ "late": 2,
+ "late_pct": 0.4,
+ "avg_late_min": 5.5,
+ "ontime": 480,
+ "ontime_pct": 99.6,
+ "anywhere_late_pct": 6.2,
  "am": {
   "scheduled": 760,
   "cancelled": 64
@@ -156,6 +156,12 @@
    "late_min": 10
   },
   {
+   "route": "185",
+   "headsign": "Narrabeen",
+   "start_time": "06:16",
+   "late_min": 8
+  },
+  {
    "route": "100",
    "headsign": "Taronga Zoo via City QVB",
    "start_time": "24:29",
@@ -198,6 +204,12 @@
    "late_min": 6
   },
   {
+   "route": "B1",
+   "headsign": "Mona Vale",
+   "start_time": "06:01",
+   "late_min": 6
+  },
+  {
    "route": "199",
    "headsign": "Palm Beach",
    "start_time": "06:00",
@@ -207,18 +219,6 @@
    "route": "100",
    "headsign": "Taronga Zoo via City QVB",
    "start_time": "05:47",
-   "late_min": 6
-  },
-  {
-   "route": "144",
-   "headsign": "Manly",
-   "start_time": "24:10",
-   "late_min": 6
-  },
-  {
-   "route": "280",
-   "headsign": "Chatswood",
-   "start_time": "05:41",
    "late_min": 6
   }
  ],
