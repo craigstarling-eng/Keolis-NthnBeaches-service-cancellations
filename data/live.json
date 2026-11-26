@@ -1,14 +1,14 @@
 {
- "updated": "2026-11-26T14:24:42+11:00",
+ "updated": "2026-11-26T14:29:49+11:00",
  "status": "ok",
  "date": "2026-11-26",
  "scheduled": 3456,
  "count": 98,
  "cancel_pct": 2.8,
- "observed": 322,
- "late": 46,
- "late_pct": 14.3,
- "avg_late_min": 9.4,
+ "observed": 335,
+ "late": 58,
+ "late_pct": 17.3,
+ "avg_late_min": 9.6,
  "am": {
   "scheduled": 800,
   "cancelled": 0
@@ -138,7 +138,25 @@
    "route": "B1",
    "headsign": "City Wynyard",
    "start_time": "13:39",
-   "late_min": 46
+   "late_min": 51
+  },
+  {
+   "route": "144",
+   "headsign": "Manly",
+   "start_time": "14:04",
+   "late_min": 26
+  },
+  {
+   "route": "144",
+   "headsign": "Chatswood",
+   "start_time": "15:10",
+   "late_min": 15
+  },
+  {
+   "route": "114",
+   "headsign": "Balmoral Beach",
+   "start_time": "14:03",
+   "late_min": 14
   },
   {
    "route": "179",
@@ -153,16 +171,22 @@
    "late_min": 13
   },
   {
-   "route": "114",
-   "headsign": "Balmoral Beach",
-   "start_time": "14:03",
-   "late_min": 12
-  },
-  {
    "route": "167",
    "headsign": "Warringah Mall",
    "start_time": "13:58",
    "late_min": 11
+  },
+  {
+   "route": "144",
+   "headsign": "Chatswood",
+   "start_time": "13:40",
+   "late_min": 10
+  },
+  {
+   "route": "144",
+   "headsign": "Manly",
+   "start_time": "13:38",
+   "late_min": 10
   },
   {
    "route": "180",
@@ -177,46 +201,22 @@
    "late_min": 10
   },
   {
-   "route": "144",
-   "headsign": "Manly",
-   "start_time": "13:38",
-   "late_min": 10
-  },
-  {
-   "route": "144",
-   "headsign": "Chatswood",
-   "start_time": "13:40",
-   "late_min": 8
+   "route": "100",
+   "headsign": "Taronga Zoo via City QVB",
+   "start_time": "13:39",
+   "late_min": 9
   },
   {
    "route": "173X",
    "headsign": "City Wynyard",
    "start_time": "14:12",
-   "late_min": 8
+   "late_min": 9
   },
   {
-   "route": "162",
-   "headsign": "Manly",
-   "start_time": "14:08",
-   "late_min": 8
-  },
-  {
-   "route": "100",
-   "headsign": "Taronga Zoo via City QVB",
-   "start_time": "12:59",
-   "late_min": 8
-  },
-  {
-   "route": "100",
-   "headsign": "Taronga Zoo via City QVB",
-   "start_time": "13:39",
-   "late_min": 8
-  },
-  {
-   "route": "144",
-   "headsign": "Chatswood",
-   "start_time": "13:20",
-   "late_min": 8
+   "route": "179",
+   "headsign": "Warringah Mall",
+   "start_time": "14:17",
+   "late_min": 9
   }
  ],
  "trips": [
