@@ -1,15 +1,15 @@
 {
- "updated": "2026-11-27T06:19:13+11:00",
+ "updated": "2026-11-27T06:24:20+11:00",
  "status": "ok",
  "date": "2026-11-27",
  "scheduled": 3416,
  "count": 128,
  "cancel_pct": 3.7,
- "observed": 432,
+ "observed": 456,
  "late": 1,
  "late_pct": 0.2,
  "avg_late_min": 5.0,
- "ontime": 431,
+ "ontime": 455,
  "ontime_pct": 99.8,
  "anywhere_late_pct": 5.3,
  "am": {
@@ -198,6 +198,12 @@
    "late_min": 6
   },
   {
+   "route": "199",
+   "headsign": "Palm Beach",
+   "start_time": "06:00",
+   "late_min": 6
+  },
+  {
    "route": "100",
    "headsign": "Taronga Zoo via City QVB",
    "start_time": "05:47",
@@ -213,12 +219,6 @@
    "route": "280",
    "headsign": "Chatswood",
    "start_time": "05:41",
-   "late_min": 6
-  },
-  {
-   "route": "178",
-   "headsign": "Warringah Mall",
-   "start_time": "05:45",
    "late_min": 6
   }
  ],
