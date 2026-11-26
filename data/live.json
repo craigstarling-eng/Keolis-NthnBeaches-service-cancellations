@@ -1,17 +1,17 @@
 {
- "updated": "2026-11-27T07:45:53+11:00",
+ "updated": "2026-11-27T07:50:59+11:00",
  "status": "ok",
  "date": "2026-11-27",
  "scheduled": 3416,
- "count": 169,
- "cancel_pct": 4.9,
- "observed": 796,
+ "count": 173,
+ "cancel_pct": 5.1,
+ "observed": 813,
  "late": 17,
  "late_pct": 2.1,
- "avg_late_min": 18.2,
- "ontime": 779,
+ "avg_late_min": 20.0,
+ "ontime": 796,
  "ontime_pct": 97.9,
- "anywhere_late_pct": 15.7,
+ "anywhere_late_pct": 16.2,
  "am": {
   "scheduled": 760,
   "cancelled": 75
@@ -135,7 +135,7 @@
    "route": "160X",
    "headsign": "Dee Why",
    "start_time": "06:30",
-   "late_min": 76
+   "late_min": 81
   },
   {
    "route": "100",
@@ -153,7 +153,13 @@
    "route": "B1",
    "headsign": "City Wynyard",
    "start_time": "07:17",
-   "late_min": 30
+   "late_min": 35
+  },
+  {
+   "route": "201",
+   "headsign": "City Gresham St",
+   "start_time": "07:25",
+   "late_min": 26
   },
   {
    "route": "172X",
@@ -213,12 +219,6 @@
    "route": "199",
    "headsign": "Manly",
    "start_time": "05:12",
-   "late_min": 12
-  },
-  {
-   "route": "191",
-   "headsign": "Avalon Beach via Taylors Point",
-   "start_time": "07:22",
    "late_min": 12
   }
  ],
@@ -659,6 +659,11 @@
    "headsign": "Balmoral Beach"
   },
   {
+   "start_time": "09:37",
+   "route": "178",
+   "headsign": "Cromer Hts"
+  },
+  {
    "start_time": "09:43",
    "route": "114",
    "headsign": "Balmoral Beach"
@@ -674,6 +679,16 @@
    "headsign": "Manly"
   },
   {
+   "start_time": "10:12",
+   "route": "178",
+   "headsign": "Warringah Mall"
+  },
+  {
+   "start_time": "10:47",
+   "route": "180",
+   "headsign": "Collaroy Plateau"
+  },
+  {
    "start_time": "10:58",
    "route": "B1",
    "headsign": "City Wynyard"
@@ -681,6 +696,11 @@
   {
    "start_time": "11:18",
    "route": "167",
+   "headsign": "Warringah Mall"
+  },
+  {
+   "start_time": "11:22",
+   "route": "180",
    "headsign": "Warringah Mall"
   },
   {
