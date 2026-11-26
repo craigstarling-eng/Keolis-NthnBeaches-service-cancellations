@@ -1,14 +1,14 @@
 {
- "updated": "2026-11-26T15:15:43+11:00",
+ "updated": "2026-11-26T15:20:48+11:00",
  "status": "ok",
  "date": "2026-11-26",
  "scheduled": 3456,
- "count": 99,
+ "count": 100,
  "cancel_pct": 2.9,
- "observed": 487,
- "late": 121,
- "late_pct": 24.8,
- "avg_late_min": 11.3,
+ "observed": 511,
+ "late": 131,
+ "late_pct": 25.6,
+ "avg_late_min": 11.9,
  "am": {
   "scheduled": 800,
   "cancelled": 0
@@ -138,13 +138,19 @@
    "route": "B1",
    "headsign": "Mona Vale",
    "start_time": "14:45",
-   "late_min": 66
+   "late_min": 71
   },
   {
    "route": "263",
    "headsign": "City Gresham St",
    "start_time": "13:37",
    "late_min": 58
+  },
+  {
+   "route": "230",
+   "headsign": "Milsons Point",
+   "start_time": "14:25",
+   "late_min": 56
   },
   {
    "route": "B1",
@@ -186,13 +192,19 @@
    "route": "173X",
    "headsign": "City Wynyard",
    "start_time": "14:50",
-   "late_min": 20
+   "late_min": 25
+  },
+  {
+   "route": "199",
+   "headsign": "Manly",
+   "start_time": "14:56",
+   "late_min": 23
   },
   {
    "route": "114",
    "headsign": "RNS Hospital",
    "start_time": "14:39",
-   "late_min": 20
+   "late_min": 22
   },
   {
    "route": "280",
@@ -201,22 +213,10 @@
    "late_min": 19
   },
   {
-   "route": "144",
-   "headsign": "Chatswood",
-   "start_time": "15:10",
+   "route": "154X",
+   "headsign": "Dee Why",
+   "start_time": "15:55",
    "late_min": 19
-  },
-  {
-   "route": "199",
-   "headsign": "Manly",
-   "start_time": "14:41",
-   "late_min": 15
-  },
-  {
-   "route": "162",
-   "headsign": "Seaforth",
-   "start_time": "14:40",
-   "late_min": 15
   }
  ],
  "trips": [
@@ -374,6 +374,11 @@
    "start_time": "15:19",
    "route": "B1",
    "headsign": "City Wynyard"
+  },
+  {
+   "start_time": "15:20",
+   "route": "166",
+   "headsign": "Frenchs Forest"
   },
   {
    "start_time": "15:26",
