@@ -1,14 +1,14 @@
 {
- "updated": "2026-11-26T15:36:06+11:00",
+ "updated": "2026-11-26T15:41:11+11:00",
  "status": "ok",
  "date": "2026-11-26",
  "scheduled": 3456,
- "count": 100,
+ "count": 101,
  "cancel_pct": 2.9,
- "observed": 566,
- "late": 182,
- "late_pct": 32.2,
- "avg_late_min": 11.5,
+ "observed": 598,
+ "late": 199,
+ "late_pct": 33.3,
+ "avg_late_min": 11.3,
  "am": {
   "scheduled": 800,
   "cancelled": 0
@@ -180,6 +180,12 @@
    "route": "114",
    "headsign": "RNS Hospital",
    "start_time": "14:39",
+   "late_min": 36
+  },
+  {
+   "route": "154X",
+   "headsign": "Dee Why",
+   "start_time": "15:55",
    "late_min": 31
   },
   {
@@ -201,22 +207,16 @@
    "late_min": 30
   },
   {
-   "route": "154X",
-   "headsign": "Dee Why",
-   "start_time": "15:55",
-   "late_min": 29
-  },
-  {
    "route": "199",
    "headsign": "Manly",
    "start_time": "14:56",
-   "late_min": 27
+   "late_min": 28
   },
   {
    "route": "114",
    "headsign": "Balmoral Beach",
    "start_time": "15:18",
-   "late_min": 22
+   "late_min": 26
   }
  ],
  "trips": [
@@ -364,6 +364,11 @@
    "start_time": "15:10",
    "route": "172X",
    "headsign": "Warringah Mall"
+  },
+  {
+   "start_time": "15:10",
+   "route": "144",
+   "headsign": "Chatswood"
   },
   {
    "start_time": "15:18",
