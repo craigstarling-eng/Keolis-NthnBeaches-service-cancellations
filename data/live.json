@@ -1,17 +1,17 @@
 {
- "updated": "2026-11-27T05:53:45+11:00",
+ "updated": "2026-11-27T05:58:51+11:00",
  "status": "ok",
  "date": "2026-11-27",
  "scheduled": 3416,
  "count": 124,
  "cancel_pct": 3.6,
- "observed": 318,
+ "observed": 342,
  "late": 0,
  "late_pct": 0.0,
  "avg_late_min": null,
- "ontime": 318,
+ "ontime": 342,
  "ontime_pct": 100.0,
- "anywhere_late_pct": 5.3,
+ "anywhere_late_pct": 5.6,
  "am": {
   "scheduled": 760,
   "cancelled": 61
@@ -186,6 +186,12 @@
    "late_min": 6
   },
   {
+   "route": "100",
+   "headsign": "Taronga Zoo via City QVB",
+   "start_time": "05:47",
+   "late_min": 6
+  },
+  {
    "route": "144",
    "headsign": "Manly",
    "start_time": "24:10",
@@ -198,27 +204,21 @@
    "late_min": 6
   },
   {
-   "route": "100",
-   "headsign": "Taronga Zoo via City QVB",
-   "start_time": "05:47",
+   "route": "280",
+   "headsign": "Chatswood",
+   "start_time": "05:41",
+   "late_min": 6
+  },
+  {
+   "route": "178",
+   "headsign": "Warringah Mall",
+   "start_time": "05:45",
    "late_min": 6
   },
   {
    "route": "144",
    "headsign": "Manly",
    "start_time": "26:30",
-   "late_min": 5
-  },
-  {
-   "route": "144",
-   "headsign": "Manly",
-   "start_time": "04:30",
-   "late_min": 5
-  },
-  {
-   "route": "178",
-   "headsign": "Warringah Mall",
-   "start_time": "05:45",
    "late_min": 5
   }
  ],
