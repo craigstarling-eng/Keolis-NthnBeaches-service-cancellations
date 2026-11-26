@@ -1,24 +1,24 @@
 {
- "updated": "2026-11-27T05:33:23+11:00",
+ "updated": "2026-11-27T05:38:29+11:00",
  "status": "ok",
  "date": "2026-11-27",
  "scheduled": 3416,
- "count": 122,
+ "count": 124,
  "cancel_pct": 3.6,
- "observed": 250,
+ "observed": 267,
  "late": 0,
  "late_pct": 0.0,
  "avg_late_min": null,
- "ontime": 250,
+ "ontime": 267,
  "ontime_pct": 100.0,
- "anywhere_late_pct": 4.4,
+ "anywhere_late_pct": 4.1,
  "am": {
   "scheduled": 760,
   "cancelled": 61
  },
  "pm": {
   "scheduled": 748,
-  "cancelled": 19
+  "cancelled": 21
  },
  "gaps": [
   {
@@ -150,15 +150,15 @@
    "late_min": 8
   },
   {
-   "route": "B1",
-   "headsign": "Mona Vale",
-   "start_time": "24:05",
-   "late_min": 7
-  },
-  {
    "route": "199",
    "headsign": "Manly",
    "start_time": "05:12",
+   "late_min": 7
+  },
+  {
+   "route": "B1",
+   "headsign": "Mona Vale",
+   "start_time": "24:05",
    "late_min": 7
   },
   {
@@ -780,6 +780,11 @@
    "headsign": "RNS Hospital"
   },
   {
+   "start_time": "17:15",
+   "route": "100",
+   "headsign": "Taronga Zoo via City QVB"
+  },
+  {
    "start_time": "17:17",
    "route": "114",
    "headsign": "Balmoral Beach"
@@ -798,6 +803,11 @@
    "start_time": "17:30",
    "route": "160X",
    "headsign": "Dee Why"
+  },
+  {
+   "start_time": "17:37",
+   "route": "114",
+   "headsign": "Balmoral Beach"
   },
   {
    "start_time": "17:40",
