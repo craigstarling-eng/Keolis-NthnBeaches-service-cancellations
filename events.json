@@ -1,0 +1,4 @@
+{
+  "_how_to": "Add days with strikes, storms, road closures etc. so they are marked on the charts. Example: {\"date\": \"2026-12-03\", \"note\": \"Industrial action\"}",
+  "events": []
+}
