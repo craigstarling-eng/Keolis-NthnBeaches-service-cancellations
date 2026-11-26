@@ -1,13 +1,13 @@
 {
- "updated": "2026-11-26T18:49:37+11:00",
+ "updated": "2026-11-26T18:54:42+11:00",
  "status": "ok",
  "date": "2026-11-26",
  "scheduled": 3456,
- "count": 110,
+ "count": 111,
  "cancel_pct": 3.2,
- "observed": 1275,
- "late": 622,
- "late_pct": 48.8,
+ "observed": 1288,
+ "late": 627,
+ "late_pct": 48.7,
  "avg_late_min": 10.9,
  "am": {
   "scheduled": 800,
@@ -15,7 +15,7 @@
  },
  "pm": {
   "scheduled": 765,
-  "cancelled": 46
+  "cancelled": 47
  },
  "gaps": [
   {
@@ -664,6 +664,11 @@
    "start_time": "18:27",
    "route": "114",
    "headsign": "Balmoral Beach"
+  },
+  {
+   "start_time": "18:33",
+   "route": "144",
+   "headsign": "Manly"
   },
   {
    "start_time": "18:34",
