@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Keolis NB Cancellations</title>
+<style>
+.viz-root{color-scheme:light;--bg:#f6f6f4;--surface-1:#fff;--text-primary:#191919;--text-secondary:#666;--grid:#e6e6e6;--border:#e2e2e2;
+--series-1:#257de0;--critical:#d93636;--good:#008a17}
+@media (prefers-color-scheme:dark){.viz-root{color-scheme:dark;--bg:#111;--surface-1:#191919;--text-primary:#efefef;--text-secondary:#9c9c9c;--grid:#2c2c2c;--border:#2e2e2e;
+--series-1:#338ced;--critical:#eb6263;--good:#0aac23}}
+*{box-sizing:border-box}
+body{margin:0;font:15px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+.viz-root{background:var(--bg);color:var(--text-primary);min-height:100vh;padding:16px;max-width:760px;margin:0 auto}
+h1{font-size:20px;margin:0 0 2px}
+h2{font-size:15px;margin:0 0 10px}
+.sub{color:var(--text-secondary);font-size:13px}
+.card{background:var(--surface-1);border:1px solid var(--border);border-radius:12px;padding:14px;margin-top:14px}
+.tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:14px}
+@media(min-width:620px){.tiles{grid-template-columns:repeat(4,1fr)}}
+.tile{background:var(--surface-1);border:1px solid var(--border);border-radius:12px;padding:12px}
+.tile .n{font-size:30px;font-weight:650;font-variant-numeric:tabular-nums}
+.tile .l{font-size:13px;color:var(--text-secondary);display:flex;align-items:center;gap:6px}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;flex:none}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:2px 8px;border-radius:99px;border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:7px 4px;border-bottom:1px solid var(--grid);font-size:14px}
+th{color:var(--text-secondary);font-weight:500;font-size:12px}
+td.r,th.r{text-align:right}
+.seg{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.seg button{font:inherit;font-size:13px;padding:4px 10px;border-radius:99px;border:1px solid var(--border);background:var(--surface-1);color:var(--text-primary)}
+.seg button[aria-pressed=true]{background:var(--text-primary);color:var(--surface-1)}
+.legend{display:flex;gap:14px;font-size:13px;color:var(--text-secondary);margin-bottom:6px;flex-wrap:wrap}
+.legend span{display:flex;align-items:center;gap:6px}
+.chart{position:relative}
+.tip{position:absolute;pointer-events:none;background:var(--surface-1);border:1px solid var(--border);border-radius:8px;padding:6px 8px;font-size:12px;box-shadow:0 2px 8px #0002;display:none;white-space:nowrap}
+.scroll{max-height:360px;overflow:auto}
+.bar{height:8px;border-radius:0 4px 4px 0;display:inline-block;vertical-align:middle}
+.empty{color:var(--text-secondary);font-size:14px;padding:6px 0}
+</style>
+</head>
+<body>
+<div class="viz-root">
+  <h1>Keolis Northern Beaches cancellations</h1>
+  <div class="sub"><span id="live" class="pill">Loading…</span> <span id="upd"></span></div>
+
+  <div class="tiles" id="tiles"></div>
+
+  <div class="card">
+    <h2>Today's cancelled trips</h2>
+    <div class="scroll"><table><thead><tr><th>Time</th><th>Route</th><th>To</th></tr></thead><tbody id="today"></tbody></table></div>
+    <div id="todayEmpty" class="empty" hidden>No cancellations logged yet today.</div>
+  </div>
+
+  <div class="card">
+    <h2>Cancellations per day</h2>
+    <div class="seg" id="range"></div>
+    <div class="chart" id="chart"><div class="tip" id="tip"></div></div>
+    <div class="sub" id="since" style="margin-top:6px"></div>
+  </div>
+
+  <div class="card">
+    <h2>Most-cancelled routes</h2>
+    <div class="seg" id="topSeg"></div>
+    <table><tbody id="top"></tbody></table>
+  </div>
+
+  <div class="card">
+    <h2>By trip start hour (all time)</h2>
+    <div class="chart" id="hours"><div class="tip" id="tip2"></div></div>
+  </div>
+
+  <div class="card">
+    <h2>By day of week (average per day)</h2>
+    <table><tbody id="wd"></tbody></table>
+  </div>
+
+  <p class="sub">Source: Transport for NSW open data (GTFS-realtime), Region 8. Updates about every 10 minutes.</p>
+</div>
+
+<script>
+let S=null,L=null,range=30,topWin="30";
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmt=d=>new Date(d+"T12:00:00").toLocaleDateString("en-AU",{weekday:"short",day:"numeric",month:"short"});
+
+async function load(){
+  const b="?t="+Date.now();
+  try{[L,S]=await Promise.all([fetch("data/live.json"+b).then(r=>r.json()),fetch("data/summary.json"+b).then(r=>r.json())])}
+  catch(e){$("live").textContent="No data yet";return}
+  render();
+}
+
+function bars(el,tip,labels,vals,tipText,labelEvery){
+  const w=el.clientWidth||600,h=200,p={l:32,r:6,t:10,b:24},n=vals.length;
+  const yMax=Math.max(4,Math.ceil(Math.max(...vals)/4)*4),bw=(w-p.l-p.r)/n,y=v=>(h-p.t-p.b)*v/yMax;
+  let g="";
+  for(let k=0;k<=4;k++){const v=yMax*k/4,yy=h-p.b-y(v);g+=`<line x1="${p.l}" x2="${w-p.r}" y1="${yy}" y2="${yy}" stroke="var(--grid)"/><text x="${p.l-6}" y="${yy+4}" text-anchor="end" font-size="11" fill="var(--text-secondary)">${v}</text>`}
+  vals.forEach((v,i)=>{const gap=n>60?1:2,x0=p.l+i*bw+gap/2,bwid=Math.max(1,bw-gap),hh=y(v),r=Math.min(4,bwid/2);
+    if(v>0)g+=`<path d="M${x0},${h-p.b}V${h-p.b-hh+r}Q${x0},${h-p.b-hh} ${x0+r},${h-p.b-hh}H${x0+bwid-r}Q${x0+bwid},${h-p.b-hh} ${x0+bwid},${h-p.b-hh+r}V${h-p.b}Z" fill="var(--series-1)"/>`;
+    if(i%labelEvery===0)g+=`<text x="${x0+bwid/2}" y="${h-6}" text-anchor="middle" font-size="11" fill="var(--text-secondary)">${labels[i]}</text>`;
+    g+=`<rect x="${p.l+i*bw}" y="0" width="${bw}" height="${h}" fill="transparent" data-i="${i}"/>`});
+  el.querySelector("svg")?.remove();
+  el.insertAdjacentHTML("afterbegin",`<svg width="${w}" height="${h}">${g}</svg>`);
+  const svg=el.querySelector("svg");
+  const show=e=>{const t=document.elementFromPoint(e.clientX,e.clientY),i=t?.dataset?.i;if(i===undefined)return;
+    tip.innerHTML=tipText(+i);tip.style.display="block";tip.style.left=Math.min(p.l+i*bw+bw,w-140)+"px";tip.style.top="8px"};
+  svg.addEventListener("pointermove",show);svg.addEventListener("pointerdown",show);
+  svg.addEventListener("pointerleave",()=>tip.style.display="none");
+}
+
+function render(){
+  const upd=new Date(L.updated),mins=Math.round((Date.now()-upd)/60000),fresh=mins<=30&&L.status==="ok";
+  $("live").innerHTML=`<span class="dot" style="background:var(${fresh?"--good":"--critical"})"></span>${fresh?"Live":"Delayed"}`;
+  $("upd").textContent=`Updated ${upd.toLocaleTimeString("en-AU",{hour:"numeric",minute:"2-digit",timeZone:"Australia/Sydney"})} (${mins} min ago)${L.status!=="ok"?" · "+L.status:""}`;
+
+  const days=Math.max(1,Math.round((new Date(L.date)-new Date(S.first_date))/864e5)+1),T=S.totals;
+  const tile=(l,n)=>`<div class="tile"><div class="l">${l}</div><div class="n">${n}</div></div>`;
+  $("tiles").innerHTML=tile("Today",L.count)+tile("Last 7 days",T["7"])+tile("Last 30 days",T["30"])+tile("Avg per day",(T.all/days).toFixed(1));
+
+  $("today").innerHTML=L.trips.map(t=>`<tr><td>${esc(t.start_time)}</td><td><b>${esc(t.route)}</b></td><td>${esc(t.headsign)}</td></tr>`).join("");
+  $("todayEmpty").hidden=L.trips.length>0;
+
+  $("range").innerHTML=[7,30,90,365].map(n=>`<button aria-pressed="${n===range}" data-n="${n}">${n===365?"1 yr":n+" days"}</button>`).join("");
+  $("range").onclick=e=>{if(e.target.dataset.n){range=+e.target.dataset.n;render()}};
+  const ds=[],end=new Date(L.date+"T12:00:00");for(let i=range-1;i>=0;i--)ds.push(new Date(end-i*864e5).toISOString().slice(0,10));
+  const dv=ds.map(d=>S.daily[d]||0);
+  bars($("chart"),$("tip"),ds.map(d=>{const x=new Date(d+"T12:00:00");return x.getDate()+"/"+(x.getMonth()+1)}),dv,i=>`<b>${fmt(ds[i])}</b><br>${dv[i]} cancelled`,Math.ceil(range/6));
+  $("since").textContent=`${T.all} total since ${new Date(S.first_date).toLocaleDateString("en-AU",{day:"numeric",month:"short",year:"numeric"})} (${days} days)`;
+
+  $("topSeg").innerHTML=[["30","30 days"],["all","All time"]].map(([k,l])=>`<button aria-pressed="${k===topWin}" data-k="${k}">${l}</button>`).join("");
+  $("topSeg").onclick=e=>{if(e.target.dataset.k){topWin=e.target.dataset.k;render()}};
+  const top=topWin==="30"?S.top_routes_30:S.top_routes_all,mx=Math.max(1,...top.map(t=>t.count));
+  $("top").innerHTML=top.length?top.map(t=>`<tr><td style="width:60px"><b>${esc(t.route)}</b></td><td><span class="bar" style="width:${Math.max(4,t.count/mx*100)}%;background:var(--series-1)"></span></td><td class="r" style="width:50px">${t.count}</td></tr>`).join(""):`<tr><td class="empty">No data yet</td></tr>`;
+
+  bars($("hours"),$("tip2"),[...Array(24)].map((_,i)=>i),S.by_hour,i=>`<b>${String(i).padStart(2,"0")}:00–${String(i).padStart(2,"0")}:59</b><br>${S.by_hour[i]} cancelled`,3);
+
+  const wk=Math.max(1,days/7),names=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],wmx=Math.max(1,...S.by_weekday);
+  $("wd").innerHTML=S.by_weekday.map((v,i)=>`<tr><td style="width:50px">${names[i]}</td><td><span class="bar" style="width:${Math.max(4,v/wmx*100)}%;background:var(--series-1)"></span></td><td class="r" style="width:50px">${(v/wk).toFixed(1)}</td></tr>`).join("");
+}
+
+load();setInterval(load,120000);
+let rt;addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(()=>S&&render(),150)});
+</script>
+</body>
+</html>
