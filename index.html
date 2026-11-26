@@ -564,7 +564,7 @@ function myBus() {
   const cset = new Set(cx.map(t => t.trip_id)), act = L.active || {}, now = nowMin();
   let centre = mb.time ? hm(mb.time) : now; if (mb.time && centre < 240) centre += 1440;
   const list = trips.filter(t => !mb.dir || t[2] === mb.dir);
-  const win = list.filter(t => { const m = hm(t[1]); return m >= centre - 30 && m <= centre + 150; });
+  const win = list.filter(t => { const m = hm(t[1]); return m >= centre - 30 && m <= centre + 90; });
   const slot = t => TS && TS.slots && ((TS.slots[mb.route] || {})[t[2]] || {})[t[1]];
   const rel = t => { const s = slot(t); if (!s || s[0] < 3) return ""; const bits = [`cancelled ${s[1]} of the last ${s[0]} days`]; if (s[2] >= 3) bits.push(`left late ${Math.round(100 * s[3] / s[2])}% of the time`); if (s[4] >= 3 && s[5] / s[4] >= 0.3) bits.push(`often standing room only (${Math.round(100 * s[5] / s[4])}%)`); return "Usually: " + bits.join(", "); };
   $("mbList").innerHTML = win.length ? win.map(t => {
