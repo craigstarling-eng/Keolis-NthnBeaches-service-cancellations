@@ -1,17 +1,17 @@
 {
- "updated": "2026-11-27T07:50:59+11:00",
+ "updated": "2026-11-27T07:56:04+11:00",
  "status": "ok",
  "date": "2026-11-27",
  "scheduled": 3416,
  "count": 173,
  "cancel_pct": 5.1,
- "observed": 813,
+ "observed": 827,
  "late": 17,
  "late_pct": 2.1,
- "avg_late_min": 20.0,
- "ontime": 796,
+ "avg_late_min": 20.9,
+ "ontime": 810,
  "ontime_pct": 97.9,
- "anywhere_late_pct": 16.2,
+ "anywhere_late_pct": 16.8,
  "am": {
   "scheduled": 760,
   "cancelled": 75
@@ -135,7 +135,7 @@
    "route": "160X",
    "headsign": "Dee Why",
    "start_time": "06:30",
-   "late_min": 81
+   "late_min": 86
   },
   {
    "route": "100",
@@ -144,28 +144,28 @@
    "late_min": 47
   },
   {
+   "route": "B1",
+   "headsign": "City Wynyard",
+   "start_time": "07:17",
+   "late_min": 40
+  },
+  {
    "route": "170X",
    "headsign": "City Wynyard",
    "start_time": "07:00",
    "late_min": 36
   },
   {
-   "route": "B1",
-   "headsign": "City Wynyard",
-   "start_time": "07:17",
-   "late_min": 35
-  },
-  {
    "route": "201",
    "headsign": "City Gresham St",
    "start_time": "07:25",
-   "late_min": 26
+   "late_min": 31
   },
   {
    "route": "172X",
    "headsign": "Warringah Mall",
    "start_time": "07:40",
-   "late_min": 23
+   "late_min": 24
   },
   {
    "route": "100",
