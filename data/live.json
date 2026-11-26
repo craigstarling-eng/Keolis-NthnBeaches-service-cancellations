@@ -1,17 +1,17 @@
 {
- "updated": "2026-11-27T01:29:14+11:00",
+ "updated": "2026-11-27T01:34:18+11:00",
  "status": "ok",
  "date": "2026-11-27",
  "scheduled": 3416,
  "count": 6,
  "cancel_pct": 0.2,
- "observed": 43,
+ "observed": 44,
  "late": 0,
  "late_pct": 0.0,
  "avg_late_min": null,
- "ontime": 43,
+ "ontime": 44,
  "ontime_pct": 100.0,
- "anywhere_late_pct": 9.3,
+ "anywhere_late_pct": 11.4,
  "am": {
   "scheduled": 760,
   "cancelled": 0
@@ -100,6 +100,12 @@
    "headsign": "Manly",
    "start_time": "24:10",
    "late_min": 6
+  },
+  {
+   "route": "144",
+   "headsign": "Manly",
+   "start_time": "25:30",
+   "late_min": 5
   }
  ],
  "trips": [
