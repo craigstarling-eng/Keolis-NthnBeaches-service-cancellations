@@ -1,812 +1,119 @@
 {
- "updated": "2026-11-26T23:57:46+11:00",
+ "updated": "2026-11-27T00:02:51+11:00",
  "status": "ok",
- "date": "2026-11-26",
- "scheduled": 3456,
- "count": 117,
- "cancel_pct": 3.4,
- "observed": 116,
- "late": 13,
- "late_pct": 11.2,
- "avg_late_min": 13.0,
- "ontime": 103,
- "ontime_pct": 88.8,
- "anywhere_late_pct": 48.1,
+ "date": "2026-11-27",
+ "scheduled": 3416,
+ "count": 6,
+ "cancel_pct": 0.2,
+ "observed": 33,
+ "late": 0,
+ "late_pct": 0.0,
+ "avg_late_min": null,
+ "ontime": 33,
+ "ontime_pct": 100.0,
+ "anywhere_late_pct": 3.0,
  "am": {
-  "scheduled": 800,
+  "scheduled": 760,
   "cancelled": 0
  },
  "pm": {
-  "scheduled": 765,
-  "cancelled": 48
+  "scheduled": 748,
+  "cancelled": 0
  },
  "gaps": [
   {
-   "route": "182",
-   "headsign": "Powderworks Rd",
-   "from": "18:19",
-   "to": "21:57",
-   "gap_min": 218,
-   "normal_min": 31.0,
-   "cancelled_in_row": 1
-  },
-  {
-   "route": "177",
-   "headsign": "Dee Why",
-   "from": "16:31",
-   "to": "19:50",
-   "gap_min": 199,
-   "normal_min": 42,
-   "cancelled_in_row": 1
-  },
-  {
-   "route": "263",
-   "headsign": "Crows Nest",
-   "from": "13:35",
-   "to": "15:05",
-   "gap_min": 90,
-   "normal_min": 45,
-   "cancelled_in_row": 1
-  },
-  {
-   "route": "177",
-   "headsign": "Dee Why",
-   "from": "15:17",
-   "to": "16:31",
-   "gap_min": 74,
-   "normal_min": 42,
-   "cancelled_in_row": 2
-  },
-  {
-   "route": "172X",
-   "headsign": "Warringah Mall",
-   "from": "17:38",
-   "to": "18:47",
-   "gap_min": 69,
-   "normal_min": 28.0,
-   "cancelled_in_row": 2
-  },
-  {
-   "route": "180",
-   "headsign": "Warringah Mall",
-   "from": "19:34",
-   "to": "20:35",
-   "gap_min": 61,
-   "normal_min": 20,
-   "cancelled_in_row": 1
-  },
-  {
-   "route": "166",
-   "headsign": "Frenchs Forest",
-   "from": "21:20",
-   "to": "22:20",
+   "route": "199",
+   "headsign": "Manly",
+   "from": "01:06",
+   "to": "02:06",
    "gap_min": 60,
-   "normal_min": 20,
+   "normal_min": 10,
    "cancelled_in_row": 1
   },
   {
-   "route": "180",
-   "headsign": "Warringah Mall",
-   "from": "20:35",
-   "to": "21:35",
+   "route": "144",
+   "headsign": "Chatswood",
+   "from": "02:20",
+   "to": "03:20",
    "gap_min": 60,
-   "normal_min": 20,
+   "normal_min": 10,
    "cancelled_in_row": 1
-  },
-  {
-   "route": "180",
-   "headsign": "Collaroy Plateau",
-   "from": "20:02",
-   "to": "21:02",
-   "gap_min": 60,
-   "normal_min": 20.0,
-   "cancelled_in_row": 1
-  },
-  {
-   "route": "230",
-   "headsign": "Milsons Point",
-   "from": "23:25",
-   "to": "00:25",
-   "gap_min": 60,
-   "normal_min": 15.0,
-   "cancelled_in_row": 1
-  },
-  {
-   "route": "180",
-   "headsign": "Warringah Mall",
-   "from": "18:05",
-   "to": "19:04",
-   "gap_min": 59,
-   "normal_min": 20,
-   "cancelled_in_row": 1
-  },
-  {
-   "route": "280",
-   "headsign": "Warringah Mall",
-   "from": "17:55",
-   "to": "18:52",
-   "gap_min": 57,
-   "normal_min": 21.0,
-   "cancelled_in_row": 2
-  }
- ],
- "late_trips": [
-  {
-   "route": "B1",
-   "headsign": "Mona Vale",
-   "start_time": "17:40",
-   "late_min": 89
-  },
-  {
-   "route": "B1",
-   "headsign": "Mona Vale",
-   "start_time": "14:45",
-   "late_min": 86
-  },
-  {
-   "route": "111",
-   "headsign": "South Mosman Wharf",
-   "start_time": "13:09",
-   "late_min": 86
-  },
-  {
-   "route": "263",
-   "headsign": "City Gresham St",
-   "start_time": "13:37",
-   "late_min": 58
-  },
-  {
-   "route": "B1",
-   "headsign": "City Wynyard",
-   "start_time": "16:26",
-   "late_min": 58
-  },
-  {
-   "route": "180X",
-   "headsign": "Collaroy Plateau",
-   "start_time": "16:46",
-   "late_min": 57
   },
   {
    "route": "199",
    "headsign": "Palm Beach",
-   "start_time": "22:05",
-   "late_min": 57
+   "from": "00:05",
+   "to": "00:35",
+   "gap_min": 30,
+   "normal_min": 10.0,
+   "cancelled_in_row": 1
   },
   {
-   "route": "100",
-   "headsign": "Taronga Zoo via City QVB",
-   "start_time": "17:28",
-   "late_min": 56
+   "route": "173X",
+   "headsign": "Warringah Mall",
+   "from": "23:40",
+   "to": "end of day",
+   "gap_min": null,
+   "normal_min": 20.0,
+   "cancelled_in_row": 1
   },
   {
-   "route": "230",
-   "headsign": "Milsons Point",
-   "start_time": "14:25",
-   "late_min": 56
-  },
-  {
-   "route": "B1",
-   "headsign": "City Wynyard",
-   "start_time": "13:39",
-   "late_min": 51
+   "route": "144",
+   "headsign": "Manly",
+   "from": "03:00",
+   "to": "end of day",
+   "gap_min": null,
+   "normal_min": 10,
+   "cancelled_in_row": 1
   },
   {
    "route": "230",
    "headsign": "Mosman Bay Wharf",
-   "start_time": "15:26",
-   "late_min": 47
-  },
+   "from": "23:56",
+   "to": "end of day",
+   "gap_min": null,
+   "normal_min": 15.0,
+   "cancelled_in_row": 1
+  }
+ ],
+ "late_trips": [
   {
-   "route": "114",
-   "headsign": "RNS Hospital",
-   "start_time": "14:39",
-   "late_min": 45
-  },
-  {
-   "route": "179",
-   "headsign": "War Veterans Hm",
-   "start_time": "13:42",
-   "late_min": 43
-  },
-  {
-   "route": "154X",
-   "headsign": "Dee Why",
-   "start_time": "15:55",
-   "late_min": 42
-  },
-  {
-   "route": "173X",
-   "headsign": "City Wynyard",
-   "start_time": "14:50",
-   "late_min": 40
+   "route": "100",
+   "headsign": "Taronga Zoo via City QVB",
+   "start_time": "24:09",
+   "late_min": 12
   }
  ],
  "trips": [
   {
-   "start_time": "12:50",
-   "route": "199",
-   "headsign": "Palm Beach"
-  },
-  {
-   "start_time": "13:50",
-   "route": "144",
-   "headsign": "Chatswood"
-  },
-  {
-   "start_time": "13:50",
-   "route": "160X",
-   "headsign": "Dee Why"
-  },
-  {
-   "start_time": "13:52",
-   "route": "160X",
-   "headsign": "Chatswood"
-  },
-  {
-   "start_time": "14:14",
-   "route": "230",
-   "headsign": "Mosman Bay Wharf"
-  },
-  {
-   "start_time": "14:16",
-   "route": "167",
-   "headsign": "Manly"
-  },
-  {
-   "start_time": "14:20",
-   "route": "263",
-   "headsign": "Crows Nest"
-  },
-  {
-   "start_time": "14:22",
-   "route": "199",
-   "headsign": "Manly"
-  },
-  {
-   "start_time": "14:30",
-   "route": "B1",
-   "headsign": "Mona Vale"
-  },
-  {
-   "start_time": "14:31",
-   "route": "172X",
-   "headsign": "City Wynyard"
-  },
-  {
-   "start_time": "14:38",
-   "route": "280",
-   "headsign": "Chatswood"
-  },
-  {
-   "start_time": "14:40",
-   "route": "B1",
-   "headsign": "City Wynyard"
-  },
-  {
-   "start_time": "14:44",
-   "route": "160X",
-   "headsign": "Chatswood"
-  },
-  {
-   "start_time": "14:52",
-   "route": "144",
-   "headsign": "Manly"
-  },
-  {
-   "start_time": "14:53",
-   "route": "160X",
-   "headsign": "Chatswood"
-  },
-  {
-   "start_time": "14:55",
-   "route": "154X",
-   "headsign": "Dee Why"
-  },
-  {
-   "start_time": "14:55",
-   "route": "230",
-   "headsign": "Milsons Point"
-  },
-  {
-   "start_time": "14:56",
-   "route": "B1",
-   "headsign": "City Wynyard"
-  },
-  {
-   "start_time": "14:57",
-   "route": "180",
-   "headsign": "Warringah Mall"
-  },
-  {
-   "start_time": "14:58",
-   "route": "167",
-   "headsign": "Warringah Mall"
-  },
-  {
-   "start_time": "14:59",
-   "route": "114",
-   "headsign": "RNS Hospital"
-  },
-  {
-   "start_time": "15:00",
-   "route": "B1",
-   "headsign": "Mona Vale"
-  },
-  {
-   "start_time": "15:00",
-   "route": "144",
-   "headsign": "Chatswood"
-  },
-  {
-   "start_time": "15:03",
-   "route": "100",
-   "headsign": "Taronga Zoo via City QVB"
-  },
-  {
-   "start_time": "15:04",
-   "route": "230",
-   "headsign": "Milsons Point"
-  },
-  {
-   "start_time": "15:05",
-   "route": "B1",
-   "headsign": "Mona Vale"
-  },
-  {
-   "start_time": "15:08",
-   "route": "166",
-   "headsign": "Manly"
-  },
-  {
-   "start_time": "15:08",
-   "route": "172X",
-   "headsign": "City Wynyard"
-  },
-  {
-   "start_time": "15:10",
-   "route": "172X",
-   "headsign": "Warringah Mall"
-  },
-  {
-   "start_time": "15:10",
-   "route": "144",
-   "headsign": "Chatswood"
-  },
-  {
-   "start_time": "15:18",
-   "route": "280",
-   "headsign": "Chatswood"
-  },
-  {
-   "start_time": "15:19",
-   "route": "B1",
-   "headsign": "City Wynyard"
-  },
-  {
-   "start_time": "15:20",
-   "route": "166",
-   "headsign": "Frenchs Forest"
-  },
-  {
-   "start_time": "15:26",
-   "route": "162",
-   "headsign": "Manly"
-  },
-  {
-   "start_time": "15:30",
-   "route": "160X",
-   "headsign": "Dee Why"
-  },
-  {
-   "start_time": "15:35",
-   "route": "B1",
-   "headsign": "City Wynyard"
-  },
-  {
-   "start_time": "15:35",
-   "route": "154X",
-   "headsign": "Dee Why"
-  },
-  {
-   "start_time": "15:35",
-   "route": "280",
-   "headsign": "Warringah Mall"
-  },
-  {
-   "start_time": "15:37",
-   "route": "177",
-   "headsign": "Dee Why"
-  },
-  {
-   "start_time": "15:37",
-   "route": "178",
-   "headsign": "Cromer Hts"
-  },
-  {
-   "start_time": "15:40",
-   "route": "150X",
-   "headsign": "Manly"
-  },
-  {
-   "start_time": "15:40",
-   "route": "160X",
-   "headsign": "Dee Why"
-  },
-  {
-   "start_time": "15:44",
-   "route": "199",
-   "headsign": "Manly"
-  },
-  {
-   "start_time": "15:45",
-   "route": "154X",
-   "headsign": "Dee Why"
-  },
-  {
-   "start_time": "15:47",
-   "route": "114",
-   "headsign": "Balmoral Beach"
-  },
-  {
-   "start_time": "15:56",
-   "route": "B1",
-   "headsign": "Mona Vale"
-  },
-  {
-   "start_time": "15:57",
-   "route": "185",
-   "headsign": "Mona Vale"
-  },
-  {
-   "start_time": "16:00",
-   "route": "162",
-   "headsign": "Seaforth"
-  },
-  {
-   "start_time": "16:00",
-   "route": "166",
-   "headsign": "Frenchs Forest"
-  },
-  {
-   "start_time": "16:09",
-   "route": "177",
-   "headsign": "Dee Why"
-  },
-  {
-   "start_time": "16:10",
-   "route": "172X",
-   "headsign": "Warringah Mall"
-  },
-  {
-   "start_time": "16:11",
-   "route": "144",
-   "headsign": "Manly"
-  },
-  {
-   "start_time": "16:12",
-   "route": "B1",
-   "headsign": "Mona Vale"
-  },
-  {
-   "start_time": "16:12",
-   "route": "178",
-   "headsign": "Warringah Mall"
-  },
-  {
-   "start_time": "16:18",
-   "route": "280",
-   "headsign": "Warringah Mall"
-  },
-  {
-   "start_time": "16:20",
-   "route": "166",
-   "headsign": "Frenchs Forest"
-  },
-  {
-   "start_time": "16:21",
-   "route": "166",
-   "headsign": "Manly"
-  },
-  {
-   "start_time": "16:26",
-   "route": "162",
-   "headsign": "Manly"
-  },
-  {
-   "start_time": "16:29",
-   "route": "230",
-   "headsign": "Mosman Bay Wharf"
-  },
-  {
-   "start_time": "16:36",
-   "route": "B1",
-   "headsign": "Mona Vale"
-  },
-  {
-   "start_time": "16:42",
-   "route": "160X",
-   "headsign": "Chatswood"
-  },
-  {
-   "start_time": "16:52",
-   "route": "B1",
-   "headsign": "Mona Vale"
-  },
-  {
-   "start_time": "17:00",
-   "route": "162",
-   "headsign": "Seaforth"
-  },
-  {
-   "start_time": "17:01",
-   "route": "160X",
-   "headsign": "Chatswood"
-  },
-  {
-   "start_time": "17:04",
-   "route": "100",
-   "headsign": "Taronga Zoo via City QVB"
-  },
-  {
-   "start_time": "17:07",
-   "route": "154X",
-   "headsign": "Dee Why"
-  },
-  {
-   "start_time": "17:10",
-   "route": "144",
-   "headsign": "Chatswood"
-  },
-  {
-   "start_time": "17:10",
-   "route": "230",
-   "headsign": "Milsons Point"
-  },
-  {
-   "start_time": "17:15",
-   "route": "280",
-   "headsign": "Chatswood"
-  },
-  {
-   "start_time": "17:20",
-   "route": "150X",
-   "headsign": "Manly"
-  },
-  {
-   "start_time": "17:20",
-   "route": "166",
-   "headsign": "Frenchs Forest"
-  },
-  {
-   "start_time": "17:20",
-   "route": "144",
-   "headsign": "Chatswood"
-  },
-  {
-   "start_time": "17:20",
-   "route": "170X",
-   "headsign": "Manly"
-  },
-  {
-   "start_time": "17:23",
-   "route": "B1",
-   "headsign": "City Wynyard"
-  },
-  {
-   "start_time": "17:26",
-   "route": "230",
-   "headsign": "Mosman Bay Wharf"
-  },
-  {
-   "start_time": "17:30",
-   "route": "181X",
-   "headsign": "Narrabeen"
-  },
-  {
-   "start_time": "17:30",
-   "route": "160X",
-   "headsign": "Dee Why"
-  },
-  {
-   "start_time": "17:40",
-   "route": "199",
-   "headsign": "Palm Beach"
-  },
-  {
-   "start_time": "17:40",
-   "route": "144",
-   "headsign": "Chatswood"
-  },
-  {
-   "start_time": "17:46",
-   "route": "162",
-   "headsign": "Manly"
-  },
-  {
-   "start_time": "17:52",
-   "route": "179",
-   "headsign": "War Veterans Hm"
-  },
-  {
-   "start_time": "18:00",
-   "route": "172X",
-   "headsign": "Warringah Mall"
-  },
-  {
-   "start_time": "18:05",
-   "route": "150X",
-   "headsign": "Manly"
-  },
-  {
-   "start_time": "18:12",
-   "route": "230",
-   "headsign": "Milsons Point"
-  },
-  {
-   "start_time": "18:15",
-   "route": "280",
-   "headsign": "Warringah Mall"
-  },
-  {
-   "start_time": "18:20",
-   "route": "B1",
-   "headsign": "Mona Vale"
-  },
-  {
-   "start_time": "18:21",
-   "route": "144",
-   "headsign": "Manly"
-  },
-  {
-   "start_time": "18:26",
-   "route": "172X",
-   "headsign": "Warringah Mall"
-  },
-  {
-   "start_time": "18:27",
-   "route": "114",
-   "headsign": "Balmoral Beach"
-  },
-  {
-   "start_time": "18:33",
-   "route": "144",
-   "headsign": "Manly"
-  },
-  {
-   "start_time": "18:34",
-   "route": "180",
-   "headsign": "Warringah Mall"
-  },
-  {
-   "start_time": "18:35",
-   "route": "280",
-   "headsign": "Warringah Mall"
-  },
-  {
-   "start_time": "18:39",
-   "route": "182",
-   "headsign": "Powderworks Rd"
-  },
-  {
-   "start_time": "18:42",
-   "route": "230",
-   "headsign": "Milsons Point"
-  },
-  {
-   "start_time": "18:43",
-   "route": "230",
-   "headsign": "Mosman HS"
-  },
-  {
-   "start_time": "19:10",
-   "route": "172X",
-   "headsign": "Warringah Mall"
-  },
-  {
-   "start_time": "19:11",
-   "route": "166",
-   "headsign": "Manly"
-  },
-  {
-   "start_time": "19:18",
-   "route": "B1",
-   "headsign": "Mona Vale"
-  },
-  {
-   "start_time": "19:20",
-   "route": "144",
-   "headsign": "Chatswood"
-  },
-  {
-   "start_time": "19:20",
-   "route": "177",
-   "headsign": "Dee Why"
-  },
-  {
-   "start_time": "19:22",
-   "route": "180",
-   "headsign": "Collaroy Plateau"
-  },
-  {
-   "start_time": "19:40",
-   "route": "199",
-   "headsign": "Palm Beach"
-  },
-  {
-   "start_time": "20:00",
-   "route": "166",
-   "headsign": "Frenchs Forest"
-  },
-  {
-   "start_time": "20:05",
-   "route": "180",
-   "headsign": "Warringah Mall"
-  },
-  {
-   "start_time": "20:17",
-   "route": "144",
-   "headsign": "Manly"
-  },
-  {
-   "start_time": "20:20",
-   "route": "199",
-   "headsign": "Palm Beach"
-  },
-  {
-   "start_time": "20:32",
-   "route": "180",
-   "headsign": "Collaroy Plateau"
-  },
-  {
-   "start_time": "20:57",
-   "route": "199",
-   "headsign": "Manly"
-  },
-  {
-   "start_time": "21:05",
-   "route": "199",
-   "headsign": "Palm Beach"
-  },
-  {
-   "start_time": "21:05",
-   "route": "180",
-   "headsign": "Warringah Mall"
-  },
-  {
-   "start_time": "21:50",
-   "route": "166",
-   "headsign": "Frenchs Forest"
-  },
-  {
-   "start_time": "22:49",
-   "route": "160X",
-   "headsign": "Chatswood"
-  },
-  {
-   "start_time": "23:02",
-   "route": "280",
-   "headsign": "Chatswood"
-  },
-  {
-   "start_time": "23:20",
-   "route": "160X",
-   "headsign": "Dee Why"
-  },
-  {
-   "start_time": "23:35",
+   "start_time": "00:10",
    "route": "173X",
-   "headsign": "City Wynyard"
-  },
-  {
-   "start_time": "23:45",
-   "route": "280",
    "headsign": "Warringah Mall"
   },
   {
-   "start_time": "23:55",
+   "start_time": "00:20",
+   "route": "199",
+   "headsign": "Palm Beach"
+  },
+  {
+   "start_time": "00:26",
    "route": "230",
-   "headsign": "Milsons Point"
+   "headsign": "Mosman Bay Wharf"
+  },
+  {
+   "start_time": "01:36",
+   "route": "199",
+   "headsign": "Manly"
+  },
+  {
+   "start_time": "02:50",
+   "route": "144",
+   "headsign": "Chatswood"
+  },
+  {
+   "start_time": "03:30",
+   "route": "144",
+   "headsign": "Manly"
   }
  ],
  "school_cancelled": []
