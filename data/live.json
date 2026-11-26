@@ -1,20 +1,20 @@
 {
- "updated": "2026-11-27T03:46:34+11:00",
+ "updated": "2026-11-27T03:51:38+11:00",
  "status": "ok",
  "date": "2026-11-27",
  "scheduled": 3416,
- "count": 86,
- "cancel_pct": 2.5,
- "observed": 67,
+ "count": 99,
+ "cancel_pct": 2.9,
+ "observed": 70,
  "late": 0,
  "late_pct": 0.0,
  "avg_late_min": null,
- "ontime": 67,
+ "ontime": 70,
  "ontime_pct": 100.0,
- "anywhere_late_pct": 10.4,
+ "anywhere_late_pct": 10.0,
  "am": {
   "scheduled": 760,
-  "cancelled": 51
+  "cancelled": 61
  },
  "pm": {
   "scheduled": 748,
@@ -85,6 +85,15 @@
    "cancelled_in_row": 1
   },
   {
+   "route": "280",
+   "headsign": "Chatswood",
+   "from": "08:26",
+   "to": "09:23",
+   "gap_min": 57,
+   "normal_min": 23.5,
+   "cancelled_in_row": 1
+  },
+  {
    "route": "165X",
    "headsign": "City Wynyard",
    "from": "06:20",
@@ -94,6 +103,24 @@
    "cancelled_in_row": 2
   },
   {
+   "route": "167",
+   "headsign": "Manly",
+   "from": "07:39",
+   "to": "08:22",
+   "gap_min": 43,
+   "normal_min": 20.0,
+   "cancelled_in_row": 1
+  },
+  {
+   "route": "280",
+   "headsign": "Warringah Mall",
+   "from": "08:05",
+   "to": "08:46",
+   "gap_min": 41,
+   "normal_min": 21.0,
+   "cancelled_in_row": 1
+  },
+  {
    "route": "174X",
    "headsign": "City Wynyard",
    "from": "06:55",
@@ -101,33 +128,6 @@
    "gap_min": 40,
    "normal_min": 14.0,
    "cancelled_in_row": 2
-  },
-  {
-   "route": "166",
-   "headsign": "Frenchs Forest",
-   "from": "09:00",
-   "to": "09:40",
-   "gap_min": 40,
-   "normal_min": 20,
-   "cancelled_in_row": 1
-  },
-  {
-   "route": "167",
-   "headsign": "Manly",
-   "from": "06:59",
-   "to": "07:39",
-   "gap_min": 40,
-   "normal_min": 20.0,
-   "cancelled_in_row": 1
-  },
-  {
-   "route": "173X",
-   "headsign": "Warringah Mall",
-   "from": "08:00",
-   "to": "08:40",
-   "gap_min": 40,
-   "normal_min": 20.0,
-   "cancelled_in_row": 1
   }
  ],
  "late_trips": [
@@ -251,6 +251,11 @@
    "headsign": "City Wynyard"
   },
   {
+   "start_time": "06:50",
+   "route": "280",
+   "headsign": "Chatswood"
+  },
+  {
    "start_time": "07:00",
    "route": "160X",
    "headsign": "Dee Why"
@@ -284,6 +289,11 @@
    "start_time": "07:16",
    "route": "171X",
    "headsign": "City Wynyard"
+  },
+  {
+   "start_time": "07:16",
+   "route": "280",
+   "headsign": "Chatswood"
   },
   {
    "start_time": "07:18",
@@ -326,6 +336,11 @@
    "headsign": "City Wynyard"
   },
   {
+   "start_time": "07:34",
+   "route": "168X",
+   "headsign": "City Wynyard"
+  },
+  {
    "start_time": "07:35",
    "route": "165X",
    "headsign": "City Wynyard"
@@ -351,6 +366,11 @@
    "headsign": "City Wynyard"
   },
   {
+   "start_time": "07:45",
+   "route": "280",
+   "headsign": "Warringah Mall"
+  },
+  {
    "start_time": "07:51",
    "route": "172X",
    "headsign": "City Wynyard"
@@ -359,6 +379,16 @@
    "start_time": "07:55",
    "route": "100",
    "headsign": "Taronga Zoo via City QVB"
+  },
+  {
+   "start_time": "07:55",
+   "route": "150X",
+   "headsign": "Milsons Point"
+  },
+  {
+   "start_time": "07:59",
+   "route": "167",
+   "headsign": "Manly"
   },
   {
    "start_time": "08:00",
@@ -374,6 +404,11 @@
    "start_time": "08:03",
    "route": "114",
    "headsign": "Balmoral Beach"
+  },
+  {
+   "start_time": "08:07",
+   "route": "170X",
+   "headsign": "City Wynyard"
   },
   {
    "start_time": "08:09",
@@ -416,6 +451,11 @@
    "headsign": "Balmoral Beach"
   },
   {
+   "start_time": "08:25",
+   "route": "280",
+   "headsign": "Warringah Mall"
+  },
+  {
    "start_time": "08:29",
    "route": "230",
    "headsign": "North Sydney"
@@ -436,6 +476,11 @@
    "headsign": "City Wynyard"
   },
   {
+   "start_time": "08:38",
+   "route": "167",
+   "headsign": "Warringah Mall"
+  },
+  {
    "start_time": "08:39",
    "route": "100",
    "headsign": "Taronga Zoo via City QVB"
@@ -449,6 +494,11 @@
    "start_time": "08:47",
    "route": "172X",
    "headsign": "City Wynyard"
+  },
+  {
+   "start_time": "08:48",
+   "route": "280",
+   "headsign": "Chatswood"
   },
   {
    "start_time": "08:50",
@@ -484,6 +534,11 @@
    "start_time": "09:10",
    "route": "243",
    "headsign": "City Wynyard"
+  },
+  {
+   "start_time": "09:16",
+   "route": "167",
+   "headsign": "Manly"
   },
   {
    "start_time": "09:20",
@@ -579,6 +634,16 @@
    "start_time": "15:30",
    "route": "144",
    "headsign": "Chatswood"
+  },
+  {
+   "start_time": "15:36",
+   "route": "100",
+   "headsign": "Taronga Zoo via City QVB"
+  },
+  {
+   "start_time": "15:46",
+   "route": "100",
+   "headsign": "Taronga Zoo via City QVB"
   },
   {
    "start_time": "16:01",
