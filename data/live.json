@@ -1,21 +1,21 @@
 {
- "updated": "2026-11-26T17:17:57+11:00",
+ "updated": "2026-11-26T17:23:02+11:00",
  "status": "ok",
  "date": "2026-11-26",
  "scheduled": 3456,
- "count": 104,
+ "count": 105,
  "cancel_pct": 3.0,
- "observed": 1011,
- "late": 410,
- "late_pct": 40.6,
- "avg_late_min": 11.0,
+ "observed": 1030,
+ "late": 427,
+ "late_pct": 41.5,
+ "avg_late_min": 10.9,
  "am": {
   "scheduled": 800,
   "cancelled": 0
  },
  "pm": {
   "scheduled": 765,
-  "cancelled": 43
+  "cancelled": 44
  },
  "gaps": [
   {
@@ -147,16 +147,16 @@
    "late_min": 58
   },
   {
+   "route": "B1",
+   "headsign": "City Wynyard",
+   "start_time": "16:26",
+   "late_min": 58
+  },
+  {
    "route": "230",
    "headsign": "Milsons Point",
    "start_time": "14:25",
    "late_min": 56
-  },
-  {
-   "route": "B1",
-   "headsign": "City Wynyard",
-   "start_time": "16:26",
-   "late_min": 53
   },
   {
    "route": "B1",
@@ -207,15 +207,15 @@
    "late_min": 38
   },
   {
-   "route": "114",
-   "headsign": "Balmoral Beach",
-   "start_time": "15:18",
-   "late_min": 33
+   "route": "180X",
+   "headsign": "Collaroy Plateau",
+   "start_time": "16:46",
+   "late_min": 37
   },
   {
    "route": "114",
-   "headsign": "RNS Hospital",
-   "start_time": "16:07",
+   "headsign": "Balmoral Beach",
+   "start_time": "15:18",
    "late_min": 33
   }
  ],
@@ -534,6 +534,11 @@
    "start_time": "17:00",
    "route": "162",
    "headsign": "Seaforth"
+  },
+  {
+   "start_time": "17:01",
+   "route": "160X",
+   "headsign": "Chatswood"
   },
   {
    "start_time": "17:04",
