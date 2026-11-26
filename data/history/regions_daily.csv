@@ -1,24 +1,25 @@
 date,code,name,scheduled,cancelled,observed,late
-2026-11-26,GSBC001,Busways R1,3724,0,341,42
-2026-11-26,GSBC002,Transit Systems NSW SW,2356,0,218,24
-2026-11-26,GSBC003,Transit Systems NSW,2811,0,291,29
-2026-11-26,GSBC008,Keolis Downer Northern Beaches,3456,97,268,17
-2026-11-26,agency:2447,Operator 2447,0,0,48,1
-2026-11-26,agency:2448,Operator 2448,0,29,132,5
-2026-11-26,agency:2449,Operator 2449,0,0,34,1
-2026-11-26,agency:2450,Operator 2450,0,0,104,4
-2026-11-26,agency:2454,Operator 2454,0,0,84,3
-2026-11-26,agency:2455,Operator 2455,0,0,15,0
-2026-11-26,agency:2456,Operator 2456,0,0,187,8
-2026-11-26,agency:2457,Operator 2457,0,0,6,0
-2026-11-26,agency:2458,Operator 2458,0,0,27,0
-2026-11-26,agency:2459,Operator 2459,0,2,587,66
+2026-11-26,GSBC001,Busways R1,3724,0,356,55
+2026-11-26,GSBC002,Transit Systems NSW SW,2356,0,231,32
+2026-11-26,GSBC003,Transit Systems NSW,2811,0,304,37
+2026-11-26,GSBC004,CDC NSW R4,3622,0,312,18
+2026-11-26,GSBC008,Keolis Downer Northern Beaches,3456,97,284,23
+2026-11-26,agency:2447,Operator 2447,0,0,52,1
+2026-11-26,agency:2448,Operator 2448,0,29,153,5
+2026-11-26,agency:2449,Operator 2449,0,0,36,1
+2026-11-26,agency:2450,Operator 2450,0,0,121,4
+2026-11-26,agency:2454,Operator 2454,0,0,88,3
+2026-11-26,agency:2455,Operator 2455,0,0,16,0
+2026-11-26,agency:2456,Operator 2456,0,0,208,8
+2026-11-26,agency:2457,Operator 2457,0,0,9,0
+2026-11-26,agency:2458,Operator 2458,0,0,28,0
+2026-11-26,agency:2459,Operator 2459,0,2,633,77
 2026-11-26,agency:2504,Operator 2504,0,0,421,14
-2026-11-26,agency:2507,Operator 2507,0,0,299,25
-2026-11-26,agency:2509,Operator 2509,0,2,419,35
-2026-11-26,agency:2510,Operator 2510,0,0,343,20
-2026-11-26,agency:2514,Operator 2514,0,0,169,10
-2026-11-26,agency:2606,Operator 2606,0,0,217,8
-2026-11-26,agency:2607,Operator 2607,0,0,112,8
-2026-11-26,agency:3000,Operator 3000,0,0,177,12
+2026-11-26,agency:2507,Operator 2507,0,0,340,28
+2026-11-26,agency:2509,Operator 2509,0,2,459,45
+2026-11-26,agency:2510,Operator 2510,0,0,367,25
+2026-11-26,agency:2514,Operator 2514,0,0,196,11
+2026-11-26,agency:2606,Operator 2606,0,0,239,12
+2026-11-26,agency:2607,Operator 2607,0,0,119,10
+2026-11-26,agency:3000,Operator 3000,0,0,195,13
 2026-11-26,agency:700003,Operator 700003,0,0,4,2
