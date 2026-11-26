@@ -62,6 +62,7 @@ a{color:var(--series-1)}
   <div id="history-note" class="note" hidden></div>
 
   <div class="tiles" id="tiles"></div>
+  <p class="sub" style="margin:8px 2px 0">All figures exclude school services. Charter work isn't in the public timetable, so it's never counted. <span id="schoolNote"></span></p>
 
   <!-- Share -->
   <div class="card">
@@ -164,9 +165,10 @@ a{color:var(--series-1)}
         <li><b>Source.</b> Transport for NSW open data: the live bus trip-updates feed (GTFS-realtime) and the published timetables. The data is checked about every 10 minutes.</li>
         <li><b>Cancelled.</b> A trip the live feed marks as cancelled. Each trip is counted once per day.</li>
         <li><b>Cancellation rate.</b> Cancelled trips divided by trips scheduled that day in the published timetable.</li>
+        <li><b>School services excluded.</b> School routes (numbered like 560n, or marked as school buses in the timetable) are left out of every figure, including the comparison with other regions. Any cancelled school service is listed separately under the headline figures. Charter work isn't in the public timetable, so it's never counted.</li>
         <li><b>Late.</b> A trip that was more than 5 minutes behind timetable at any point we checked it. This is not identical to the official Transport for NSW on-time measure, which uses departure from the first stop. Because checks are about 10 minutes apart, some short delays are missed.</li>
         <li><b>Longest waits.</b> The gap between the scheduled start of the bus before and the bus after a cancelled trip on the same route and direction.</li>
-        <li><b>Comparisons.</b> Every Sydney contract region is measured with exactly the same method.</li>
+        <li><b>Comparisons.</b> Every Sydney contract region is measured with exactly the same method. Operators may differ in how promptly they mark trips as cancelled in the live feed, so treat region comparisons alongside the official Transport for NSW figures.</li>
         <li><b>Limits.</b> If the live feed is down, nothing is recorded for that time. Tracking began on <span id="mStart"></span>. Marked days (strikes, storms) are shown on the charts so they can be read in context.</li>
       </ul>
       <p class="sub">This site is independent and not affiliated with Keolis or Transport for NSW. For official figures see <a href="https://www.transport.nsw.gov.au/data-and-research/data-and-insights/bus-performance-reports" target="_blank" rel="noopener">Transport for NSW bus performance reports</a>.</p>
@@ -234,6 +236,8 @@ function render() {
   $("gaps").innerHTML = gaps.map(g => `<tr><td><b>${esc(g.route)}</b></td><td>${esc(g.headsign)}</td><td>${g.from}–${esc(g.to)}${g.cancelled_in_row > 1 ? ` <span class="sub">(${g.cancelled_in_row} in a row)</span>` : ""}</td><td class="r ${g.gap_min && g.normal_min && g.gap_min >= 2 * g.normal_min ? "warn" : ""}">${g.gap_min ? g.gap_min + " min" : "last bus"}</td><td class="r">${g.normal_min ? Math.round(g.normal_min) + " min" : "–"}</td></tr>`).join("");
   $("gapsEmpty").hidden = gaps.length > 0;
 
+  const sc = L.school_cancelled || [];
+  $("schoolNote").innerHTML = sc.length ? `<span class="warn">${sc.length} school service${sc.length === 1 ? " was" : "s were"} also cancelled today</span> (${sc.slice(0, 6).map(t => esc(t.route) + " " + esc(t.start_time)).join(", ")}${sc.length > 6 ? "…" : ""}).` : "";
   $("today").innerHTML = (L.trips || []).map(t => `<tr><td>${esc(t.start_time)}</td><td><b>${esc(t.route)}</b></td><td>${esc(t.headsign)}</td></tr>`).join("");
   $("todayEmpty").hidden = (L.trips || []).length > 0;
   $("lateTrips").innerHTML = (L.late_trips || []).map(t => `<tr><td>${esc(t.start_time)}</td><td><b>${esc(t.route)}</b></td><td>${esc(t.headsign)}</td><td class="r">${t.late_min} min</td></tr>`).join("");

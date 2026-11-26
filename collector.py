@@ -15,6 +15,7 @@ import datetime as dt
 import io
 import json
 import os
+import re
 import statistics
 import sys
 import zipfile
@@ -42,9 +43,17 @@ LATE_SECONDS = 300                        # "late" = more than 5 minutes behind
 AM_PEAK = range(6, 9)                     # trips starting 06:00-08:59
 PM_PEAK = range(16, 19)                   # trips starting 16:00-18:59
 SCHEDULE_DAYS_BACK, SCHEDULE_DAYS_AHEAD = 2, 14
+STATIC_VERSION = 2                        # bump to force timetables to reload
+SCHOOL_ROUTE_TYPES = {"712"}              # GTFS extended type: school bus
+SCHOOL_NAME = re.compile(r"^\d+n$")        # TfNSW school services are numbered like 560n
+
+
+def is_school_route(route):
+    """School services are excluded from all statistics."""
+    return route.get("route_type", "") in SCHOOL_ROUTE_TYPES or bool(SCHOOL_NAME.match(route.get("route_short_name", "").strip()))
 
 CXL_LOG = os.path.join(DATA, "cancellations.csv")
-CXL_FIELDS = ["service_date", "trip_id", "route", "start_time", "headsign", "first_seen"]
+CXL_FIELDS = ["service_date", "trip_id", "route", "start_time", "headsign", "first_seen", "school"]
 R8_DAILY = os.path.join(HIST, "r8_daily.csv")
 R8_DAILY_FIELDS = ["date", "scheduled", "cancelled", "observed", "late",
                    "am_scheduled", "am_cancelled", "pm_scheduled", "pm_cancelled",
@@ -186,21 +195,29 @@ def build_region(hdr, code, detailed):
     if z is None:
         return {"code": code, "missing": True, "built": now_syd().isoformat(timespec="seconds")}
     agencies = {a["agency_id"]: a.get("agency_name", "") for a in zrows(z, "agency.txt")}
-    routes = {r["route_id"]: (r.get("route_short_name") or r["route_id"]).strip() for r in zrows(z, "routes.txt")}
+    routes, school = {}, []
+    for r in zrows(z, "routes.txt"):
+        routes[r["route_id"]] = (r.get("route_short_name") or r["route_id"]).strip()
+        if is_school_route(r):
+            school.append(r["route_id"])
+    school_set = set(school)
     active = service_dates(z, schedule_window())
     per_date = Counter()
     trips = {}
     for t in zrows(z, "trips.txt"):
         if t["route_id"] not in routes:
             continue
-        for d in active.get(t["service_id"], ()):
-            per_date[d] += 1
+        if t["route_id"] not in school_set:
+            for d in active.get(t["service_id"], ()):
+                per_date[d] += 1
         if detailed:
             trips[t["trip_id"]] = [t["route_id"], t.get("trip_headsign", "").strip(), "", t["service_id"]]
     out = {
         "code": code,
+        "v": STATIC_VERSION,
         "built": now_syd().isoformat(timespec="seconds"),
         "agencies": agencies,
+        "school_routes": school,
         "name": " / ".join(sorted(set(agencies.values()))) or code,
         "scheduled_by_date": dict(per_date),
     }
@@ -236,7 +253,8 @@ def load_regions(hdr):
         stale = True
         if cached:
             try:
-                stale = (now_syd() - dt.datetime.fromisoformat(cached["built"])).days >= max_age
+                stale = (cached.get("v") != STATIC_VERSION or
+                         (now_syd() - dt.datetime.fromisoformat(cached["built"])).days >= max_age)
             except (KeyError, ValueError):
                 pass
         if stale and (home or downloads < MAX_REGION_DOWNLOADS_PER_RUN):
@@ -267,7 +285,7 @@ def trip_delay(tu):
     return None
 
 
-def read_feed(hdr, prefix_to_code, home):
+def read_feed(hdr, prefix_to_code, home, school_routes):
     r = requests.get(f"{API}/realtime/buses", headers=hdr, timeout=120)
     r.raise_for_status()
     feed = gtfs_realtime_pb2.FeedMessage()
@@ -294,6 +312,7 @@ def read_feed(hdr, prefix_to_code, home):
             "trip_id": td.trip_id,
             "route_id": rid,
             "cancelled": td.schedule_relationship == CANCELED,
+            "school": rid in school_routes,
             "delay": trip_delay(tu),
             "start_time": (td.start_time or (info[2] if info else ""))[:5],
         })
@@ -326,6 +345,8 @@ def apply_observations(seen):
     for date, items in by_date.items():
         st = load_state(date)
         for s in items:
+            if s["school"]:
+                continue
             reg = st["regions"].setdefault(s["code"], {"cxl": [], "delay": {}})
             if s["cancelled"]:
                 if s["trip_id"] not in reg["cxl"]:
@@ -344,8 +365,9 @@ def home_scheduled(home, date):
     """List of (trip_id, route_id, headsign, start_min) scheduled on date."""
     out = []
     services = home.get("services", {})
+    school = set(home.get("school_routes", []))
     for tid, (rid, hs, start, sid) in home["trips"].items():
-        if date in services.get(sid, ()):
+        if rid not in school and date in services.get(sid, ()):
             out.append((tid, rid, hs, hhmm_to_min(start)))
     return out
 
@@ -394,7 +416,10 @@ def home_day(home, date, cxl_rows, state):
     for rid, nm in routes.items():
         name_to_rid.setdefault(nm, rid)
     sched = home_scheduled(home, date)
-    cxl_today = [r for r in cxl_rows if r["service_date"] == date]
+    cxl_all = [r for r in cxl_rows if r["service_date"] == date]
+    school_names = {routes.get(rid, rid) for rid in home.get("school_routes", [])}
+    cxl_today = [r for r in cxl_all if r["route"] not in school_names]
+    school_cxl = [r for r in cxl_all if r["route"] in school_names]
     cancelled = {r["trip_id"] for r in cxl_today}
     delays = state["regions"].get(HOME_CODE, {}).get("delay", {})
     delays = {t: d for t, d in delays.items() if t not in cancelled}
@@ -440,7 +465,7 @@ def home_day(home, date, cxl_rows, state):
              "am_scheduled": len(am_s), "am_cancelled": am_c, "pm_scheduled": len(pm_s), "pm_cancelled": pm_c,
              "longest_gap_min": longest["gap_min"] if longest else "",
              "longest_gap_route": f'{longest["route"]} to {longest["headsign"]}' if longest else ""}
-    return daily, route_rows, gaps[:12], late_trips, cxl_today
+    return daily, route_rows, gaps[:12], late_trips, cxl_today, school_cxl
 
 
 def region_rows(regions, date, state):
@@ -469,11 +494,15 @@ def sum_rows(rows, fields):
     return {f: sum(int(r.get(f) or 0) for r in rows) for f in fields}
 
 
+SCHOOL_ROUTE_NAMES_CACHE = set()
+
+
 def build_outputs(today, live_extra, status):
+    school_names = set(SCHOOL_ROUTE_NAMES_CACHE)
     r8 = read_csv(R8_DAILY)
-    routes_hist = read_csv(R8_ROUTES)
+    routes_hist = [r for r in read_csv(R8_ROUTES) if r["route"] not in school_names and not SCHOOL_NAME.match(r["route"])]
     regions_hist = read_csv(REGIONS_DAILY)
-    cxl = read_csv(CXL_LOG)
+    cxl = [r for r in read_csv(CXL_LOG) if r["route"] not in school_names and not SCHOOL_NAME.match(r["route"])]
     tstr = iso(today)
 
     def window(rows, days):
@@ -579,6 +608,29 @@ def build_outputs(today, live_extra, status):
 
 
 # ---------------------------------------------------------------- main
+def migrate_school_exclusion(home):
+    """One-off: earlier versions counted school services. Rebuild today's figures without them."""
+    if not os.path.exists(CXL_LOG):
+        return
+    with open(CXL_LOG) as f:
+        header = f.readline()
+    if "school" in header:
+        return
+    print("Upgrading data: excluding school services")
+    school_names = {home["routes"].get(r, r) for r in home.get("school_routes", [])}
+    rows = read_csv(CXL_LOG)
+    for r in rows:
+        r["school"] = "yes" if (r["route"] in school_names or SCHOOL_NAME.match(r["route"])) else ""
+    write_csv(CXL_LOG, CXL_FIELDS, rows)
+    for path, fields in ((R8_DAILY, R8_DAILY_FIELDS), (R8_ROUTES, R8_ROUTES_FIELDS), (REGIONS_DAILY, REGIONS_FIELDS)):
+        kept = [r for r in read_csv(path) if r["route"] not in school_names] if path == R8_ROUTES else read_csv(path)
+        today = iso(now_syd().date())
+        write_csv(path, fields, [r for r in kept if r["date"] != today])
+    if os.path.isdir(STATE_DIR):
+        for f in os.listdir(STATE_DIR):
+            os.remove(os.path.join(STATE_DIR, f))
+
+
 def main():
     os.makedirs(DATA, exist_ok=True)
     old = os.path.join(DATA, "static_r8.json")  # replaced by cache/
@@ -587,14 +639,17 @@ def main():
     hdr = headers()
     regions = load_regions(hdr)
     home = regions[HOME_CODE]
-    prefix_to_code = {}
+    prefix_to_code, school_routes = {}, set()
     for code, reg in regions.items():
         for aid in reg.get("agencies", {}):
             prefix_to_code[aid] = code
+        school_routes.update(reg.get("school_routes", []))
 
+    migrate_school_exclusion(home)
+    SCHOOL_ROUTE_NAMES_CACHE.update(home["routes"].get(r, r) for r in home.get("school_routes", []))
     status = "ok"
     try:
-        seen = read_feed(hdr, prefix_to_code, home)
+        seen = read_feed(hdr, prefix_to_code, home, school_routes)
     except Exception as exc:
         seen = []
         status = f"feed error: {exc}"
@@ -612,7 +667,8 @@ def main():
             new.append({"service_date": s["date"], "trip_id": s["trip_id"],
                         "route": home["routes"].get(s["route_id"], s["route_id"]),
                         "start_time": s["start_time"] or (info[2] if info else ""),
-                        "headsign": info[1] if info else "", "first_seen": stamp})
+                        "headsign": info[1] if info else "", "first_seen": stamp,
+                        "school": "yes" if s["school"] else ""})
     if new:
         cxl_rows.extend(new)
         write_csv(CXL_LOG, CXL_FIELDS, cxl_rows)
@@ -625,7 +681,7 @@ def main():
     live_extra = {}
     for date in dates:
         state = touched.get(date) or load_state(date)
-        daily, route_rows, gaps, late_trips, cxl_today = home_day(home, date, cxl_rows, state)
+        daily, route_rows, gaps, late_trips, cxl_today, school_cxl = home_day(home, date, cxl_rows, state)
         upsert_csv(R8_DAILY, R8_DAILY_FIELDS, [daily], ["date"], keep_max=("observed", "late"))
         upsert_csv(R8_ROUTES, R8_ROUTES_FIELDS, route_rows, ["date", "route"], keep_max=("observed", "late"))
         upsert_csv(REGIONS_DAILY, REGIONS_FIELDS, region_rows(regions, date, state), ["date", "code"],
@@ -640,6 +696,8 @@ def main():
                 "gaps": gaps, "late_trips": late_trips,
                 "trips": [{k: r[k] for k in ("start_time", "route", "headsign")}
                           for r in sorted(cxl_today, key=lambda r: r["start_time"] or "99")],
+                "school_cancelled": [{k: r[k] for k in ("start_time", "route", "headsign")}
+                                     for r in sorted(school_cxl, key=lambda r: r["start_time"] or "99")],
             }
     prune_state({iso(today - dt.timedelta(days=i)) for i in range(0, 3)} | set(touched))
     build_outputs(today, live_extra, status)
