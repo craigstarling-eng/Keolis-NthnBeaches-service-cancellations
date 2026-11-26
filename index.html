@@ -109,9 +109,10 @@ a{color:var(--series-1)}
 
   <div class="card">
     <h2>Peak hour vs off peak</h2>
-    <p class="lede">Share of scheduled trips cancelled. Peaks are trips starting 6–9am and 4–7pm.</p>
+    <p class="lede">Peaks are trips starting 6–9am and 4–7pm.</p>
     <div class="seg" id="peakSeg"></div>
-    <table><tbody id="peak"></tbody></table>
+    <table><thead><tr><th></th><th class="r">Cancelled</th><th class="r">Late 5+ min</th></tr></thead><tbody id="peak"></tbody></table>
+    <div class="sub" id="avgLate" style="margin-top:6px"></div>
   </div>
 
   <!-- Routes -->
@@ -123,8 +124,9 @@ a{color:var(--series-1)}
 
   <div class="card">
     <h2>Worst routes (last 30 days)</h2>
-    <p class="lede">Routes with at least 50 scheduled trips, ranked by share of trips cancelled.</p>
-    <table><thead><tr><th>Route</th><th>Cancelled</th><th class="r">Rate</th><th class="r">Late</th></tr></thead><tbody id="league"></tbody></table>
+    <div class="seg" id="leagueSeg"></div>
+    <p class="lede" id="leagueLede"></p>
+    <table><thead><tr><th>Route</th><th></th><th class="r">Cancelled</th><th class="r">Late</th></tr></thead><tbody id="league"></tbody></table>
   </div>
 
   <!-- Compare -->
@@ -190,7 +192,7 @@ a{color:var(--series-1)}
 
 <script>
 let S, L, R, G, E = [];
-let state = {metric: "rate", range: 30, peak: "30", reg: "d30", share: "today", route: null};
+let state = {metric: "rate", range: 30, peak: "30", reg: "d30", share: "today", route: null, league: "cxl"};
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const pc = v => v == null ? "–" : v.toFixed(1) + "%";
@@ -226,7 +228,7 @@ function render() {
   const peakS = (L.am?.scheduled || 0) + (L.pm?.scheduled || 0), peakC = (L.am?.cancelled || 0) + (L.pm?.cancelled || 0);
   $("tiles").innerHTML = [
     ["Cancelled today", nf(L.count), L.scheduled ? `${pc(L.cancel_pct)} of ${nf(L.scheduled)} scheduled trips` : ""],
-    ["Late today (5+ min)", pc(L.late_pct), L.observed ? `${nf(L.late)} of ${nf(L.observed)} trips tracked` : "No running trips tracked yet"],
+    ["Late today (5+ min)", pc(L.late_pct), L.observed ? `${nf(L.late)} of ${nf(L.observed)} trips${L.avg_late_min ? ` · avg ${L.avg_late_min} min late` : ""}` : "No running trips tracked yet"],
     ["Peak-hour cancellations", nf(peakC), peakS ? `${pc(pct(peakC, peakS))} of peak trips` : ""],
     ["Longest wait caused", g0 ? g0.gap_min + " min" : "–", g0 ? `Route ${esc(g0.route)}, ${g0.from}–${g0.to}` : "No gaps yet today"],
   ].map(([l, n, s]) => `<div class="tile"><div class="l">${l}</div><div class="n">${n}</div><div class="s">${s}</div></div>`).join("");
@@ -249,9 +251,10 @@ function render() {
   dailyChart();
 
   seg($("peakSeg"), [["7", "7 days"], ["30", "30 days"], ["all", "All time"]], state.peak, v => { state.peak = v; render(); });
-  const T = S.totals[state.peak], pmx = Math.max(1, T.am_pct || 0, T.pm_pct || 0, T.off_pct || 0);
-  $("peak").innerHTML = [["Morning peak (6–9am)", T.am_pct, T.am_cancelled], ["Evening peak (4–7pm)", T.pm_pct, T.pm_cancelled], ["Off peak", T.off_pct, T.cancelled - T.am_cancelled - T.pm_cancelled]]
-    .map(([l, v, n]) => `<tr><td style="width:42%">${l}</td><td><span class="bar" style="width:${Math.max(2, (v || 0) / pmx * 100)}%"></span></td><td class="r" style="width:70px"><b>${pc(v)}</b></td><td class="r sub" style="width:60px">${nf(n)}</td></tr>`).join("");
+  const T = S.totals[state.peak];
+  $("peak").innerHTML = [["Morning peak", T.am_pct, T.am_cancelled, T.am_late_pct], ["Evening peak", T.pm_pct, T.pm_cancelled, T.pm_late_pct], ["Off peak", T.off_pct, T.cancelled - T.am_cancelled - T.pm_cancelled, T.off_late_pct]]
+    .map(([l, v, n, lt]) => `<tr><td>${l}</td><td class="r"><b>${pc(v)}</b> <span class="sub">(${nf(n)})</span></td><td class="r"><b>${pc(lt)}</b></td></tr>`).join("");
+  $("avgLate").textContent = T.avg_late_min ? `When buses were late, they were on average ${T.avg_late_min} minutes behind.` : "";
 
   // route lookup
   const names = Object.keys(R).sort((a, b) => a.localeCompare(b, "en", {numeric: true}));
@@ -260,7 +263,10 @@ function render() {
   $("routeSel").onchange = e => { state.route = e.target.value; render(); };
   routeDetail();
 
-  $("league").innerHTML = S.league.length ? S.league.slice(0, 10).map(r => `<tr><td><b>${esc(r.route)}</b></td><td>${nf(r.cancelled)} <span class="sub">of ${nf(r.scheduled)}</span></td><td class="r"><b>${pc(r.cancel_pct)}</b></td><td class="r">${pc(r.late_pct)}</td></tr>`).join("") : `<tr><td class="empty">Not enough data yet</td></tr>`;
+  seg($("leagueSeg"), [["cxl", "By cancellations"], ["late", "By lateness"]], state.league, v => { state.league = v; render(); });
+  const byLate = state.league === "late", LG = (byLate ? S.league_late : S.league) || [];
+  $("leagueLede").textContent = byLate ? "Routes with at least 30 tracked trips, ranked by share running 5+ minutes late." : "Routes with at least 50 scheduled trips, ranked by share of trips cancelled.";
+  $("league").innerHTML = LG.length ? LG.slice(0, 10).map(r => `<tr><td><b>${esc(r.route)}</b></td><td class="sub">${byLate ? `${nf(r.late)} of ${nf(r.observed)} late` : `${nf(r.cancelled)} of ${nf(r.scheduled)} cancelled`}</td><td class="r">${byLate ? pc(r.cancel_pct) : `<b>${pc(r.cancel_pct)}</b>`}</td><td class="r">${byLate ? `<b>${pc(r.late_pct)}</b>` : pc(r.late_pct)}</td></tr>`).join("") : `<tr><td class="empty">Not enough data yet</td></tr>`;
 
   seg($("regSeg"), [["today", "Today"], ["d7", "7 days"], ["d30", "30 days"]], state.reg, v => { state.reg = v; render(); });
   const regs = (G[state.reg] || []), rmx = Math.max(1, ...regs.map(r => r.cancel_pct || 0));

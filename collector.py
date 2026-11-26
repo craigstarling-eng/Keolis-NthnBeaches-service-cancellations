@@ -57,7 +57,8 @@ CXL_FIELDS = ["service_date", "trip_id", "route", "start_time", "headsign", "fir
 R8_DAILY = os.path.join(HIST, "r8_daily.csv")
 R8_DAILY_FIELDS = ["date", "scheduled", "cancelled", "observed", "late",
                    "am_scheduled", "am_cancelled", "pm_scheduled", "pm_cancelled",
-                   "longest_gap_min", "longest_gap_route"]
+                   "longest_gap_min", "longest_gap_route",
+                   "am_observed", "am_late", "pm_observed", "pm_late", "late_minutes"]
 R8_ROUTES = os.path.join(HIST, "r8_routes_daily.csv")
 R8_ROUTES_FIELDS = ["date", "route", "scheduled", "cancelled", "observed", "late"]
 REGIONS_DAILY = os.path.join(HIST, "regions_daily.csv")
@@ -460,11 +461,20 @@ def home_day(home, date, cxl_rows, state):
         late_trips.append({"route": trip_route.get(tid, "?"), "headsign": info[1] if info else "",
                            "start_time": info[2] if info else "", "late_min": round(d / 60)})
 
+    def peak_late(rng):
+        obs = [d for t, d in delays.items() if is_peak(hhmm_to_min((home["trips"].get(t) or ["", "", ""])[2]), rng)]
+        return len(obs), sum(1 for d in obs if d > LATE_SECONDS)
+
+    am_o, am_l = peak_late(AM_PEAK)
+    pm_o, pm_l = peak_late(PM_PEAK)
+    late_minutes = round(sum(d for d in delays.values() if d > LATE_SECONDS) / 60)
+
     daily = {"date": date, "scheduled": len(sched), "cancelled": len(cancelled),
              "observed": len(delays), "late": sum(1 for d in delays.values() if d > LATE_SECONDS),
              "am_scheduled": len(am_s), "am_cancelled": am_c, "pm_scheduled": len(pm_s), "pm_cancelled": pm_c,
              "longest_gap_min": longest["gap_min"] if longest else "",
-             "longest_gap_route": f'{longest["route"]} to {longest["headsign"]}' if longest else ""}
+             "longest_gap_route": f'{longest["route"]} to {longest["headsign"]}' if longest else "",
+             "am_observed": am_o, "am_late": am_l, "pm_observed": pm_o, "pm_late": pm_l, "late_minutes": late_minutes}
     return daily, route_rows, gaps[:12], late_trips, cxl_today, school_cxl
 
 
@@ -509,7 +519,8 @@ def build_outputs(today, live_extra, status):
         start = iso(today - dt.timedelta(days=days - 1))
         return [r for r in rows if start <= r["date"] <= tstr]
 
-    F = ["scheduled", "cancelled", "observed", "late", "am_scheduled", "am_cancelled", "pm_scheduled", "pm_cancelled"]
+    F = ["scheduled", "cancelled", "observed", "late", "am_scheduled", "am_cancelled", "pm_scheduled", "pm_cancelled",
+         "am_observed", "am_late", "pm_observed", "pm_late", "late_minutes"]
     totals = {k: sum_rows(window(r8, n) if n else r8, F) for k, n in (("7", 7), ("30", 30), ("all", 0))}
     for t in totals.values():
         t["cancel_pct"] = pct(t["cancelled"], t["scheduled"])
@@ -519,6 +530,10 @@ def build_outputs(today, live_extra, status):
         off_s = t["scheduled"] - t["am_scheduled"] - t["pm_scheduled"]
         off_c = t["cancelled"] - t["am_cancelled"] - t["pm_cancelled"]
         t["off_pct"] = pct(off_c, off_s)
+        t["am_late_pct"] = pct(t["am_late"], t["am_observed"])
+        t["pm_late_pct"] = pct(t["pm_late"], t["pm_observed"])
+        t["off_late_pct"] = pct(t["late"] - t["am_late"] - t["pm_late"], t["observed"] - t["am_observed"] - t["pm_observed"])
+        t["avg_late_min"] = round(t["late_minutes"] / t["late"], 1) if t["late"] else None
 
     # league table (30 days)
     agg = defaultdict(lambda: Counter())
@@ -530,6 +545,9 @@ def build_outputs(today, live_extra, status):
         if c["scheduled"] >= 50:
             league.append({"route": rn, **c, "cancel_pct": pct(c["cancelled"], c["scheduled"]),
                            "late_pct": pct(c["late"], c["observed"])})
+    league_late = sorted([dict(route=rn, **c, late_pct=pct(c["late"], c["observed"]), cancel_pct=pct(c["cancelled"], c["scheduled"]))
+                          for rn, c in agg.items() if c["observed"] >= 30],
+                         key=lambda x: (-(x["late_pct"] or 0), -x["late"]))
     league.sort(key=lambda x: (-(x["cancel_pct"] or 0), -x["cancelled"]))
 
     # by hour / weekday (cancellations)
@@ -551,6 +569,7 @@ def build_outputs(today, live_extra, status):
         "daily": [{"date": r["date"], **{k: int(r[k] or 0) for k in ("scheduled", "cancelled", "observed", "late", "longest_gap_min")}} for r in r8],
         "totals": totals,
         "league": league[:15],
+        "league_late": league_late[:15],
         "by_hour": hours,
         "by_weekday_avg": [round(s / d, 1) if d else None for s, d in zip(wd_sum, wd_days)],
     }
@@ -682,7 +701,8 @@ def main():
     for date in dates:
         state = touched.get(date) or load_state(date)
         daily, route_rows, gaps, late_trips, cxl_today, school_cxl = home_day(home, date, cxl_rows, state)
-        upsert_csv(R8_DAILY, R8_DAILY_FIELDS, [daily], ["date"], keep_max=("observed", "late"))
+        upsert_csv(R8_DAILY, R8_DAILY_FIELDS, [daily], ["date"],
+                   keep_max=("observed", "late", "am_observed", "am_late", "pm_observed", "pm_late", "late_minutes"))
         upsert_csv(R8_ROUTES, R8_ROUTES_FIELDS, route_rows, ["date", "route"], keep_max=("observed", "late"))
         upsert_csv(REGIONS_DAILY, REGIONS_FIELDS, region_rows(regions, date, state), ["date", "code"],
                    keep_max=("cancelled", "observed", "late"))
@@ -691,6 +711,7 @@ def main():
                 "scheduled": daily["scheduled"], "count": daily["cancelled"],
                 "cancel_pct": pct(daily["cancelled"], daily["scheduled"]),
                 "observed": daily["observed"], "late": daily["late"], "late_pct": pct(daily["late"], daily["observed"]),
+                "avg_late_min": round(daily["late_minutes"] / daily["late"], 1) if daily["late"] else None,
                 "am": {"scheduled": daily["am_scheduled"], "cancelled": daily["am_cancelled"]},
                 "pm": {"scheduled": daily["pm_scheduled"], "cancelled": daily["pm_cancelled"]},
                 "gaps": gaps, "late_trips": late_trips,
