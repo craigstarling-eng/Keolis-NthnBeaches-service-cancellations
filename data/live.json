@@ -1,24 +1,24 @@
 {
- "updated": "2026-11-27T04:06:53+11:00",
+ "updated": "2026-11-27T04:11:58+11:00",
  "status": "ok",
  "date": "2026-11-27",
  "scheduled": 3416,
- "count": 99,
+ "count": 100,
  "cancel_pct": 2.9,
- "observed": 79,
+ "observed": 84,
  "late": 0,
  "late_pct": 0.0,
  "avg_late_min": null,
- "ontime": 79,
+ "ontime": 84,
  "ontime_pct": 100.0,
- "anywhere_late_pct": 8.9,
+ "anywhere_late_pct": 8.3,
  "am": {
   "scheduled": 760,
   "cancelled": 61
  },
  "pm": {
   "scheduled": 748,
-  "cancelled": 5
+  "cancelled": 6
  },
  "gaps": [
   {
@@ -659,6 +659,11 @@
    "start_time": "16:10",
    "route": "160X",
    "headsign": "Dee Why"
+  },
+  {
+   "start_time": "16:10",
+   "route": "199",
+   "headsign": "Palm Beach"
   },
   {
    "start_time": "16:50",
