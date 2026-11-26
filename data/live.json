@@ -1,13 +1,14 @@
 {
- "updated": "2026-11-26T14:19:35+11:00",
+ "updated": "2026-11-26T14:24:42+11:00",
  "status": "ok",
  "date": "2026-11-26",
  "scheduled": 3456,
- "count": 97,
+ "count": 98,
  "cancel_pct": 2.8,
- "observed": 303,
- "late": 32,
- "late_pct": 10.6,
+ "observed": 322,
+ "late": 46,
+ "late_pct": 14.3,
+ "avg_late_min": 9.4,
  "am": {
   "scheduled": 800,
   "cancelled": 0
@@ -33,6 +34,15 @@
    "to": "19:50",
    "gap_min": 199,
    "normal_min": 42,
+   "cancelled_in_row": 1
+  },
+  {
+   "route": "263",
+   "headsign": "Crows Nest",
+   "from": "13:35",
+   "to": "15:05",
+   "gap_min": 90,
+   "normal_min": 45,
    "cancelled_in_row": 1
   },
   {
@@ -115,15 +125,6 @@
    "gap_min": 46,
    "normal_min": 17,
    "cancelled_in_row": 1
-  },
-  {
-   "route": "162",
-   "headsign": "Manly",
-   "from": "15:03",
-   "to": "15:46",
-   "gap_min": 43,
-   "normal_min": 21.0,
-   "cancelled_in_row": 1
   }
  ],
  "late_trips": [
@@ -131,18 +132,24 @@
    "route": "111",
    "headsign": "South Mosman Wharf",
    "start_time": "13:09",
-   "late_min": 70
+   "late_min": 76
   },
   {
    "route": "B1",
    "headsign": "City Wynyard",
    "start_time": "13:39",
-   "late_min": 41
+   "late_min": 46
   },
   {
    "route": "179",
    "headsign": "War Veterans Hm",
    "start_time": "13:42",
+   "late_min": 13
+  },
+  {
+   "route": "100",
+   "headsign": "Taronga Zoo via City QVB",
+   "start_time": "13:29",
    "late_min": 13
   },
   {
@@ -170,10 +177,28 @@
    "late_min": 10
   },
   {
-   "route": "100",
-   "headsign": "Taronga Zoo via City QVB",
-   "start_time": "13:29",
-   "late_min": 9
+   "route": "144",
+   "headsign": "Manly",
+   "start_time": "13:38",
+   "late_min": 10
+  },
+  {
+   "route": "144",
+   "headsign": "Chatswood",
+   "start_time": "13:40",
+   "late_min": 8
+  },
+  {
+   "route": "173X",
+   "headsign": "City Wynyard",
+   "start_time": "14:12",
+   "late_min": 8
+  },
+  {
+   "route": "162",
+   "headsign": "Manly",
+   "start_time": "14:08",
+   "late_min": 8
   },
   {
    "route": "100",
@@ -182,40 +207,16 @@
    "late_min": 8
   },
   {
+   "route": "100",
+   "headsign": "Taronga Zoo via City QVB",
+   "start_time": "13:39",
+   "late_min": 8
+  },
+  {
    "route": "144",
    "headsign": "Chatswood",
    "start_time": "13:20",
    "late_min": 8
-  },
-  {
-   "route": "178",
-   "headsign": "Cromer Hts",
-   "start_time": "13:57",
-   "late_min": 8
-  },
-  {
-   "route": "144",
-   "headsign": "Chatswood",
-   "start_time": "13:40",
-   "late_min": 7
-  },
-  {
-   "route": "162",
-   "headsign": "Manly",
-   "start_time": "14:08",
-   "late_min": 7
-  },
-  {
-   "route": "230",
-   "headsign": "Mosman Bay Wharf",
-   "start_time": "13:59",
-   "late_min": 7
-  },
-  {
-   "route": "144",
-   "headsign": "Manly",
-   "start_time": "13:38",
-   "late_min": 7
   }
  ],
  "trips": [
@@ -248,6 +249,11 @@
    "start_time": "14:16",
    "route": "167",
    "headsign": "Manly"
+  },
+  {
+   "start_time": "14:20",
+   "route": "263",
+   "headsign": "Crows Nest"
   },
   {
    "start_time": "14:22",
