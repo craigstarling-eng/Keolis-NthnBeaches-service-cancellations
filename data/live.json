@@ -1,17 +1,17 @@
 {
- "updated": "2026-11-27T00:28:15+11:00",
+ "updated": "2026-11-27T00:33:20+11:00",
  "status": "ok",
  "date": "2026-11-27",
  "scheduled": 3416,
  "count": 6,
  "cancel_pct": 0.2,
- "observed": 35,
+ "observed": 36,
  "late": 0,
  "late_pct": 0.0,
  "avg_late_min": null,
- "ontime": 35,
+ "ontime": 36,
  "ontime_pct": 100.0,
- "anywhere_late_pct": 5.7,
+ "anywhere_late_pct": 8.3,
  "am": {
   "scheduled": 760,
   "cancelled": 0
@@ -82,6 +82,12 @@
    "headsign": "Taronga Zoo via City QVB",
    "start_time": "24:09",
    "late_min": 12
+  },
+  {
+   "route": "B1",
+   "headsign": "Mona Vale",
+   "start_time": "24:05",
+   "late_min": 7
   },
   {
    "route": "144",
