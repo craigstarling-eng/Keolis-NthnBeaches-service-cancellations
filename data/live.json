@@ -1,17 +1,17 @@
 {
- "updated": "2026-11-26T22:41:29+11:00",
+ "updated": "2026-11-26T22:46:34+11:00",
  "status": "ok",
  "date": "2026-11-26",
  "scheduled": 3456,
  "count": 117,
  "cancel_pct": 3.4,
- "observed": 99,
- "late": 8,
- "late_pct": 8.1,
- "avg_late_min": 14.2,
- "ontime": 91,
- "ontime_pct": 91.9,
- "anywhere_late_pct": 46.6,
+ "observed": 104,
+ "late": 7,
+ "late_pct": 6.7,
+ "avg_late_min": 16.0,
+ "ontime": 97,
+ "ontime_pct": 93.3,
+ "anywhere_late_pct": 47.0,
  "am": {
   "scheduled": 800,
   "cancelled": 0
@@ -210,16 +210,16 @@
    "late_min": 42
   },
   {
+   "route": "199",
+   "headsign": "Palm Beach",
+   "start_time": "22:05",
+   "late_min": 41
+  },
+  {
    "route": "173X",
    "headsign": "City Wynyard",
    "start_time": "14:50",
    "late_min": 40
-  },
-  {
-   "route": "263",
-   "headsign": "Neutral Bay Jn",
-   "start_time": "16:10",
-   "late_min": 38
   }
  ],
  "trips": [
