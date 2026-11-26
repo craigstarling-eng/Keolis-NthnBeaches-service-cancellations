@@ -89,7 +89,9 @@ section[hidden]{display:none}
   <h1>Northern Beaches bus tracker</h1>
   <p class="lede">Independent tracking of cancelled and late Keolis Northern Beaches (Region 8) bus services, built from Transport for NSW open data.</p>
   <div class="sub"><span id="live" class="pill">Loading…</span> <span id="upd"></span></div>
-  <nav class="tabs" role="tablist">
+  <div id="installBar" hidden style="margin:8px 0 0"><button class="btn primary" id="installBtn" type="button">📲 Install app</button>
+  <p class="sub" id="installHelp" hidden style="margin-top:6px"></p></div>
+<nav class="tabs" role="tablist">
     <button role="tab" data-tab="mybus">My bus</button>
     <button role="tab" data-tab="school">School bus</button>
     <button role="tab" data-tab="stats">Stats</button>
@@ -570,6 +572,25 @@ function tabsInit() {
 }
 
 
+
+// ---------- install button
+(() => {
+  const standalone = matchMedia("(display-mode: standalone)").matches || navigator.standalone;
+  if (standalone) return;
+  const bar = $("installBar"), btn = $("installBtn"), help = $("installHelp");
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  let prompt = null;
+  addEventListener("beforeinstallprompt", e => { e.preventDefault(); prompt = e; });
+  addEventListener("appinstalled", () => { bar.hidden = true; });
+  bar.hidden = false;
+  btn.onclick = async () => {
+    if (prompt) { prompt.prompt(); await prompt.userChoice; prompt = null; return; }
+    help.hidden = false;
+    help.innerHTML = ios
+      ? "On iPhone: open this page in <b>Safari</b>, tap the <b>Share</b> button (square with an arrow) at the bottom, then <b>Add to Home Screen</b>."
+      : "Tap the browser menu <b>⋮</b> (top right in Chrome), then <b>Install app</b> or <b>Add to Home screen</b>.";
+  };
+})();
 // ---------- school bus finder
 let SC = null, scMap = null, scLayer = null, scHome = null, scStarted = false;
 function loadLeaflet() {
