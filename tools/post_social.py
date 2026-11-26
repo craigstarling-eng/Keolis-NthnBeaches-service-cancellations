@@ -172,7 +172,7 @@ def post_bluesky(text, image_path, alt):
 def post_facebook(text, image_path):
     page, token = os.environ.get("FB_PAGE_ID", "").strip(), os.environ.get("FB_PAGE_TOKEN", "").strip()
     with open(image_path, "rb") as fh:
-        r = requests.post(f"{FB_API}/{page}/photos", data={"caption": text + "\n\nFull figures: " + SITE, "access_token": token},
+        r = requests.post(f"{FB_API}/{page}/photos", data={"caption": text + "\n\nFull figures: " + SITE + "#stats", "access_token": token},
                           files={"source": ("card.png", fh, "image/png")}, timeout=60)
     if r.status_code >= 400:
         print("Facebook error:", re.sub(r"access_token=[^&\s]+", "access_token=***", r.text[:500]))

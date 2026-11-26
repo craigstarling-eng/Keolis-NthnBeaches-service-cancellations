@@ -12,6 +12,7 @@ workflow keeps between runs with actions/cache. It is not published.
 """
 import csv
 import datetime as dt
+import gzip
 import io
 import json
 import os
@@ -44,7 +45,7 @@ EARLY_SECONDS = -60                       # TfNSW on-time window: no more than 1
 AM_PEAK = range(6, 9)                     # trips starting 06:00-08:59
 PM_PEAK = range(16, 19)                   # trips starting 16:00-18:59
 SCHEDULE_DAYS_BACK, SCHEDULE_DAYS_AHEAD = 2, 14
-STATIC_VERSION = 2                        # bump to force timetables to reload
+STATIC_VERSION = 3                        # bump to force timetables to reload
 SCHOOL_ROUTE_TYPES = {"712"}              # GTFS extended type: school bus
 SCHOOL_NAME = re.compile(r"^\d+n$")        # TfNSW school services are numbered like 560n
 
@@ -67,6 +68,11 @@ R8_DAILY_FIELDS = ["date", "scheduled", "cancelled", "observed", "late",
 R8_ROUTES = os.path.join(HIST, "r8_routes_daily.csv")
 R8_ROUTES_FIELDS = ["date", "route", "scheduled", "cancelled", "observed", "late", "ontime"]
 REGIONS_DAILY = os.path.join(HIST, "regions_daily.csv")
+TIMETABLE = os.path.join(DATA, "timetable_today.json")
+TRIP_STATS = os.path.join(DATA, "trip_stats.json")
+TRIPS_HIST = os.path.join(HIST, "trips")
+TRIP_STATS_DAYS = 30
+CROWDED = 3                               # GTFS occupancy: 3 = standing room only, 4 = crushed, 5 = full
 REGIONS_FIELDS = ["date", "code", "name", "scheduled", "cancelled", "observed", "late", "ontime"]
 
 
@@ -238,9 +244,12 @@ def build_region(hdr, code, detailed):
             except ValueError:
                 continue
             if tid not in first or seq < first[tid][0]:
-                first[tid] = (seq, st.get("departure_time") or st.get("arrival_time") or "")
-        for tid, (_, t) in first.items():
+                first[tid] = (seq, st.get("departure_time") or st.get("arrival_time") or "", st.get("stop_id", ""))
+        want_stops = {f[2] for f in first.values()}
+        stop_names = {x["stop_id"]: (x.get("stop_name") or "").strip() for x in zrows(z, "stops.txt") if x["stop_id"] in want_stops}
+        for tid, (_, t, sid_) in first.items():
             trips[tid][2] = t[:5]
+            trips[tid].append(stop_names.get(sid_, ""))
         out["routes"] = routes
         out["trips"] = trips
         out["services"] = {k: sorted(v) for k, v in active.items()}
@@ -302,6 +311,42 @@ def trip_start_delay(tu):
     return None
 
 
+def service_date(feed_date, feed_start, static_start, today):
+    """After-midnight trips (timetabled 24:xx+) belong to the previous day's service; the feed
+    sometimes labels them with the calendar date instead."""
+    sdate = feed_date or today
+    feed_hour = int(feed_start[:2]) if feed_start[:2].isdigit() else None
+    if static_start[:2].isdigit() and int(static_start[:2]) >= 24 and (
+            (feed_hour is not None and feed_hour < 4) or
+            (feed_hour is None and sdate == today and now_syd().hour < 8)):
+        sdate = (dt.datetime.strptime(sdate, "%Y%m%d") - dt.timedelta(days=1)).strftime("%Y%m%d")
+    return f"{sdate[:4]}-{sdate[4:6]}-{sdate[6:8]}"
+
+
+def read_occupancy(hdr, home):
+    """How full each Northern Beaches bus is right now (where the bus reports it)."""
+    try:
+        r = requests.get(f"{API}/vehiclepos/buses", headers=hdr, timeout=120)
+        r.raise_for_status()
+        feed = gtfs_realtime_pb2.FeedMessage()
+        feed.ParseFromString(r.content)
+    except Exception as exc:
+        print("occupancy feed unavailable:", exc)
+        return {}
+    today = now_syd().strftime("%Y%m%d")
+    out = {}
+    for e in feed.entity:
+        if not e.HasField("vehicle"):
+            continue
+        v = e.vehicle
+        info = home["trips"].get(v.trip.trip_id)
+        if not info or not v.HasField("occupancy_status"):
+            continue
+        d = service_date(v.trip.start_date, v.trip.start_time, info[2], today)
+        out[(d, v.trip.trip_id)] = int(v.occupancy_status)
+    return out
+
+
 def read_feed(hdr, prefix_to_code, home, school_routes):
     r = requests.get(f"{API}/realtime/buses", headers=hdr, timeout=120)
     r.raise_for_status()
@@ -322,15 +367,8 @@ def read_feed(hdr, prefix_to_code, home, school_routes):
         code = HOME_CODE if (info or rid in home_routes) else prefix_to_code.get(prefix, f"agency:{prefix}" if prefix else "")
         if not code:
             continue
-        sdate = td.start_date or today
-        # After-midnight trips (timetabled as 24:xx/25:xx) belong to the previous day's
-        # service. The feed sometimes labels them with the calendar date instead.
         static_start = info[2] if info else ""
-        feed_hour = int(td.start_time[:2]) if td.start_time[:2].isdigit() else None
-        if static_start[:2].isdigit() and int(static_start[:2]) >= 24 and (
-                (feed_hour is not None and feed_hour < 4) or
-                (feed_hour is None and sdate == today and now_syd().hour < 8)):
-            sdate = (dt.datetime.strptime(sdate, "%Y%m%d") - dt.timedelta(days=1)).strftime("%Y%m%d")
+        sdate = service_date(td.start_date, td.start_time, static_start, today).replace("-", "")
         seen.append({
             "code": code,
             "date": f"{sdate[:4]}-{sdate[4:6]}-{sdate[6:8]}",
@@ -397,7 +435,8 @@ def home_scheduled(home, date):
     out = []
     services = home.get("services", {})
     school = set(home.get("school_routes", []))
-    for tid, (rid, hs, start, sid) in home["trips"].items():
+    for tid, info in home["trips"].items():
+        rid, hs, start, sid = info[:4]
         if rid not in school and date in services.get(sid, ()):
             out.append((tid, rid, hs, hhmm_to_min(start)))
     return out
@@ -671,6 +710,101 @@ def build_outputs(today, live_extra, status):
 
 
 # ---------------------------------------------------------------- main
+# ---------------------------------------------------------------- My Bus data
+def write_timetable(home, today):
+    """Today's regular (non-school) trips by route, written once a day."""
+    if read_json(TIMETABLE, {}).get("date") == today:
+        return
+    by_route = defaultdict(list)
+    for tid, rid, hs, m in home_scheduled(home, today):
+        info = home["trips"][tid]
+        by_route[home["routes"].get(rid, rid)].append([tid, info[2], hs, info[4] if len(info) > 4 else ""])
+    for v in by_route.values():
+        v.sort(key=lambda t: t[1])
+    write_json(TIMETABLE, {"date": today, "routes": dict(sorted(by_route.items()))})
+
+
+def record_occupancy(occ):
+    """Keep the fullest level seen for each trip, per day."""
+    by_date = defaultdict(dict)
+    for (d, tid), level in occ.items():
+        by_date[d][tid] = level
+    for d, levels in by_date.items():
+        st = load_state(d)
+        reg = st["regions"].setdefault(HOME_CODE, {"cxl": [], "delay": {}})
+        o = reg.setdefault("occ", {})
+        for tid, level in levels.items():
+            o[tid] = max(level, o.get(tid, 0))
+        save_state(d, st)
+
+
+def live_active(home, today, state, occ_now):
+    """Status of trips that started in the last 3 hours or start in the next hour."""
+    reg = state["regions"].get(HOME_CODE, {})
+    start, anywhere = reg.get("start", {}), reg.get("delay", {})
+    now_m = now_syd().hour * 60 + now_syd().minute
+    out = {}
+    for tid, rid, hs, m in home_scheduled(home, today):
+        if m is None or not (now_m - 180 <= m <= now_m + 60):
+            continue
+        s, a, o = start.get(tid), anywhere.get(tid), occ_now.get((today, tid))
+        if s is None and a is None and o is None:
+            continue
+        out[tid] = [None if s is None else round(s / 60), None if a is None else round(a / 60), o]
+    return out
+
+
+def finalise_trips(home, cxl_rows):
+    """Once a day, save yesterday's per-trip results and rebuild the 30-day reliability stats."""
+    if now_syd().hour < 4:
+        return
+    y = iso(now_syd().date() - dt.timedelta(days=1))
+    path = os.path.join(TRIPS_HIST, f"{y}.csv.gz")
+    if os.path.exists(path):
+        return
+    st = load_state(y)
+    reg = st["regions"].get(HOME_CODE, {})
+    start, occ = reg.get("start", {}), reg.get("occ", {})
+    cancelled = {r["trip_id"] for r in cxl_rows if r["service_date"] == y and not r.get("reinstated")}
+    cutoff = hhmm_to_min(PARTIAL_DAYS.get(y, "00:00"))
+    rows = []
+    for tid, rid, hs, m in home_scheduled(home, y):
+        if m is not None and m < cutoff:
+            continue
+        info = home["trips"][tid]
+        rows.append({"route": home["routes"].get(rid, rid), "headsign": hs, "start": info[2],
+                     "first_stop": info[4] if len(info) > 4 else "", "cancelled": int(tid in cancelled),
+                     "start_delay": "" if tid in cancelled or tid not in start else start[tid],
+                     "occupancy": occ.get(tid, "")})
+    if not rows:
+        return
+    os.makedirs(TRIPS_HIST, exist_ok=True)
+    with gzip.open(path, "wt", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=list(rows[0]))
+        w.writeheader()
+        w.writerows(rows)
+    build_trip_stats()
+
+
+def build_trip_stats():
+    files = sorted(f for f in os.listdir(TRIPS_HIST) if f.endswith(".csv.gz"))[-TRIP_STATS_DAYS:]
+    slots = {}
+    for fn in files:
+        with gzip.open(os.path.join(TRIPS_HIST, fn), "rt", newline="") as f:
+            for r in csv.DictReader(f):
+                s = slots.setdefault(r["route"], {}).setdefault(r["headsign"], {}).setdefault(r["start"], [0, 0, 0, 0, 0, 0])
+                s[0] += 1
+                s[1] += int(r["cancelled"])
+                if r["start_delay"] != "":
+                    s[2] += 1
+                    s[3] += int(int(r["start_delay"]) > LATE_SECONDS)
+                if r["occupancy"] != "":
+                    s[4] += 1
+                    s[5] += int(int(r["occupancy"]) >= CROWDED)
+    write_json(TRIP_STATS, {"days": len(files), "from": files[0][:10] if files else None,
+                            "fields": ["days", "cancelled", "tracked", "late", "occ_tracked", "crowded"], "slots": slots})
+
+
 def migrate_school_exclusion(home):
     """One-off: earlier versions counted school services. Rebuild today's figures without them."""
     if not os.path.exists(CXL_LOG):
@@ -781,7 +915,12 @@ def main():
     print(f"Feed trips: {len(seen)}; new home cancellations: {len(new)}")
 
     touched = apply_observations(seen)
+    occ_now = read_occupancy(hdr, home) if status == "ok" else {}
+    if occ_now:
+        record_occupancy(occ_now)
     today = now_syd().date()
+    write_timetable(home, iso(today))
+    finalise_trips(home, cxl_rows)
     dates = sorted(set(touched) | {iso(today), iso(today - dt.timedelta(days=1))})
     dates = [d for d in dates if d >= iso(today - dt.timedelta(days=1))]
     live_extra = {}
@@ -804,8 +943,9 @@ def main():
                 "am": {"scheduled": daily["am_scheduled"], "cancelled": daily["am_cancelled"]},
                 "pm": {"scheduled": daily["pm_scheduled"], "cancelled": daily["pm_cancelled"]},
                 "gaps": gaps, "late_trips": late_trips,
-                "trips": [{k: r[k] for k in ("start_time", "route", "headsign")}
+                "trips": [{k: r[k] for k in ("start_time", "route", "headsign", "trip_id")}
                           for r in sorted(cxl_today, key=lambda r: r["start_time"] or "99")],
+                "active": live_active(home, date, load_state(date), occ_now),
                 "school_cancelled": [{k: r[k] for k in ("start_time", "route", "headsign")}
                                      for r in sorted(school_cxl, key=lambda r: r["start_time"] or "99")],
             }

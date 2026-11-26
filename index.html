@@ -63,6 +63,18 @@ a{color:var(--series-1)}
 .steps{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 .topnav{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 a.btn{text-decoration:none;display:inline-block}
+.tabs{position:sticky;top:0;z-index:5;display:flex;gap:4px;margin:12px -16px 0;padding:8px 16px;background:var(--bg);border-bottom:1px solid var(--border);overflow-x:auto}
+.tabs button{font:inherit;font-size:15px;font-weight:600;padding:8px 14px;border:0;border-radius:99px;background:transparent;color:var(--text-secondary);cursor:pointer;white-space:nowrap}
+.tabs button[aria-selected=true]{background:var(--text-primary);color:var(--surface-1)}
+section[hidden]{display:none}
+.trip{display:grid;grid-template-columns:64px 1fr;gap:2px 10px;padding:10px 0;border-bottom:1px solid var(--grid)}
+.trip .t{font-size:18px;font-weight:650;font-variant-numeric:tabular-nums}
+.trip .past{opacity:.55}
+.badge{display:inline-block;font-size:12px;font-weight:600;padding:2px 8px;border-radius:99px;border:1px solid var(--border);margin-right:6px}
+.badge.bad{color:var(--critical);border-color:var(--critical)}
+.badge.ok{color:var(--good);border-color:var(--good)}
+.badge.warn{color:var(--warn);border-color:var(--warn)}
+.trip .meta{grid-column:2;font-size:13px;color:var(--text-secondary)}
 </style>
 </head>
 <body>
@@ -70,7 +82,40 @@ a.btn{text-decoration:none;display:inline-block}
   <h1>Northern Beaches bus tracker</h1>
   <p class="lede">Independent tracking of cancelled and late Keolis Northern Beaches (Region 8) bus services, built from Transport for NSW open data.</p>
   <div class="sub"><span id="live" class="pill">Loading…</span> <span id="upd"></span></div>
-  <div class="topnav"><a class="btn" href="#report">Report a problem or compliment a driver</a></div>
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-tab="mybus">My bus</button>
+    <button role="tab" data-tab="stats">Stats</button>
+    <button role="tab" data-tab="report">Report</button>
+    <button role="tab" data-tab="about">About</button>
+  </nav>
+  <section data-tab="mybus" hidden>
+  <div class="note" id="todayStrip" style="border-style:solid">Loading today's figures…</div>
+
+  <div class="card">
+    <h2>Is my bus running?</h2>
+    <p class="lede">Choose your route, direction and roughly when you travel. Times shown are when each bus leaves the start of its route.</p>
+    <div class="form">
+      <label>Route<select id="mbRoute"></select></label>
+      <label>Direction<select id="mbDir"></select></label>
+      <label>Around<input id="mbTime" type="time"></label>
+      <label>&nbsp;<button class="btn" id="mbSave" type="button">Save as my bus</button></label>
+    </div>
+    <div id="mbList" style="margin-top:12px"></div>
+    <p class="sub" style="margin-top:10px">For live arrival times at your stop, use the <a href="https://transportnsw.info/trip" target="_blank" rel="noopener">Transport for NSW trip planner</a> or the Opal Travel app. Crowding is shown only when the bus reports it.</p>
+  </div>
+
+  <div class="card">
+    <h2>Most reliable buses near your time</h2>
+    <p class="lede">Over the last 30 days, for the route and direction above.</p>
+    <div id="mbBest"></div>
+  </div>
+
+  <div class="card">
+    <h2>Cancellation alerts</h2>
+    <p class="sub">Coming soon: get a free Telegram message when your usual bus is cancelled, often hours before it's due.</p>
+  </div>
+  </section>
+  <section data-tab="stats" hidden>
   <div id="history-note" class="note" hidden></div>
 
   <div class="tiles" id="tiles"></div>
@@ -141,7 +186,45 @@ a.btn{text-decoration:none;display:inline-block}
     <p class="lede" id="leagueLede"></p>
     <table><thead><tr><th>Route</th><th></th><th class="r">Cancelled</th><th class="r">Late</th></tr></thead><tbody id="league"></tbody></table>
   </div>
+  <!-- Compare -->
+  <div class="card">
+    <h2>How the Northern Beaches compares</h2>
+    <p class="lede">Every Sydney bus contract region, measured the same way. Ranked by share of trips cancelled.</p>
+    <div class="seg" id="regSeg"></div>
+    <table><thead><tr><th>Operator</th><th>Cancelled</th><th class="r">Rate</th><th class="r">Late start</th></tr></thead><tbody id="regions"></tbody></table>
+    <div id="regEmpty" class="empty" hidden>Other regions' timetables are still loading (this takes about an hour after setup).</div>
+  </div>
 
+  <div class="card" id="officialCard" hidden>
+    <h2>Official Transport for NSW figures</h2>
+    <p class="lede">On-time running is the share of trips leaving their first stop no more than 1 minute early or 5 minutes late, as published monthly by Transport for NSW.</p>
+    <div class="seg" id="offSeg"></div>
+    <div class="legend"><span><span class="dot" style="background:var(--series-1)"></span>Northern Beaches (Region 8)</span><span><span class="dot" style="background:var(--muted)"></span>Average of other Sydney regions</span></div>
+    <div class="chart" id="offChart"><div class="tip" id="tip4"></div></div>
+    <h2 style="margin-top:14px">On-time running, last 12 months</h2>
+    <table><tbody id="offRank"></tbody></table>
+    <p class="sub" id="offCancel" style="margin-top:8px"></p>
+    <p class="sub" id="offSrc"></p>
+  </div>
+
+  <div class="grid2">
+    <div class="card" style="margin-top:14px">
+      <h2>Cancellations by start hour</h2>
+      <div class="chart" id="hours"><div class="tip" id="tip2"></div></div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <h2>Average cancellations by weekday</h2>
+      <table><tbody id="wd"></tbody></table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Totals</h2>
+    <table><thead><tr><th></th><th class="r">7 days</th><th class="r">30 days</th><th class="r">All</th></tr></thead><tbody id="totals"></tbody></table>
+    <div class="sub" id="since" style="margin-top:6px"></div>
+  </div>
+  </section>
+  <section data-tab="report" hidden>
   <!-- Report -->
   <div class="card" id="report">
     <h2>Report a problem or compliment a driver</h2>
@@ -194,55 +277,18 @@ a.btn{text-decoration:none;display:inline-block}
       <p class="sub" style="margin-top:8px">Paste the message into the Transport for NSW form (choose Buses). Prefer to call? Ring 131 500. "Email a copy" opens your own email app with the message ready. Add your own address to keep a copy. This site doesn't store or send anything.</p>
     </div>
   </div>
-
-  <!-- Compare -->
-  <div class="card">
-    <h2>How the Northern Beaches compares</h2>
-    <p class="lede">Every Sydney bus contract region, measured the same way. Ranked by share of trips cancelled.</p>
-    <div class="seg" id="regSeg"></div>
-    <table><thead><tr><th>Operator</th><th>Cancelled</th><th class="r">Rate</th><th class="r">Late start</th></tr></thead><tbody id="regions"></tbody></table>
-    <div id="regEmpty" class="empty" hidden>Other regions' timetables are still loading (this takes about an hour after setup).</div>
-  </div>
-
-  <div class="card" id="officialCard" hidden>
-    <h2>Official Transport for NSW figures</h2>
-    <p class="lede">On-time running is the share of trips leaving their first stop no more than 1 minute early or 5 minutes late, as published monthly by Transport for NSW.</p>
-    <div class="seg" id="offSeg"></div>
-    <div class="legend"><span><span class="dot" style="background:var(--series-1)"></span>Northern Beaches (Region 8)</span><span><span class="dot" style="background:var(--muted)"></span>Average of other Sydney regions</span></div>
-    <div class="chart" id="offChart"><div class="tip" id="tip4"></div></div>
-    <h2 style="margin-top:14px">On-time running, last 12 months</h2>
-    <table><tbody id="offRank"></tbody></table>
-    <p class="sub" id="offCancel" style="margin-top:8px"></p>
-    <p class="sub" id="offSrc"></p>
-  </div>
-
-  <div class="grid2">
-    <div class="card" style="margin-top:14px">
-      <h2>Cancellations by start hour</h2>
-      <div class="chart" id="hours"><div class="tip" id="tip2"></div></div>
-    </div>
-    <div class="card" style="margin-top:14px">
-      <h2>Average cancellations by weekday</h2>
-      <table><tbody id="wd"></tbody></table>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2>Totals</h2>
-    <table><thead><tr><th></th><th class="r">7 days</th><th class="r">30 days</th><th class="r">All</th></tr></thead><tbody id="totals"></tbody></table>
-    <div class="sub" id="since" style="margin-top:6px"></div>
-  </div>
-
+  </section>
+  <section data-tab="about" hidden>
   <div class="card" id="eventsCard" hidden>
     <h2>Marked days</h2>
     <table><tbody id="events"></tbody></table>
   </div>
 
   <div class="card">
-    <details>
+    <details open>
       <summary>How this is measured</summary>
       <ul class="sub" style="padding-left:18px">
-        <li><b>Source.</b> Transport for NSW open data: the live bus trip-updates feed (GTFS-realtime) and the published timetables. The data is checked about every 10 minutes.</li>
+        <li><b>Source.</b> Transport for NSW open data: the live bus trip-updates feed (GTFS-realtime) and the published timetables. The data is checked about every 5 minutes.</li>
         <li><b>Cancelled.</b> A trip the live feed marks as cancelled. Each trip is counted once per day.</li>
         <li><b>Cancellation rate.</b> Cancelled trips divided by trips scheduled that day in the published timetable.</li>
         <li><b>School services excluded.</b> School routes (numbered like 560n, or marked as school buses in the timetable) are left out of every figure, including the comparison with other regions. Any cancelled school service is listed separately under the headline figures. Charter work isn't in the public timetable, so it's never counted.</li>
@@ -265,12 +311,11 @@ a.btn{text-decoration:none;display:inline-block}
       <li><a href="data/history/regions_daily.csv" download>Daily totals for all Sydney regions (CSV)</a></li>
     </ul>
   </div>
-
-  <p class="sub">Source: Transport for NSW open data, licensed CC BY 4.0. Updates about every 10 minutes.</p>
+  </section>
+  <p class="sub">Source: Transport for NSW open data, licensed CC BY 4.0. Updates about every 5 minutes.</p>
 </div>
-
 <script>
-let S, L, R, G, O, E = [];
+let S, L, R, G, O, TT, TS, E = [];
 let state = {off: 60, metric: "rate", range: 30, peak: "30", reg: "d30", share: "today", route: null, league: "cxl"};
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -287,6 +332,8 @@ async function load() {
   G = await j("data/regions.json").catch(() => ({}));
   E = (await j("events.json").catch(() => ({events: []}))).events || [];
   O = await j("data/official/official.json").catch(() => null);
+  if (!TT || TT.date !== L.date) TT = await j("data/timetable_today.json").catch(() => null);
+  if (!TS) TS = await j("data/trip_stats.json").catch(() => null);
   render();
 }
 
@@ -355,6 +402,7 @@ function render() {
   $("regEmpty").hidden = regs.filter(r => !r.home).length > 0;
 
   officialSection();
+  myBus();
   hourChart();
   const names7 = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"], wv = S.by_weekday_avg, wmx = Math.max(1, ...wv.map(v => v || 0));
   $("wd").innerHTML = wv.map((v, i) => `<tr><td style="width:50px">${names7[i]}</td><td><span class="bar" style="width:${v == null ? 0 : Math.max(3, v / wmx * 100)}%"></span></td><td class="r" style="width:60px">${v == null ? "–" : v.toFixed(1)}</td></tr>`).join("");
@@ -469,6 +517,82 @@ function officialSection() {
   $("offSrc").textContent = `Latest official month: ${new Date(O.latest_month + "-15").toLocaleDateString("en-AU", {month: "long", year: "numeric"})}. Refreshed monthly from Transport for NSW open data.`;
 }
 
+
+// ---------- tabs
+function showTab(name) {
+  const names = ["mybus", "stats", "report", "about"];
+  if (!names.includes(name)) name = "mybus";
+  document.querySelectorAll("section[data-tab]").forEach(sec => sec.hidden = sec.dataset.tab !== name);
+  document.querySelectorAll(".tabs button").forEach(b => b.setAttribute("aria-selected", String(b.dataset.tab === name)));
+  if (S) render();
+}
+function tabsInit() {
+  document.querySelector(".tabs").onclick = e => { const t = e.target.dataset.tab; if (t) { history.replaceState(null, "", "#" + t); showTab(t); window.scrollTo(0, 0); } };
+  addEventListener("hashchange", () => showTab(location.hash.slice(1)));
+  document.querySelectorAll('a[href="#stats"],a[href="#report"],a[href="#about"],a[href="#mybus"]').forEach(a => a.onclick = e => { e.preventDefault(); history.replaceState(null, "", a.getAttribute("href")); showTab(a.getAttribute("href").slice(1)); window.scrollTo(0, 0); });
+  showTab(location.hash.slice(1));
+}
+
+// ---------- my bus
+const OCC = ["Empty", "Plenty of seats", "Few seats left", "Standing room only", "Very crowded", "Full", "Not taking passengers"];
+let mb = null;
+function nowMin() { const p = new Date().toLocaleTimeString("en-GB", {timeZone: "Australia/Sydney", hour: "2-digit", minute: "2-digit", hour12: false}).split(":"); let m = +p[0] * 60 + +p[1]; if (m < 240) m += 1440; return m; }
+const hm = t => { const [h, m] = (t || "").split(":"); return h === undefined || m === undefined ? null : +h * 60 + +m; };
+const fmtT = t => { const m = hm(t); return m == null ? t : `${String(Math.floor(m / 60) % 24).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`; };
+function myBus() {
+  const cx = L.trips || [], sumEl = $("todayStrip");
+  sumEl.innerHTML = `Today so far: <b>${nf(L.count)}</b> Northern Beaches services cancelled${L.scheduled ? ` (${pc(L.cancel_pct)} of scheduled trips)` : ""}${L.ontime_pct != null ? ` · <b>${pc(L.ontime_pct)}</b> left their first stop on time` : ""}. <a href="#stats">See all stats</a>`;
+  sumEl.querySelector("a").onclick = e => { e.preventDefault(); history.replaceState(null, "", "#stats"); showTab("stats"); window.scrollTo(0, 0); };
+  if (!TT || !TT.routes) { $("mbList").innerHTML = `<p class="empty">Today's timetable is loading. Check back in a few minutes.</p>`; return; }
+  const routes = Object.keys(TT.routes).sort((a, b) => a.localeCompare(b, "en", {numeric: true}));
+  if (!mb) {
+    let saved = null; try { saved = JSON.parse(localStorage.getItem("nbbus.mybus") || "null"); } catch (e) {}
+    const t = nowMin() % 1440;
+    mb = saved && TT.routes[saved.route] ? saved : {route: routes.includes("B1") ? "B1" : routes[0], dir: "", time: `${String(Math.floor(t / 60)).padStart(2, "0")}:${String(t % 60).padStart(2, "0")}`};
+    if (!saved) mb.time = "";
+  }
+  const trips = TT.routes[mb.route] || [], dirs = [...new Set(trips.map(t => t[2]))].sort();
+  if (mb.dir && !dirs.includes(mb.dir)) mb.dir = "";
+  $("mbRoute").innerHTML = routes.map(r => `<option ${r === mb.route ? "selected" : ""}>${esc(r)}</option>`).join("");
+  $("mbDir").innerHTML = `<option value="">Both directions</option>` + dirs.map(d => `<option ${d === mb.dir ? "selected" : ""}>${esc(d)}</option>`).join("");
+  if (document.activeElement !== $("mbTime")) $("mbTime").value = mb.time || "";
+  $("mbRoute").onchange = e => { mb.route = e.target.value; mb.dir = ""; myBus(); };
+  $("mbDir").onchange = e => { mb.dir = e.target.value; myBus(); };
+  $("mbTime").onchange = e => { mb.time = e.target.value; myBus(); };
+  $("mbSave").onclick = () => { try { localStorage.setItem("nbbus.mybus", JSON.stringify({...mb, time: mb.time || $("mbTime").value})); $("mbSave").textContent = "Saved ✓"; setTimeout(() => $("mbSave").textContent = "Save as my bus", 1500); } catch (e) { $("mbSave").textContent = "Couldn't save on this device"; } };
+
+  const cset = new Set(cx.map(t => t.trip_id)), act = L.active || {}, now = nowMin();
+  let centre = mb.time ? hm(mb.time) : now; if (mb.time && centre < 240) centre += 1440;
+  const list = trips.filter(t => !mb.dir || t[2] === mb.dir);
+  const win = list.filter(t => { const m = hm(t[1]); return m >= centre - 30 && m <= centre + 150; });
+  const slot = t => TS && TS.slots && ((TS.slots[mb.route] || {})[t[2]] || {})[t[1]];
+  const rel = t => { const s = slot(t); if (!s || s[0] < 3) return ""; const bits = [`cancelled ${s[1]} of the last ${s[0]} days`]; if (s[2] >= 3) bits.push(`left late ${Math.round(100 * s[3] / s[2])}% of the time`); if (s[4] >= 3 && s[5] / s[4] >= 0.3) bits.push(`often standing room only (${Math.round(100 * s[5] / s[4])}%)`); return "Usually: " + bits.join(", "); };
+  $("mbList").innerHTML = win.length ? win.map(t => {
+    const m = hm(t[1]), a = act[t[0]], past = m < now - 5;
+    let badges = "", extra = "";
+    if (cset.has(t[0])) {
+      badges = `<span class="badge bad">Cancelled</span>`;
+      const nxt = list.find(u => hm(u[1]) > m && u[2] === t[2] && !cset.has(u[0]));
+      extra = nxt ? `Next bus: ${fmtT(nxt[1])} (${hm(nxt[1]) - m} min later)` : "No later bus today in this direction";
+    } else if (a && a[0] != null) {
+      const d = a[0], verb = m > now ? "Expected to leave" : "Left";
+      badges = d > 5 ? `<span class="badge warn">${verb} ${d} min late</span>` : d < -1 ? `<span class="badge warn">${verb} ${-d} min early</span>` : `<span class="badge ok">${m > now ? "On time" : "Left on time"}</span>`;
+      if (a[1] != null && a[1] > 5 && a[1] > d + 2) badges += `<span class="badge warn">Now ${a[1]} min behind</span>`;
+    } else {
+      badges = m > now ? `<span class="badge">Scheduled</span>` : `<span class="badge">No live data</span>`;
+    }
+    if (a && a[2] != null) badges += `<span class="badge ${a[2] >= 3 ? "warn" : ""}">${OCC[a[2]] || ""}</span>`;
+    const r = rel(t);
+    return `<div class="trip"><div class="t ${past ? "past" : ""}">${fmtT(t[1])}</div><div>${badges}<div class="meta">To ${esc(t[2])}${t[3] ? ` · from ${esc(t[3])}` : ""}</div>${extra ? `<div class="meta"><b>${extra}</b></div>` : ""}${r ? `<div class="meta">${r}</div>` : ""}</div></div>`;
+  }).join("") : `<p class="empty">No ${esc(mb.route)} buses in this direction around that time today.</p>`;
+
+  // best bets
+  const near = list.filter(t => Math.abs(hm(t[1]) - centre) <= 60).map(t => ({t, s: slot(t)})).filter(x => x.s && x.s[0] >= 5);
+  near.sort((a, b) => (a.s[1] / a.s[0]) - (b.s[1] / b.s[0]) || ((a.s[2] ? a.s[3] / a.s[2] : 0) - (b.s[2] ? b.s[3] / b.s[2] : 0)));
+  $("mbBest").innerHTML = near.length ? `<table><thead><tr><th>Leaves</th><th>Towards</th><th class="r">Cancelled</th><th class="r">Left late</th></tr></thead><tbody>${near.slice(0, 5).map(({t, s}) => `<tr><td><b>${fmtT(t[1])}</b></td><td>${esc(t[2])}</td><td class="r">${s[1]} of ${s[0]}</td><td class="r">${s[2] ? Math.round(100 * s[3] / s[2]) + "%" : "–"}</td></tr>`).join("")}</tbody></table>`
+    : `<p class="empty">Not enough history yet. This fills in after about a week of tracking${TS && TS.days ? ` (${TS.days} day${TS.days === 1 ? "" : "s"} so far)` : ""}.</p>`;
+}
+
 // ---------- report / compliment
 let repType = "complaint";
 function reportInit() {
@@ -546,6 +670,7 @@ $("dlShare").onclick = () => { const a = document.createElement("a"); a.download
 $("copyShare").onclick = async () => { try { await navigator.clipboard.writeText($("shareText").value); $("copyShare").textContent = "Copied"; setTimeout(() => $("copyShare").textContent = "Copy text", 1500); } catch (e) { $("shareText").select(); } };
 
 reportInit();
+tabsInit();
 load(); setInterval(load, 120000);
 let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => S && render(), 150); });
 </script>
