@@ -1,13 +1,13 @@
 {
- "updated": "2026-11-26T17:28:08+11:00",
+ "updated": "2026-11-26T17:33:14+11:00",
  "status": "ok",
  "date": "2026-11-26",
  "scheduled": 3456,
- "count": 105,
- "cancel_pct": 3.0,
- "observed": 1047,
- "late": 441,
- "late_pct": 42.1,
+ "count": 106,
+ "cancel_pct": 3.1,
+ "observed": 1068,
+ "late": 459,
+ "late_pct": 43.0,
  "avg_late_min": 10.9,
  "am": {
   "scheduled": 800,
@@ -165,6 +165,12 @@
    "late_min": 51
   },
   {
+   "route": "180X",
+   "headsign": "Collaroy Plateau",
+   "start_time": "16:46",
+   "late_min": 47
+  },
+  {
    "route": "230",
    "headsign": "Mosman Bay Wharf",
    "start_time": "15:26",
@@ -186,12 +192,6 @@
    "route": "154X",
    "headsign": "Dee Why",
    "start_time": "15:55",
-   "late_min": 42
-  },
-  {
-   "route": "180X",
-   "headsign": "Collaroy Plateau",
-   "start_time": "16:46",
    "late_min": 42
   },
   {
@@ -724,6 +724,11 @@
    "start_time": "20:17",
    "route": "144",
    "headsign": "Manly"
+  },
+  {
+   "start_time": "20:20",
+   "route": "199",
+   "headsign": "Palm Beach"
   },
   {
    "start_time": "20:32",
