@@ -35,7 +35,7 @@ STATIC_DIR = os.path.join(CACHE, "static")
 STATE_DIR = os.path.join(CACHE, "state")
 
 HOME_CODE = "GSBC008"                     # Keolis Northern Beaches
-REGION_CODES = [f"GSBC{n:03d}" for n in range(1, 16)]
+REGION_CODES = [f"GSBC{n:03d}" for n in range(1, 16)] + ["SBSC006"]
 HOME_MAX_AGE_DAYS = 3
 OTHER_MAX_AGE_DAYS = 7
 MAX_REGION_DOWNLOADS_PER_RUN = 3

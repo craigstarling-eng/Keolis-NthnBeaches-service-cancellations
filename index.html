@@ -138,6 +138,18 @@ a{color:var(--series-1)}
     <div id="regEmpty" class="empty" hidden>Other regions' timetables are still loading (this takes about an hour after setup).</div>
   </div>
 
+  <div class="card" id="officialCard" hidden>
+    <h2>Official Transport for NSW figures</h2>
+    <p class="lede">On-time running is the share of trips leaving their first stop no more than 1 minute early or 5 minutes late, as published monthly by Transport for NSW.</p>
+    <div class="seg" id="offSeg"></div>
+    <div class="legend"><span><span class="dot" style="background:var(--series-1)"></span>Northern Beaches (Region 8)</span><span><span class="dot" style="background:var(--muted)"></span>Average of other Sydney regions</span></div>
+    <div class="chart" id="offChart"><div class="tip" id="tip4"></div></div>
+    <h2 style="margin-top:14px">On-time running, last 12 months</h2>
+    <table><tbody id="offRank"></tbody></table>
+    <p class="sub" id="offCancel" style="margin-top:8px"></p>
+    <p class="sub" id="offSrc"></p>
+  </div>
+
   <div class="grid2">
     <div class="card" style="margin-top:14px">
       <h2>Cancellations by start hour</h2>
@@ -191,8 +203,8 @@ a{color:var(--series-1)}
 </div>
 
 <script>
-let S, L, R, G, E = [];
-let state = {metric: "rate", range: 30, peak: "30", reg: "d30", share: "today", route: null, league: "cxl"};
+let S, L, R, G, O, E = [];
+let state = {off: 60, metric: "rate", range: 30, peak: "30", reg: "d30", share: "today", route: null, league: "cxl"};
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const pc = v => v == null ? "–" : v.toFixed(1) + "%";
@@ -207,6 +219,7 @@ async function load() {
   R = await j("data/routes.json").catch(() => ({}));
   G = await j("data/regions.json").catch(() => ({}));
   E = (await j("events.json").catch(() => ({events: []}))).events || [];
+  O = await j("data/official/official.json").catch(() => null);
   render();
 }
 
@@ -273,6 +286,7 @@ function render() {
   $("regions").innerHTML = regs.map((r, i) => `<tr class="${r.home ? "home" : ""}"><td>${i + 1}. ${esc(r.name)}${r.home ? " ◀" : ""}</td><td>${nf(r.cancelled)} <span class="sub">of ${nf(r.scheduled)}</span></td><td class="r"><span class="bar ${r.home ? "" : "muted"}" style="width:${Math.max(4, (r.cancel_pct || 0) / rmx * 60)}px;margin-right:6px"></span>${pc(r.cancel_pct)}</td><td class="r">${pc(r.late_pct)}</td></tr>`).join("");
   $("regEmpty").hidden = regs.filter(r => !r.home).length > 0;
 
+  officialSection();
   hourChart();
   const names7 = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"], wv = S.by_weekday_avg, wmx = Math.max(1, ...wv.map(v => v || 0));
   $("wd").innerHTML = wv.map((v, i) => `<tr><td style="width:50px">${names7[i]}</td><td><span class="bar" style="width:${v == null ? 0 : Math.max(3, v / wmx * 100)}%"></span></td><td class="r" style="width:60px">${v == null ? "–" : v.toFixed(1)}</td></tr>`).join("");
@@ -345,6 +359,41 @@ function routeDetail() {
   const dd = r.daily.slice(-30);
   bars($("routeChart"), $("tip3"), dd.map(d => { const x = new Date(d[0] + "T12:00:00"); return x.getDate() + "/" + (x.getMonth() + 1); }), dd.map(d => d[2]),
     i => `<b>${dfmt(dd[i][0])}</b><br>${dd[i][2]} cancelled of ${dd[i][1]}<br>Late 5+ min: ${dd[i][4]} of ${dd[i][3]}`, Math.max(1, Math.ceil(dd.length / 6)));
+}
+
+function officialSection() {
+  $("officialCard").hidden = !O || !O.otr_series.length;
+  if ($("officialCard").hidden) return;
+  seg($("offSeg"), [[24, "2 years"], [60, "5 years"], [999, "Since 2010"]], state.off, v => { state.off = +v; render(); });
+  const ser = O.otr_series.filter(r => r.home != null || r.others_avg != null).slice(-state.off);
+  const el = $("offChart"), tip = $("tip4"), w = el.clientWidth || 600, h = 220, p = {l: 38, r: 8, t: 12, b: 24};
+  const vals = ser.flatMap(r => [r.home, r.others_avg]).filter(v => v != null);
+  const lo = Math.floor(Math.min(...vals) - 1), hi = Math.min(100, Math.ceil(Math.max(...vals) + 0.5));
+  const x = i => p.l + (ser.length < 2 ? 0 : i * (w - p.l - p.r) / (ser.length - 1)), y = v => p.t + (h - p.t - p.b) * (1 - (v - lo) / (hi - lo));
+  let g = "";
+  for (let k = 0; k <= 4; k++) { const v = lo + (hi - lo) * k / 4; g += `<line x1="${p.l}" x2="${w - p.r}" y1="${y(v)}" y2="${y(v)}" stroke="var(--grid)"/><text x="${p.l - 6}" y="${y(v) + 4}" text-anchor="end" font-size="11" fill="var(--text-secondary)">${v.toFixed(0)}%</text>`; }
+  const take = ser.findIndex(r => r.month >= "2021-10");
+  if (take > 0) g += `<line x1="${x(take)}" x2="${x(take)}" y1="${p.t}" y2="${h - p.b}" stroke="var(--event)" stroke-dasharray="4 3"/><text x="${x(take) + 4}" y="${p.t + 10}" font-size="11" fill="var(--text-secondary)">Keolis takes over</text>`;
+  const path = k => { let d = "", on = false; ser.forEach((r, i) => { if (r[k] == null) { on = false; return; } d += `${on ? "L" : "M"}${x(i).toFixed(1)},${y(r[k]).toFixed(1)}`; on = true; }); return d; };
+  g += `<path d="${path("others_avg")}" fill="none" stroke="var(--muted)" stroke-width="2"/><path d="${path("home")}" fill="none" stroke="var(--series-1)" stroke-width="2"/>`;
+  const every = Math.max(1, Math.ceil(ser.length / 6));
+  ser.forEach((r, i) => { if (i % every === 0) g += `<text x="${x(i)}" y="${h - 6}" text-anchor="${i === 0 ? "start" : "middle"}" font-size="11" fill="var(--text-secondary)">${r.month.slice(5)}/${r.month.slice(2, 4)}</text>`; });
+  g += `<line id="offX" y1="${p.t}" y2="${h - p.b}" stroke="var(--text-secondary)" stroke-dasharray="3 3" visibility="hidden"/>`;
+  el.querySelector("svg")?.remove();
+  el.insertAdjacentHTML("afterbegin", `<svg width="${w}" height="${h}" role="img" aria-label="Official on-time running">${g}</svg>`);
+  const svg = el.querySelector("svg"), xh = svg.querySelector("#offX");
+  const mv = e => { const r = svg.getBoundingClientRect(), cx = e.clientX - r.left, i = Math.max(0, Math.min(ser.length - 1, Math.round((cx - p.l) / ((w - p.l - p.r) / Math.max(1, ser.length - 1))))), d = ser[i];
+    xh.setAttribute("x1", x(i)); xh.setAttribute("x2", x(i)); xh.setAttribute("visibility", "visible");
+    tip.innerHTML = `<b>${new Date(d.month + "-15").toLocaleDateString("en-AU", {month: "long", year: "numeric"})}</b><br><span class="dot" style="background:var(--series-1)"></span> Northern Beaches: ${d.home ?? "–"}%${d.home_operator ? ` <span class="sub">(${esc(d.home_operator)})</span>` : ""}<br><span class="dot" style="background:var(--muted)"></span> Other regions: ${d.others_avg ?? "–"}%`;
+    tip.style.display = "block"; tip.style.left = Math.min(x(i) + 8, w - 230) + "px"; tip.style.top = "8px"; };
+  svg.addEventListener("pointermove", mv); svg.addEventListener("pointerdown", mv);
+  svg.addEventListener("pointerleave", () => { tip.style.display = "none"; xh.setAttribute("visibility", "hidden"); });
+
+  const rk = O.otr_ranking_12m, mx = Math.max(...rk.map(r => r.otr_12m)), mn = Math.min(...rk.map(r => r.otr_12m)) - 1;
+  $("offRank").innerHTML = rk.map((r, i) => `<tr class="${r.home ? "home" : ""}"><td>${i + 1}. ${esc(r.operator)} <span class="sub">(Region ${r.region})</span>${r.home ? " ◀" : ""}</td><td class="r" style="width:150px;white-space:nowrap"><span class="bar ${r.home ? "" : "muted"}" style="width:${Math.max(4, (r.otr_12m - mn) / (mx - mn) * 70)}px;margin-right:6px"></span>${r.otr_12m.toFixed(1)}%</td></tr>`).join("");
+  const sm = O.sydney_monthly.filter(r => r.cancelled != null).slice(-1)[0];
+  $("offCancel").innerHTML = sm ? `Transport for NSW's official cancellation rate across all Sydney buses was <b>${sm.cancelled.toFixed(1)}%</b> in ${new Date(sm.month + "-15").toLocaleDateString("en-AU", {month: "long", year: "numeric"})}. It isn't published separately for each region. This site's own Northern Beaches figure for the last 7 days is <b>${pc(S.totals["7"].cancel_pct)}</b>, measured differently (from the live feed, excluding school services), so treat the two as a guide rather than a like-for-like comparison.` : "";
+  $("offSrc").textContent = `Latest official month: ${new Date(O.latest_month + "-15").toLocaleDateString("en-AU", {month: "long", year: "numeric"})}. Refreshed monthly from Transport for NSW open data.`;
 }
 
 // ---------- share card
