@@ -1,14 +1,17 @@
 {
- "updated": "2026-11-26T19:15:03+11:00",
+ "updated": "2026-11-26T22:31:18+11:00",
  "status": "ok",
  "date": "2026-11-26",
  "scheduled": 3456,
- "count": 112,
- "cancel_pct": 3.2,
- "observed": 1330,
- "late": 652,
- "late_pct": 49.0,
- "avg_late_min": 10.8,
+ "count": 117,
+ "cancel_pct": 3.4,
+ "observed": 84,
+ "late": 10,
+ "late_pct": 11.9,
+ "avg_late_min": 11.5,
+ "ontime": 74,
+ "ontime_pct": 88.1,
+ "anywhere_late_pct": 46.5,
  "am": {
   "scheduled": 800,
   "cancelled": 0
@@ -100,6 +103,15 @@
    "cancelled_in_row": 1
   },
   {
+   "route": "230",
+   "headsign": "Milsons Point",
+   "from": "23:25",
+   "to": "00:25",
+   "gap_min": 60,
+   "normal_min": 15.0,
+   "cancelled_in_row": 1
+  },
+  {
    "route": "180",
    "headsign": "Warringah Mall",
    "from": "18:05",
@@ -116,15 +128,6 @@
    "gap_min": 57,
    "normal_min": 21.0,
    "cancelled_in_row": 2
-  },
-  {
-   "route": "150X",
-   "headsign": "Manly",
-   "from": "17:40",
-   "to": "18:30",
-   "gap_min": 50,
-   "normal_min": 20.0,
-   "cancelled_in_row": 1
   }
  ],
  "late_trips": [
@@ -779,6 +782,31 @@
    "start_time": "22:49",
    "route": "160X",
    "headsign": "Chatswood"
+  },
+  {
+   "start_time": "23:02",
+   "route": "280",
+   "headsign": "Chatswood"
+  },
+  {
+   "start_time": "23:20",
+   "route": "160X",
+   "headsign": "Dee Why"
+  },
+  {
+   "start_time": "23:35",
+   "route": "173X",
+   "headsign": "City Wynyard"
+  },
+  {
+   "start_time": "23:45",
+   "route": "280",
+   "headsign": "Warringah Mall"
+  },
+  {
+   "start_time": "23:55",
+   "route": "230",
+   "headsign": "Milsons Point"
   }
  ],
  "school_cancelled": []
