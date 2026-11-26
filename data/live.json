@@ -1,13 +1,13 @@
 {
- "updated": "2026-11-26T15:46:17+11:00",
+ "updated": "2026-11-26T15:51:22+11:00",
  "status": "ok",
  "date": "2026-11-26",
  "scheduled": 3456,
  "count": 101,
  "cancel_pct": 2.9,
- "observed": 619,
- "late": 206,
- "late_pct": 33.3,
+ "observed": 637,
+ "late": 216,
+ "late_pct": 33.9,
  "avg_late_min": 11.4,
  "am": {
   "scheduled": 800,
@@ -165,16 +165,16 @@
    "late_min": 47
   },
   {
+   "route": "114",
+   "headsign": "RNS Hospital",
+   "start_time": "14:39",
+   "late_min": 45
+  },
+  {
    "route": "179",
    "headsign": "War Veterans Hm",
    "start_time": "13:42",
    "late_min": 43
-  },
-  {
-   "route": "114",
-   "headsign": "RNS Hospital",
-   "start_time": "14:39",
-   "late_min": 41
   },
   {
    "route": "173X",
@@ -183,22 +183,22 @@
    "late_min": 40
   },
   {
-   "route": "154X",
-   "headsign": "Dee Why",
-   "start_time": "15:55",
-   "late_min": 31
-  },
-  {
    "route": "114",
    "headsign": "Balmoral Beach",
    "start_time": "15:18",
-   "late_min": 30
+   "late_min": 33
   },
   {
    "route": "114",
    "headsign": "RNS Hospital",
    "start_time": "16:07",
-   "late_min": 30
+   "late_min": 33
+  },
+  {
+   "route": "154X",
+   "headsign": "Dee Why",
+   "start_time": "15:55",
+   "late_min": 31
   },
   {
    "route": "177",
