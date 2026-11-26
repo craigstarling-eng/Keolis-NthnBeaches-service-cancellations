@@ -1,24 +1,24 @@
 {
- "updated": "2026-11-27T07:20:24+11:00",
+ "updated": "2026-11-27T07:25:29+11:00",
  "status": "ok",
  "date": "2026-11-27",
  "scheduled": 3416,
- "count": 152,
- "cancel_pct": 4.4,
- "observed": 709,
- "late": 12,
- "late_pct": 1.7,
+ "count": 163,
+ "cancel_pct": 4.8,
+ "observed": 721,
+ "late": 13,
+ "late_pct": 1.8,
  "avg_late_min": 15.7,
- "ontime": 697,
- "ontime_pct": 98.3,
- "anywhere_late_pct": 12.6,
+ "ontime": 708,
+ "ontime_pct": 98.2,
+ "anywhere_late_pct": 12.9,
  "am": {
   "scheduled": 760,
-  "cancelled": 74
+  "cancelled": 75
  },
  "pm": {
   "scheduled": 748,
-  "cancelled": 26
+  "cancelled": 32
  },
  "gaps": [
   {
@@ -31,6 +31,15 @@
    "cancelled_in_row": 1
   },
   {
+   "route": "182",
+   "headsign": "Mona Vale",
+   "from": "15:57",
+   "to": "17:57",
+   "gap_min": 120,
+   "normal_min": 60.0,
+   "cancelled_in_row": 1
+  },
+  {
    "route": "177",
    "headsign": "Warringah Mall",
    "from": "08:50",
@@ -38,6 +47,15 @@
    "gap_min": 92,
    "normal_min": 60,
    "cancelled_in_row": 1
+  },
+  {
+   "route": "156",
+   "headsign": "Mccarrs Creek",
+   "from": "15:03",
+   "to": "16:14",
+   "gap_min": 71,
+   "normal_min": 30,
+   "cancelled_in_row": 2
   },
   {
    "route": "263",
@@ -76,6 +94,15 @@
    "cancelled_in_row": 1
   },
   {
+   "route": "185",
+   "headsign": "Narrabeen",
+   "from": "14:36",
+   "to": "15:36",
+   "gap_min": 60,
+   "normal_min": 30,
+   "cancelled_in_row": 1
+  },
+  {
    "route": "280",
    "headsign": "Chatswood",
    "from": "08:26",
@@ -94,40 +121,13 @@
    "cancelled_in_row": 2
   },
   {
-   "route": "174X",
-   "headsign": "Narraweena",
-   "from": "17:17",
-   "to": "18:07",
+   "route": "185",
+   "headsign": "Mona Vale",
+   "from": "15:07",
+   "to": "15:57",
    "gap_min": 50,
-   "normal_min": 27.5,
+   "normal_min": 30,
    "cancelled_in_row": 1
-  },
-  {
-   "route": "167",
-   "headsign": "Manly",
-   "from": "07:39",
-   "to": "08:22",
-   "gap_min": 43,
-   "normal_min": 20.0,
-   "cancelled_in_row": 1
-  },
-  {
-   "route": "280",
-   "headsign": "Warringah Mall",
-   "from": "08:05",
-   "to": "08:46",
-   "gap_min": 41,
-   "normal_min": 21.0,
-   "cancelled_in_row": 1
-  },
-  {
-   "route": "174X",
-   "headsign": "City Wynyard",
-   "from": "06:55",
-   "to": "07:35",
-   "gap_min": 40,
-   "normal_min": 14.0,
-   "cancelled_in_row": 2
   }
  ],
  "late_trips": [
@@ -135,7 +135,7 @@
    "route": "160X",
    "headsign": "Dee Why",
    "start_time": "06:30",
-   "late_min": 50
+   "late_min": 55
   },
   {
    "route": "100",
@@ -210,15 +210,15 @@
    "late_min": 11
   },
   {
-   "route": "199",
-   "headsign": "Palm Beach",
-   "start_time": "06:00",
-   "late_min": 11
-  },
-  {
    "route": "263",
    "headsign": "Neutral Bay Jn",
    "start_time": "07:00",
+   "late_min": 11
+  },
+  {
+   "route": "199",
+   "headsign": "Palm Beach",
+   "start_time": "06:00",
    "late_min": 11
   }
  ],
@@ -457,6 +457,11 @@
    "start_time": "07:59",
    "route": "167",
    "headsign": "Manly"
+  },
+  {
+   "start_time": "07:59",
+   "route": "B1",
+   "headsign": "Mona Vale"
   },
   {
    "start_time": "08:00",
@@ -779,6 +784,11 @@
    "headsign": "Milsons Point"
   },
   {
+   "start_time": "15:06",
+   "route": "185",
+   "headsign": "Narrabeen"
+  },
+  {
    "start_time": "15:08",
    "route": "166",
    "headsign": "Manly"
@@ -814,6 +824,11 @@
    "headsign": "Chatswood"
   },
   {
+   "start_time": "15:34",
+   "route": "156",
+   "headsign": "Mccarrs Creek"
+  },
+  {
    "start_time": "15:35",
    "route": "165X",
    "headsign": "South Curl Curl"
@@ -822,6 +837,11 @@
    "start_time": "15:36",
    "route": "100",
    "headsign": "Taronga Zoo via City QVB"
+  },
+  {
+   "start_time": "15:37",
+   "route": "185",
+   "headsign": "Mona Vale"
   },
   {
    "start_time": "15:40",
@@ -847,6 +867,11 @@
    "start_time": "15:50",
    "route": "199",
    "headsign": "Palm Beach"
+  },
+  {
+   "start_time": "15:54",
+   "route": "156",
+   "headsign": "Mccarrs Creek"
   },
   {
    "start_time": "15:57",
@@ -914,6 +939,11 @@
    "headsign": "RNS Hospital"
   },
   {
+   "start_time": "16:38",
+   "route": "B1",
+   "headsign": "City Wynyard"
+  },
+  {
    "start_time": "16:40",
    "route": "B1",
    "headsign": "Mona Vale"
@@ -942,6 +972,16 @@
    "start_time": "16:57",
    "route": "114",
    "headsign": "RNS Hospital"
+  },
+  {
+   "start_time": "16:57",
+   "route": "182",
+   "headsign": "Mona Vale"
+  },
+  {
+   "start_time": "17:04",
+   "route": "B1",
+   "headsign": "Mona Vale"
   },
   {
    "start_time": "17:15",
@@ -979,9 +1019,24 @@
    "headsign": "Dee Why"
   },
   {
+   "start_time": "17:40",
+   "route": "B1",
+   "headsign": "Mona Vale"
+  },
+  {
    "start_time": "17:42",
    "route": "174X",
    "headsign": "Narraweena"
+  },
+  {
+   "start_time": "17:52",
+   "route": "B1",
+   "headsign": "Mona Vale"
+  },
+  {
+   "start_time": "17:55",
+   "route": "B1",
+   "headsign": "City Wynyard"
   }
  ],
  "school_cancelled": []
