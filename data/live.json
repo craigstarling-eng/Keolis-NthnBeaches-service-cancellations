@@ -1,12 +1,12 @@
 {
- "updated": "2026-11-26T18:59:47+11:00",
+ "updated": "2026-11-26T19:04:52+11:00",
  "status": "ok",
  "date": "2026-11-26",
  "scheduled": 3456,
  "count": 111,
  "cancel_pct": 3.2,
- "observed": 1295,
- "late": 634,
+ "observed": 1309,
+ "late": 642,
  "late_pct": 49.0,
  "avg_late_min": 10.9,
  "am": {
