@@ -88,7 +88,7 @@ def figures():
         f"🗓️ Last 30 days{since(m, 30)}: {m['cxl']:,} cancelled ({pct(m['cxl'], m['sched'])}){ontime(m, 300)}.",
     ] + ([f"Most cancelled route this week: {w['worst'][0]} ({w['worst'][1]})."] if w["worst"] else []) + [
         "",
-        "School and charter services are left out. Today's count includes cancellations already listed for tonight.",
+        "Keolis Downer Northern Beaches (Region 8) services only. Other operators, school and charter services are left out. Today's count includes cancellations already listed for tonight.",
         "",
         f"Check your bus and see the full figures: {SITE}",
     ])
@@ -188,7 +188,7 @@ def draw_card(f, path):
         y += 230
     if f["worst"]:
         d.text((70, 915), f"Most cancelled route this week: {f['worst'][0]} ({f['worst'][1]})", font=font(32), fill="#cfe0f5")
-    d.text((70, 970), "School & charter services excluded · Data: Transport for NSW", font=font(26), fill="#6f8fb8")
+    d.text((70, 970), "Keolis Region 8 only · School & charter excluded · Data: TfNSW", font=font(26), fill="#6f8fb8")
     d.text((70, 1010), SITE.replace("https://", "").rstrip("/"), font=font(24), fill="#6f8fb8")
     im.save(path, "PNG", optimize=True)
 

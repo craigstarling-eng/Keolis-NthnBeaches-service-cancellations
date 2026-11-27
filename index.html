@@ -92,6 +92,7 @@ section[hidden]{display:none}
 <div class="viz-root">
   <h1>Northern Beaches Bus Watch</h1>
   <p class="lede">Independent tracking of cancelled and late Keolis buses on the Northern Beaches and Lower North Shore, using Transport for NSW's own live data.</p>
+  <p class="note" style="margin:0 0 10px;border-style:solid"><b>Keolis Downer Northern Beaches (Sydney bus Region 8) only.</b> Buses run by other operators, such as CDC NSW in the Forest district (Region 14), aren't counted.</p>
   <div class="sub"><span id="live" class="pill">Loading…</span> <span id="upd"></span></div>
   <div id="installBar" hidden style="margin:8px 0 0"><button class="btn primary" id="installBtn" type="button">📲 Install app</button>
   <p class="sub" id="installHelp" hidden style="margin-top:6px"></p></div>
@@ -189,7 +190,7 @@ section[hidden]{display:none}
 
   <div class="grid2">
     <div class="card" style="margin-top:14px">
-      <h2>Today's cancelled trips</h2>
+      <h2>Today's cancelled Keolis (Region 8) trips</h2>
       <p class="lede">Most cancelled routes today: <span id="todayRoutes"></span></p>
       <details id="todayDet"><summary id="todaySum">Show every cancelled trip</summary>
       <div class="scroll"><table><thead><tr><th>Time</th><th>Route</th><th>To</th></tr></thead><tbody id="today"></tbody></table></div></details>
@@ -321,6 +322,7 @@ section[hidden]{display:none}
     <details open>
       <summary>How this is measured</summary>
       <ul class="sub" style="padding-left:18px">
+        <li><b>What's covered.</b> Only services run by Keolis Downer Northern Beaches under Sydney bus contract Region 8. Other operators' buses on the Northern Beaches, such as CDC NSW (Region 14), aren't included in any figure except the region comparison.</li>
         <li><b>Source.</b> Transport for NSW open data: the live bus trip-updates feed (GTFS-realtime) and the published timetables. The data is checked about every 5 minutes.</li>
         <li><b>Cancelled.</b> A trip the live feed marks as cancelled. Each trip is counted once per day.</li>
         <li><b>Cancellation rate.</b> Cancelled trips divided by trips scheduled that day in the published timetable.</li>
@@ -391,7 +393,7 @@ function render() {
   const g0 = (L.gaps || []).find(g => g.gap_min);
   const peakS = (L.am?.scheduled || 0) + (L.pm?.scheduled || 0), peakC = (L.am?.cancelled || 0) + (L.pm?.cancelled || 0);
   $("tiles").innerHTML = [
-    ["Cancelled today", nf(L.count), (L.count_due != null ? `${nf(L.count_due)} so far, ${nf(L.count_ahead)} announced for later · ` : "") + (L.scheduled ? `${pc(L.cancel_pct)} of today's ${nf(L.scheduled)} trips` : "")],
+    ["Keolis trips cancelled today", nf(L.count), (L.count_due != null ? `${nf(L.count_due)} so far, ${nf(L.count_ahead)} announced for later · ` : "") + (L.scheduled ? `${pc(L.cancel_pct)} of today's ${nf(L.scheduled)} trips` : "")],
     ["Buses on time", pc(L.ontime_pct), L.observed ? `${pc(L.late_pct)} left 5+ min late${officialOtr() ? ` · TfNSW's official 12-month figure: ${officialOtr()}%` : ""}` : "No departures tracked yet"],
     ["Peak-hour cancellations", nf(peakC), peakS ? `${pc(pct(peakC, peakS))} of peak trips` : ""],
     ["Longest wait caused", g0 ? g0.gap_min + " min" : "–", g0 ? `Route ${esc(g0.route)}, ${g0.from}–${g0.to}` : "No gaps yet today"],
@@ -895,7 +897,7 @@ function drawShare() {
   lines.forEach((l, i) => x.fillText(l, 80, 620 + i * 70));
   x.fillStyle = "#6f8fb8"; x.font = "30px system-ui, sans-serif";
   x.font = "28px system-ui, sans-serif";
-  x.fillText("Keolis Northern Beaches · Data: Transport for NSW", 80, 950);
+  x.fillText("Keolis Northern Beaches (Region 8) only · Data: Transport for NSW", 80, 950);
   x.fillText(location.host + location.pathname.replace(/index\.html$/, ""), 80, 995, 920);
   $("shareText").value = `Northern Beaches buses, ${d.title.toLowerCase()} (${d.when}): ${nf(d.cancelled)} Keolis services cancelled${d.scheduled ? ` (${pc(d.rate)} of ${nf(d.scheduled)} scheduled trips)` : ""}${d.late != null ? `, and ${pc(d.late)} of buses left their first stop 5+ minutes late` : ""}.${d.extra ? " " + d.extra + "." : ""} Data from Transport for NSW: ${location.href.split("?")[0]}`;
   $("shareOut").hidden = false;
