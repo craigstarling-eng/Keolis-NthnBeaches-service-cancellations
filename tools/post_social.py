@@ -56,12 +56,14 @@ def period(daily, route_rows, dates):
     cxl = sum(n(r["cancelled"]) for r in days)
     obs = sum(n(r["observed"]) for r in days)
     on = sum(n(r.get("ontime")) for r in days)
+    peak = {k: sum(n(r.get(k)) for r in days) for k in
+            ("am_scheduled", "am_cancelled", "pm_scheduled", "pm_cancelled", "am_observed", "am_late", "pm_observed", "pm_late")}
     worst = Counter()
     for r in route_rows:
         if r["date"] in dates:
             worst[r["route"]] += n(r["cancelled"])
     top = worst.most_common(1)
-    return {"days": len(days), "sched": sched, "cxl": cxl, "obs": obs, "on": on,
+    return {"days": len(days), "sched": sched, "cxl": cxl, "obs": obs, "on": on, "peak": peak,
             "worst": top[0] if top and top[0][1] else None,
             "first": min((r["date"] for r in days), default=None)}
 
@@ -80,9 +82,9 @@ BAD_LINES = [
 ]
 VERY_BAD_LINES = [
     "😞 A really bad day for Beaches commuters.",
-    "😔 Hard to sugar-coat this one: well over one in twenty services didn't run.",
+    "😔 Hard to sugar-coat this one. A really poor day.",
     "😞 A very poor day. Commuters deserve far better.",
-    "😠 Not acceptable. Far too many services didn't run today.",
+    "😠 Not acceptable. Far too many buses let people down today.",
     "😞 One of those days where the bus just didn't turn up.",
     "😔 Grim numbers today for anyone relying on the bus.",
 ]
@@ -103,8 +105,8 @@ WEEK_BAD_LINES = [
 ]
 WEEK_VERY_BAD_LINES = [
     "😞 A really bad week for Beaches commuters.",
-    "😔 Hard to sugar-coat this one: well over one in twenty services didn't run last week.",
-    "😠 Not acceptable. Far too many services didn't run last week.",
+    "😔 Hard to sugar-coat this one. A really poor week.",
+    "😠 Not acceptable. Far too many buses let people down last week.",
     "😞 A very poor week. Commuters deserve far better.",
 ]
 WEEK_LATE_LINES = [
@@ -114,20 +116,75 @@ WEEK_LATE_LINES = [
 ]
 
 
+# Service rating, same bands as the live dial on the site. Takes the worse of the whole period and the
+# AM / PM peaks, so a terrible evening peak isn't averaged away by a quiet middle of the day.
+RATINGS = [("Good", "#2e9e3e"), ("Fair", "#f2c200"), ("Poor", "#f08a00"), ("Bad", "#d62d20"), ("Extremely bad", "#8e0e0e")]
+CXL_STEPS = [1, 3, 6, 10]      # % cancelled: upper edge of Good, Fair, Poor, Bad
+OTR_STEPS = [95, 90, 85, 75]   # % on time: lower edge of Good, Fair, Poor, Bad (TfNSW contract target is 95%)
+
+
+def _pos(v, steps, up):
+    e = [0 if up else 100, *steps, 20 if up else 50]
+    for i in range(5):
+        lo, hi = e[i], e[i + 1]
+        if (v < hi) if up else (v > hi):
+            return i + (v - lo) / (hi - lo)
+    return 4.97
+
+
+def rating(p):
+    """Return (position 0..5, 'cxl' or 'late') for a period dict from period()."""
+    cands = []
+    if p["sched"]:
+        cands.append((_pos(100 * p["cxl"] / p["sched"], CXL_STEPS, True), "cxl"))
+    if p["obs"] >= 100:
+        cands.append((_pos(100 * p["on"] / p["obs"], OTR_STEPS, False), "late"))
+    pk = p.get("peak") or {}
+    for side in ("am", "pm"):
+        if pk.get(f"{side}_scheduled", 0) >= 30:
+            cands.append((_pos(100 * pk[f"{side}_cancelled"] / pk[f"{side}_scheduled"], CXL_STEPS, True), "cxl"))
+        if pk.get(f"{side}_observed", 0) >= 50:   # peaks record late, not on time: early buses count as on time here
+            cands.append((_pos(100 - 100 * pk[f"{side}_late"] / pk[f"{side}_observed"], OTR_STEPS, False), "late"))
+    if not cands:
+        return 0.0, "cxl"
+    s, why = max(cands)
+    return max(0.0, min(4.97, s)), why
+
+
 def tone(d, today, pools=None):
-    """Return a disappointed opening line if the figures are bad, else ''."""
+    """Disappointed opening line when the rating is Poor or worse, else ''."""
     very_bad, bad, late = pools or (VERY_BAD_LINES, BAD_LINES, LATE_LINES)
-    cxl = 100 * d["cxl"] / d["sched"] if d["sched"] else 0
-    ontime = 100 * d["on"] / d["obs"] if d["obs"] >= 100 else 100
+    s, why = rating(d)
+    lvl = int(s)
     # Different line each day; stepping by 5 (coprime with every pool size) means no repeat on back-to-back days.
     pick = lambda lines: lines[(today.toordinal() * 5) % len(lines)]
-    if cxl >= VERY_BAD_CXL:
-        return pick(very_bad)
-    if cxl >= BAD_CXL:
-        return pick(bad)
-    if ontime < BAD_ONTIME:
+    if lvl < 2:
+        return ""
+    if why == "late":
         return pick(late)
-    return ""
+    return pick(very_bad if lvl >= 3 else bad)
+
+
+def draw_dial(im, cx, cy, r, score, label):
+    """Corner dial: five coloured wedges, needle, and the rating underneath."""
+    import math
+    d = ImageDraw.Draw(im)
+    ro = r + 14
+    d.pieslice((cx - ro, cy - ro, cx + ro, cy + ro), 180, 360, fill="#0b1a30")
+    for i, (_, col) in enumerate(RATINGS):
+        d.pieslice((cx - r, cy - r, cx + r, cy + r), 180 + 36 * i, 216 + 36 * i, fill=col, outline="#0b1a30", width=3)
+    d.rectangle((cx - ro, cy, cx + ro, cy + 8), fill="#0b1a30")
+    ang = math.radians(180 - score * 36)
+    tip = (cx + (r - 8) * math.cos(ang), cy - (r - 8) * math.sin(ang))
+    b1 = (cx + 9 * math.cos(ang + math.pi / 2), cy - 9 * math.sin(ang + math.pi / 2))
+    b2 = (cx + 9 * math.cos(ang - math.pi / 2), cy - 9 * math.sin(ang - math.pi / 2))
+    d.polygon([tip, b1, b2], fill="white", outline="#0b1a30", width=3)
+    d.ellipse((cx - 13, cy - 13, cx + 13, cy + 13), fill="white", outline="#0b1a30", width=3)
+    name, col = RATINGS[int(score)]
+    txt_col = {"Fair": "#ffd84d", "Poor": "#ffa53d", "Bad": "#ff7b6e", "Extremely bad": "#ff4d4d"}.get(name, "#5fd36f")
+    f1, f2 = font(22), font(30, True)
+    d.text((cx - d.textlength(label, font=f1) / 2, cy + 16), label, font=f1, fill="#9fc3f0")
+    d.text((cx - d.textlength(name.upper(), font=f2) / 2, cy + 42), name.upper(), font=f2, fill=txt_col)
 
 
 def figures():
@@ -163,7 +220,8 @@ def figures():
         blocks.append(("Last 30 days", m, since(m, 30).strip(" ()")))
     alt = (f"Northern Beaches bus figures for {when}: today {d['cxl']} cancelled, last 7 days {w['cxl']}, "
            f"last 30 days {m['cxl']}.")
-    return {"when": when, "blocks": blocks, "text": text, "alt": alt, "worst": w["worst"]}
+    return {"when": when, "short": today.strftime("%a %-d %b"), "blocks": blocks, "text": text, "alt": alt,
+            "worst": w["worst"], "score": rating(d)[0]}
 
 
 def weekly_figures():
@@ -208,14 +266,17 @@ def weekly_figures():
            "ℹ️ Keolis Region 8 only. School & charter services excluded.",
            f"👉 Full figures: {SITE}",
            f"📲 Free app: {INSTALL}"])
-    return {"when": when + partial, "total": w, "worst": worst, "bad_day": bd, "change": change, "text": text}
+    return {"when": when + partial, "total": w, "worst": worst, "bad_day": bd, "change": change, "text": text,
+            "score": rating(w)[0]}
 
 
 def draw_weekly(f, path):
     im = Image.new("RGB", (1080, 1080), "#0f2747")
     d = ImageDraw.Draw(im)
     d.text((70, 70), "Week in review", font=font(56, True), fill="white")
-    d.text((70, 145), f"Keolis Northern Beaches · {f['when']}", font=font(32), fill="#9fc3f0")
+    d.text((70, 140), "Keolis Northern Beaches", font=font(32), fill="#9fc3f0")
+    d.text((70, 178), f["when"], font=font(26), fill="#9fc3f0")
+    draw_dial(im, 912, 128, 80, f["score"], "Last week")
     t = f["total"]
     d.rounded_rectangle((60, 215, 1020, 420), radius=24, fill="#16335c")
     d.text((95, 240), "Last week", font=font(36, True), fill="#9fc3f0")
@@ -258,7 +319,8 @@ def draw_card(f, path):
     im = Image.new("RGB", (1080, 1080), "#0f2747")
     d = ImageDraw.Draw(im)
     d.text((70, 70), "Northern Beaches buses", font=font(52, True), fill="white")
-    d.text((70, 140), f"Keolis cancellations · {f['when']}", font=font(34), fill="#9fc3f0")
+    d.text((70, 140), f"Keolis cancellations · {f['short']}", font=font(34), fill="#9fc3f0")
+    draw_dial(im, 912, 128, 80, f["score"], "Today")
     y = 215 + 115 * (3 - len(f["blocks"]))   # centre when the 30-day box is hidden
     for label, p, note in f["blocks"]:
         d.rounded_rectangle((60, y, 1020, y + 205), radius=24, fill="#16335c")
