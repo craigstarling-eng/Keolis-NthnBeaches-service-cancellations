@@ -958,7 +958,7 @@ let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() 
 // Visitor counter (GoatCounter, free, no cookies). Hidden if the count can't be loaded.
 fetch("https://nbbuswatch.goatcounter.com/counter/TOTAL.json")
   .then(r => r.ok ? r.json() : Promise.reject())
-  .then(d => { if (d && d.count) { document.getElementById("visitCount").textContent = d.count; document.getElementById("visits").hidden = false; } })
+  .then(d => { if (d && d.count && d.count !== "0") { document.getElementById("visitCount").textContent = d.count; document.getElementById("visits").hidden = false; } })
   .catch(() => {});
 </script>
 <script>
