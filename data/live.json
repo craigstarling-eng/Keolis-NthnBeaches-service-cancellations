@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-28T04:12:15+11:00",
+ "updated": "2026-11-28T04:17:00+11:00",
  "status": "ok",
  "date": "2026-11-28",
  "count_due": 0,
@@ -7,13 +7,13 @@
  "scheduled": 2596,
  "count": 0,
  "cancel_pct": 0.0,
- "observed": 29,
+ "observed": 31,
  "late": 0,
  "late_pct": 0.0,
  "avg_late_min": null,
- "ontime": 29,
+ "ontime": 31,
  "ontime_pct": 100.0,
- "anywhere_late_pct": 3.4,
+ "anywhere_late_pct": 6.5,
  "am": {
   "scheduled": 348,
   "cancelled": 0
@@ -29,6 +29,12 @@
    "headsign": "Manly",
    "start_time": "04:00",
    "late_min": 10
+  },
+  {
+   "route": "BN1",
+   "headsign": "Mona Vale",
+   "start_time": "04:11",
+   "late_min": 6
   }
  ],
  "trips": [],
@@ -42,6 +48,11 @@
    0,
    0,
    1
+  ],
+  "2087781": [
+   0,
+   0,
+   null
   ],
   "2087838": [
    0,
@@ -60,7 +71,7 @@
   ],
   "2088134": [
    0,
-   1,
+   6,
    1
   ],
   "2088143": [
@@ -130,7 +141,7 @@
   ],
   "2375925": [
    0,
-   2,
+   3,
    1
   ],
   "2376084": [
@@ -139,6 +150,11 @@
    null
   ],
   "2376104": [
+   0,
+   0,
+   null
+  ],
+  "2376135": [
    0,
    0,
    null
