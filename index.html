@@ -99,9 +99,10 @@ section[hidden]{display:none}
 .badge.ok{color:var(--good);border-color:var(--good)}
 .badge.warn{color:var(--warn);border-color:var(--warn)}
 .trip .meta{grid-column:2;font-size:13px;color:var(--text-secondary)}
-.top{display:flex;gap:12px;align-items:flex-start;margin-bottom:10px}
-.top-text{flex:1;min-width:0}
-.dial{flex:0 0 auto;width:150px;text-align:center;padding:6px 8px 8px;margin-top:0}
+.status-row{display:flex;gap:10px;align-items:stretch;margin:0 0 10px}
+.status-side{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:8px}
+.status-side .wx{margin:0}
+.dial{flex:0 0 auto;width:150px;text-align:center;padding:6px 8px 8px;margin-top:0;display:flex;flex-direction:column;justify-content:center}
 .dial svg{width:100%;display:block;margin:0 auto}
 .dial .lvl{font-size:15px;font-weight:750;line-height:1.2}
 .dial .act{font-size:12px;font-weight:600;line-height:1.25}
@@ -110,16 +111,16 @@ section[hidden]{display:none}
 </head>
 <body>
 <div class="viz-root">
-  <div class="top">
-    <div class="top-text">
-      <h1>Northern Beaches Bus Watch</h1>
-      <p class="lede">Independent tracking of cancelled and late buses on the Northern Beaches and Lower North Shore, using Transport for NSW's own live data.</p>
-    </div>
+  <h1>Northern Beaches Bus Watch</h1>
+  <p class="lede">Independent tracking of cancelled and late buses on the Northern Beaches and Lower North Shore, using Transport for NSW's own live data.</p>
+  <div class="status-row">
     <div id="dial" class="card dial" aria-live="polite"></div>
+    <div class="status-side">
+      <div id="wx" class="wx" hidden></div>
+      <div class="sub"><span id="live" class="pill">Loading…</span> <span id="upd"></span><span id="dialWhy"></span></div>
+    </div>
   </div>
-  <div id="wx" class="wx" hidden></div>
   <p class="note" style="margin:0 0 10px;border-style:solid"><b>Headline figures are Keolis Downer Northern Beaches (Sydney bus Region 8) only.</b> CDC NSW routes that also run through the Northern Beaches (Region 14, mainly the Forest district) are tracked separately, and are marked "(CDC)" in My bus.</p>
-  <div class="sub"><span id="live" class="pill">Loading…</span> <span id="upd"></span><span id="dialWhy"></span></div>
   <div id="installBar" hidden style="margin:8px 0 0"><button class="btn primary" id="installBtn" type="button">📲 Install app</button>
   <p class="sub" id="installHelp" hidden style="margin-top:6px"></p> <a class="sub" href="install/">How to install</a></div>
 <nav class="tabs" role="tablist">
