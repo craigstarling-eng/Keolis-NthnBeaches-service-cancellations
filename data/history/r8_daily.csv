@@ -1,4 +1,4 @@
 date,scheduled,cancelled,observed,late,am_scheduled,am_cancelled,pm_scheduled,pm_cancelled,longest_gap_min,longest_gap_route,am_observed,am_late,pm_observed,pm_late,late_minutes,ontime,anywhere_observed,anywhere_late
 2026-11-26,2000,123,116,13,0,0,765,48,218,182 to Powderworks Rd,0,0,0,0,169,103,1496,721
-2026-11-27,3416,233,2924,261,760,76,748,53,130,177 to Warringah Mall,683,38,695,109,3495,2663,3021,1316
+2026-11-27,3416,233,2936,261,760,76,748,53,130,177 to Warringah Mall,683,38,695,109,3480,2675,3033,1320
 2026-11-28,2596,0,0,0,348,0,460,0,,,0,0,0,0,0,0,0,0
