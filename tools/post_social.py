@@ -69,15 +69,28 @@ def period(daily, route_rows, dates):
 # Disappointed opening line when the day is bad. Aimed at the service, never at drivers or a party.
 BAD_CXL, VERY_BAD_CXL, BAD_ONTIME = 3.0, 6.0, 85.0   # % cancelled, % cancelled, % on time
 BAD_LINES = [
-    "😞 Another disappointing day for Northern Beaches bus users.",
-    "😞 Not good enough today. Commuters on the Beaches deserve better.",
-    "😔 A lot of people were left waiting at stops today.",
+    "😞 Another disappointing day for Beaches bus users.",
+    "😞 Not good enough today. Commuters deserve better.",
+    "😔 Plenty of people left waiting at stops today.",
     "😞 A rough day on the Beaches buses.",
+    "😕 Not the service the Beaches should be getting.",
+    "😞 Disappointing numbers again today.",
+    "😔 Another day of waiting for buses that didn't come.",
+    "😞 Today fell short. Again.",
 ]
 VERY_BAD_LINES = [
-    "😞 A really bad day for Northern Beaches commuters. This isn't the service people are paying for.",
-    "😔 Hard to sugar-coat today: well over one in twenty services didn't run.",
-    "😞 Another very poor day on the Beaches buses. Commuters deserve far better than this.",
+    "😞 A really bad day for Beaches commuters.",
+    "😔 Hard to sugar-coat this one: well over one in twenty services didn't run.",
+    "😞 A very poor day. Commuters deserve far better.",
+    "😠 Not acceptable. Far too many services didn't run today.",
+    "😞 One of those days where the bus just didn't turn up.",
+    "😔 Grim numbers today for anyone relying on the bus.",
+]
+LATE_LINES = [
+    "😞 Disappointing day: too many buses running late.",
+    "😔 Lots of late running today. Not good enough.",
+    "😕 If your bus was late today, you weren't alone.",
+    "😞 Timetable? More of a suggestion today.",
 ]
 
 
@@ -85,14 +98,14 @@ def tone(d, today):
     """Return a disappointed opening line if today's figures are bad, else ''."""
     cxl = 100 * d["cxl"] / d["sched"] if d["sched"] else 0
     ontime = 100 * d["on"] / d["obs"] if d["obs"] >= 100 else 100
-    pick = lambda lines: lines[today.toordinal() % len(lines)]   # varies day to day
+    # Different line each day; stepping by 5 (coprime with every pool size) means no repeat on back-to-back days.
+    pick = lambda lines: lines[(today.toordinal() * 5) % len(lines)]
     if cxl >= VERY_BAD_CXL:
         return pick(VERY_BAD_LINES)
     if cxl >= BAD_CXL:
         return pick(BAD_LINES)
     if ontime < BAD_ONTIME:
-        return pick(["😞 Disappointing day: too many buses running late.",
-                     "😔 Lots of late running today. Not good enough."])
+        return pick(LATE_LINES)
     return ""
 
 
@@ -109,25 +122,24 @@ def figures():
         if p["days"] >= full:
             return ""
         return f" (since {dt.date.fromisoformat(p['first']).strftime('%-d %b')})"
-    ontime = lambda p, need: f", {pct(p["on"], p["obs"])} left their first stop on time" if p["obs"] >= need else ""
+    ontime = lambda p, need: f", {pct(p["on"], p["obs"])} on time" if p["obs"] >= need else ""
     when = today.strftime("%A %-d %B")
     mood = tone(d, today)
-    text = "\n".join([
-        f"Northern Beaches buses – {when}",
-        "",
-    ] + ([mood, ""] if mood else []) + [
-        f"🚌 Today so far: {d['cxl']} Keolis services cancelled ({pct(d['cxl'], d['sched'])} of today's trips){ontime(d, 100)}.",
-        f"📅 Last 7 days{since(w, 7)}: {w['cxl']:,} cancelled ({pct(w['cxl'], w['sched'])}){ontime(w, 300)}.",
-        f"🗓️ Last 30 days{since(m, 30)}: {m['cxl']:,} cancelled ({pct(m['cxl'], m['sched'])}){ontime(m, 300)}.",
-    ] + ([f"Most cancelled route this week: {w['worst'][0]} ({w['worst'][1]})."] if w["worst"] else []) + [
-        "",
-        "Keolis Downer Northern Beaches (Region 8) services only. Other operators, school and charter services are left out. Today's count includes cancellations already listed for tonight.",
-        "",
-        f"Check your bus and see the full figures: {SITE}",
-        f"📲 Get the free app on your phone: {INSTALL}",
-    ])
-    blocks = [("Today so far", d, ""), ("Last 7 days", w, since(w, 7).strip(" ()")),
-              ("Last 30 days", m, since(m, 30).strip(" ()"))]
+    show_month = m["days"] > w["days"]   # hide 30 days until there's more than a week of data
+    text = "\n".join(
+        [f"Northern Beaches buses – {when}", ""]
+        + ([mood, ""] if mood else [])
+        + [f"🚌 Today: {d['cxl']} cancelled ({pct(d['cxl'], d['sched'])}){ontime(d, 100)}",
+           f"📅 Last 7 days: {w['cxl']:,} cancelled ({pct(w['cxl'], w['sched'])}){ontime(w, 300)}"]
+        + ([f"🗓️ Last 30 days: {m['cxl']:,} cancelled ({pct(m['cxl'], m['sched'])}){ontime(m, 300)}"] if show_month else [])
+        + ([f"Worst route this week: {w['worst'][0]} ({w['worst'][1]})"] if w["worst"] else [])
+        + ["",
+           "Keolis Region 8 only. School & charter services excluded.",
+           f"Full figures: {SITE}",
+           f"📲 Free app: {INSTALL}"])
+    blocks = [("Today so far", d, ""), ("Last 7 days", w, since(w, 7).strip(" ()"))]
+    if show_month:
+        blocks.append(("Last 30 days", m, since(m, 30).strip(" ()")))
     alt = (f"Northern Beaches bus figures for {when}: today {d['cxl']} cancelled, last 7 days {w['cxl']}, "
            f"last 30 days {m['cxl']}.")
     return {"when": when, "blocks": blocks, "text": text, "alt": alt, "worst": w["worst"]}
@@ -206,7 +218,7 @@ def draw_card(f, path):
     d = ImageDraw.Draw(im)
     d.text((70, 70), "Northern Beaches buses", font=font(52, True), fill="white")
     d.text((70, 140), f"Keolis cancellations · {f['when']}", font=font(34), fill="#9fc3f0")
-    y = 215
+    y = 215 + 115 * (3 - len(f["blocks"]))   # centre when the 30-day box is hidden
     for label, p, note in f["blocks"]:
         d.rounded_rectangle((60, y, 1020, y + 205), radius=24, fill="#16335c")
         d.text((95, y + 25), label, font=font(36, True), fill="#9fc3f0")
