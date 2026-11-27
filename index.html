@@ -34,6 +34,10 @@ h2{font-size:16px;margin:0 0 4px}
 .tile .s{font-size:12px;color:var(--text-secondary);margin-top:2px}
 .dot{width:10px;height:10px;border-radius:50%;display:inline-block;flex:none;vertical-align:middle}
 .pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:2px 8px;border-radius:99px;border:1px solid var(--border)}
+.wx{display:flex;align-items:center;gap:8px;flex-wrap:wrap;border-radius:10px;padding:8px 12px;margin:0 0 10px;font-size:14px;background:var(--surface-1);border:1px solid var(--border)}
+.wx.rain{background:#e8f1fc;border-color:#9cc3ef;color:#0f3a6b}.wx.storm{background:#fde9e7;border-color:#f0a59c;color:#7a1a10}
+@media (prefers-color-scheme:dark){.wx.rain{background:#14304f;border-color:#2f5f94;color:#cfe3fb}.wx.storm{background:#3d1814;border-color:#8a3a30;color:#ffd6d0}}
+.wx b{font-weight:600}
 .note{background:var(--surface-1);border:1px dashed var(--border);border-radius:10px;padding:8px 12px;font-size:13px;color:var(--text-secondary);margin-top:12px}
 table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
 th,td{text-align:left;padding:7px 4px;border-bottom:1px solid var(--grid);font-size:14px;vertical-align:middle}
@@ -93,6 +97,7 @@ section[hidden]{display:none}
 <div class="viz-root">
   <h1>Northern Beaches Bus Watch</h1>
   <p class="lede">Independent tracking of cancelled and late buses on the Northern Beaches and Lower North Shore, using Transport for NSW's own live data.</p>
+  <div id="wx" class="wx" hidden></div>
   <p class="note" style="margin:0 0 10px;border-style:solid"><b>Headline figures are Keolis Downer Northern Beaches (Sydney bus Region 8) only.</b> CDC NSW routes that also run through the Northern Beaches (Region 14, mainly the Forest district) are tracked separately, and are marked "(CDC)" in My bus.</p>
   <div class="sub"><span id="live" class="pill">Loading…</span> <span id="upd"></span></div>
   <div id="installBar" hidden style="margin:8px 0 0"><button class="btn primary" id="installBtn" type="button">📲 Install app</button>
@@ -972,5 +977,33 @@ fetch("https://nbbuswatch.goatcounter.com/counter/TOTAL.json")
 window.goatcounter = { path: (matchMedia("(display-mode: standalone)").matches || navigator.standalone) ? "/app" : location.pathname };
 </script>
 <script data-goatcounter="https://nbbuswatch.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+<script>
+// ---------- weather strip (Open-Meteo, free, no key). Centred on Dee Why.
+{
+  const el = document.getElementById("wx");
+  const U = "https://api.open-meteo.com/v1/forecast?latitude=-33.75&longitude=151.29&current=temperature_2m,weather_code,precipitation&hourly=precipitation_probability,precipitation,weather_code&forecast_hours=4&timezone=Australia%2FSydney";
+  const WC = c => c === 0 ? ["☀️","Clear"] : c <= 2 ? ["⛅","Partly cloudy"] : c === 3 ? ["☁️","Cloudy"] : c <= 48 ? ["🌫️","Fog"]
+    : c <= 57 ? ["🌦️","Drizzle"] : c <= 67 ? ["🌧️","Rain"] : c <= 77 ? ["🌨️","Hail/snow"] : c <= 82 ? ["🌧️","Showers"] : ["⛈️","Thunderstorms"];
+  const show = () => fetch(U).then(r => r.json()).then(d => {
+    const c = d.current, h = d.hourly;
+    const [icon, label] = WC(c.weather_code);
+    const next = h.time.map((t, i) => ({ t, p: h.precipitation_probability[i] || 0, mm: h.precipitation[i] || 0, code: h.weather_code[i] }));
+    const storm = c.weather_code >= 95 || next.some(x => x.code >= 95 && x.p >= 40);
+    const wet = c.precipitation > 0 || next.find(x => x.p >= 50 || x.mm >= 0.5);
+    let msg = "";
+    if (storm) msg = "⚠️ <b>Storms possible in the next few hours.</b> Expect delays and allow extra time.";
+    else if (c.precipitation > 0) msg = "☔ <b>Raining now.</b> Buses often run late in the wet. Allow extra time.";
+    else if (wet) msg = "☔ <b>Rain likely from about " + (h => (h % 12 || 12) + (h < 12 ? "am" : "pm"))(+wet.t.slice(11, 13)) + ".</b> Bring an umbrella for the wait.";
+    el.className = "wx" + (storm ? " storm" : (msg ? " rain" : ""));
+    el.textContent = "";
+    const now = document.createElement("span");
+    now.textContent = icon + " " + Math.round(c.temperature_2m) + "° " + label + " on the Northern Beaches";
+    el.appendChild(now);
+    if (msg) { const w = document.createElement("span"); w.innerHTML = msg; el.appendChild(w); }
+    el.hidden = false;
+  }).catch(() => {});
+  show(); setInterval(show, 15 * 60 * 1000);
+}
+</script>
 </body>
 </html>
