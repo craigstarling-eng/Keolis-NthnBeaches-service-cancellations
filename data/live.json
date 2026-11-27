@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-28T03:11:43+11:00",
+ "updated": "2026-11-28T03:16:19+11:00",
  "status": "ok",
  "date": "2026-11-28",
  "count_due": 0,
@@ -7,13 +7,13 @@
  "scheduled": 2596,
  "count": 0,
  "cancel_pct": 0.0,
- "observed": 4,
+ "observed": 5,
  "late": 1,
- "late_pct": 25.0,
- "avg_late_min": 9.0,
- "ontime": 3,
- "ontime_pct": 75.0,
- "anywhere_late_pct": 25.0,
+ "late_pct": 20.0,
+ "avg_late_min": 10.0,
+ "ontime": 4,
+ "ontime_pct": 80.0,
+ "anywhere_late_pct": 20.0,
  "am": {
   "scheduled": 348,
   "cancelled": 0
@@ -28,19 +28,24 @@
    "route": "144",
    "headsign": "Manly",
    "start_time": "04:00",
-   "late_min": 9
+   "late_min": 10
   }
  ],
  "trips": [],
  "active": {
+  "2087725": [
+   0,
+   0,
+   null
+  ],
   "2088134": [
    0,
    0,
    null
   ],
   "2374008": [
-   9,
-   9,
+   10,
+   10,
    null
   ],
   "2375595": [
