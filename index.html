@@ -343,7 +343,7 @@ section[hidden]{display:none}
         <li><b>On time / late.</b> Measured when the bus leaves its first stop, the same point Transport for NSW uses for its official on-time running figures. On time means no more than 1 minute early or 5 minutes late. Late means more than 5 minutes late. This uses the live feed's latest reading for the first stop, checked every 5 minutes, so it's close to but not identical to the official figure.</li>
         <li><b>Late anywhere on the route.</b> Shown separately: a bus that was 5+ minutes behind timetable at any stop we checked. This is much higher than the first-stop figure, because delays build up along a route, so don't compare it with official on-time running.</li>
         <li><b>Longest waits.</b> The gap between the scheduled start of the bus before and the bus after a cancelled trip on the same route and direction.</li>
-        <li><b>Privacy.</b> This site has no logins and no tracking. In the School bus tab, a home address you type is looked up with OpenStreetMap's free address search and never stored. "Save as my bus" is stored only on your own phone. If Telegram alerts are switched on, they store only your chat number and chosen buses, encrypted, so the bot can message you; send /stop to delete them.</li>
+        <li><b>Privacy.</b> This site has no logins and no tracking cookies. Visits are counted with GoatCounter, which stores no personal data and doesn't follow you to other sites. In the School bus tab, a home address you type is looked up with OpenStreetMap's free address search and never stored. "Save as my bus" is stored only on your own phone. If Telegram alerts are switched on, they store only your chat number and chosen buses, encrypted, so the bot can message you; send /stop to delete them.</li>
         <li><b>Comparisons.</b> Every Sydney contract region is measured with exactly the same method. Operators may differ in how promptly they mark trips as cancelled in the live feed, so treat region comparisons alongside the official Transport for NSW figures.</li>
         <li><b>Limits.</b> If the live feed is down, nothing is recorded for that time. Tracking began on <span id="mStart"></span>. Marked days (strikes, storms) are shown on the charts so they can be read in context.</li>
       </ul>
@@ -362,6 +362,7 @@ section[hidden]{display:none}
   </div>
   </section>
   <p class="sub">Source: Transport for NSW open data, licensed CC BY 4.0. Updates about every 5 minutes.</p>
+  <p class="sub" id="visits" hidden>👀 <b id="visitCount"></b> visits to this site</p>
 </div>
 <script>
 let S, L, R, G, O, TT, TS, CD = null, E = [], BOT = null;
@@ -953,5 +954,13 @@ tabsInit();
 load(); setInterval(load, 120000);
 let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => S && render(), 150); });
 </script>
+<script>
+// Visitor counter (GoatCounter, free, no cookies). Hidden if the count can't be loaded.
+fetch("https://nbbuswatch.goatcounter.com/counter/TOTAL.json")
+  .then(r => r.ok ? r.json() : Promise.reject())
+  .then(d => { if (d && d.count) { document.getElementById("visitCount").textContent = d.count; document.getElementById("visits").hidden = false; } })
+  .catch(() => {});
+</script>
+<script data-goatcounter="https://nbbuswatch.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 </body>
 </html>
