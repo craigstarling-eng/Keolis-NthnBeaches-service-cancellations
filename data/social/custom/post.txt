@@ -1,0 +1,13 @@
+205 Keolis bus trips cancelled on the Northern Beaches today, and the day isn't over.
+
+🚌 112 have already been missed, and 93 more are already listed as cancelled for later today
+📊 That's 6% of the 3,416 trips scheduled
+🌅 Morning peak: 76 of 760 trips cancelled (10%)
+⏱️ Longest wait: route 177 to Warringah Mall, 130 minutes with no bus (normally hourly)
+📍 Most cancelled: B1 (28), 199 (23), 160X (21)
+
+Figures as at 2:15pm, from Transport for NSW's own live data. Keolis Downer Northern Beaches services only. School and charter runs are not counted.
+
+Check whether your bus is running: nbbuswatch.github.io
+
+Was your bus cancelled today? Tell us your route in the comments 👇

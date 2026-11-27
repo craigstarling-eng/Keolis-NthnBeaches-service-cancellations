@@ -1,0 +1,26 @@
+name: social-custom-post
+# Posts data/social/custom/post.txt with post.png to the Facebook Page whenever post.txt changes.
+on:
+  push:
+    branches: [main]
+    paths: ["data/social/custom/post.txt"]
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests pillow
+      - run: |
+          python - <<'PY'
+          import sys
+          sys.path.insert(0, "tools")
+          import post_social as p
+          text = open("data/social/custom/post.txt", encoding="utf-8").read().strip()
+          sys.exit(0 if p.post_facebook(text, "data/social/custom/post.png") else 1)
+          PY
+        env:
+          FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
+          FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
