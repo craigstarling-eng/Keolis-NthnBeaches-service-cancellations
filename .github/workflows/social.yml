@@ -6,7 +6,7 @@ on:
       mode:
         description: "Which post"
         type: choice
-        options: [summary]
+        options: [summary, weekly]
         default: summary
 jobs:
   post:

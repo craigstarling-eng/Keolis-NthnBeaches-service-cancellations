@@ -2,6 +2,7 @@
 
   python tools/post_social.py auto       -> run by the collector every 5 min; posts the afternoon summary once a day
   python tools/post_social.py summary    -> post the summary now
+  python tools/post_social.py weekly     -> post last week's worst routes now (Mondays 9am automatically)
   add --dry-run to only build the image and text (saved in data/social/)
 
 One post a day at POST_AT (Sydney time): today so far, the last 7 days and the last 30 days, with a link to the site.
@@ -28,6 +29,7 @@ SYD = ZoneInfo("Australia/Sydney")
 FB_API = "https://graph.facebook.com/v26.0"
 PAGE_ID = "1455302057670675"   # Northern Beaches Bus Watch (public)
 POST_AT = (17, 0)        # 5:00 pm, after the school run and as the evening peak starts
+WEEKLY_AT = (9, 0)       # Mondays 9:00 am: worst routes of the week just gone
 MAX_TRIES = 3
 
 
@@ -97,6 +99,68 @@ def figures():
     return {"when": when, "blocks": blocks, "text": text, "alt": alt, "worst": w["worst"]}
 
 
+def weekly_figures():
+    """Monday to Sunday just gone: totals, change on the week before, and the five worst routes."""
+    today = dt.datetime.now(SYD).date()
+    end = today - dt.timedelta(days=today.weekday() + 1)          # last Sunday
+    week = {(end - dt.timedelta(days=i)).isoformat() for i in range(7)}
+    prev = {(end - dt.timedelta(days=i)).isoformat() for i in range(7, 14)}
+    daily = rows("history/r8_daily.csv")
+    routes = rows("history/r8_routes_daily.csv")
+    w, p = period(daily, routes, week), period(daily, routes, prev)
+    if not w["sched"]:
+        sys.exit("No figures for last week yet; nothing to post.")
+    per = {}
+    for r in routes:
+        if r["date"] in week:
+            a = per.setdefault(r["route"], [0, 0])
+            a[0] += n(r["scheduled"]); a[1] += n(r["cancelled"])
+    worst = sorted(((rt, c, sc) for rt, (sc, c) in per.items() if c and sc >= 20), key=lambda x: (-x[1], -x[1] / x[2]))[:5]
+    first = dt.date.fromisoformat(min(d for d in week)).strftime("%-d %b")
+    when = f"{first} – {end.strftime('%-d %b')}"
+    partial = f" ({w['days']} days tracked)" if w["days"] < 7 else ""
+    change = ""
+    if p["days"] == 7 and w["days"] == 7 and p["cxl"]:
+        diff = w["cxl"] - p["cxl"]
+        change = f" That's {abs(diff)} {'more' if diff > 0 else 'fewer'} than the week before." if diff else " Same as the week before."
+    lines = [f"{i}. Route {rt}: {c} cancelled ({pct(c, sc)} of its trips)" for i, (rt, c, sc) in enumerate(worst, 1)]
+    text = "\n".join([
+        f"Worst Northern Beaches bus routes, week of {when}{partial} 🚌",
+        "",
+        f"{w['cxl']:,} Keolis services were cancelled ({pct(w['cxl'], w['sched'])} of scheduled trips).{change}",
+        "",
+        "Most cancelled routes:",
+        *lines,
+        "",
+        "School and charter services are left out.",
+        "",
+        f"Check your route: {SITE}",
+    ])
+    return {"when": when + partial, "total": w, "worst": worst, "text": text}
+
+
+def draw_weekly(f, path):
+    im = Image.new("RGB", (1080, 1080), "#0f2747")
+    d = ImageDraw.Draw(im)
+    d.text((70, 70), "Worst routes last week", font=font(56, True), fill="white")
+    d.text((70, 145), f"Keolis Northern Beaches · {f['when']}", font=font(32), fill="#9fc3f0")
+    t = f["total"]
+    d.text((70, 215), f"{t['cxl']:,} cancelled · {pct(t['cxl'], t['sched'])} of {t['sched']:,} trips", font=font(38, True), fill="white")
+    top = max((c for _, c, _ in f["worst"]), default=1)
+    y = 310
+    for rt, c, sc in f["worst"]:
+        d.rounded_rectangle((60, y, 1020, y + 105), radius=20, fill="#16335c")
+        d.text((90, y + 22), rt, font=font(52, True), fill="white")
+        w = int(420 * c / top)
+        d.rounded_rectangle((300, y + 30, 300 + max(w, 8), y + 75), radius=8, fill="#e8a33d")
+        lab = f"{c}  ({pct(c, sc)})"
+        d.text((1000 - d.textlength(lab, font=font(32, True)), y + 33), lab, font=font(32, True), fill="white")
+        y += 120
+    d.text((70, 970), "Cancelled trips (share of route's trips) · School & charter excluded", font=font(24), fill="#6f8fb8")
+    d.text((70, 1010), SITE.replace("https://", "").rstrip("/"), font=font(24), fill="#6f8fb8")
+    im.save(path, "PNG", optimize=True)
+
+
 def font(size, bold=False):
     p = f"/usr/share/fonts/truetype/dejavu/DejaVuSans{'-Bold' if bold else ''}.ttf"
     return ImageFont.truetype(p, size) if os.path.exists(p) else ImageFont.load_default(size)
@@ -145,11 +209,15 @@ def configured():
     return bool((os.environ.get("FB_PAGE_ID", "").strip() or PAGE_ID) and os.environ.get("FB_PAGE_TOKEN", "").strip())
 
 
-def publish(dry=False):
-    f = figures()
+def publish(kind="summary", dry=False):
     os.makedirs(OUT_DIR, exist_ok=True)
-    img = os.path.join(OUT_DIR, "summary.png")
-    draw_card(f, img)
+    img = os.path.join(OUT_DIR, f"{kind}.png")
+    if kind == "weekly":
+        f = weekly_figures()
+        draw_weekly(f, img)
+    else:
+        f = figures()
+        draw_card(f, img)
     print(f["text"])
     if dry:
         return True
@@ -161,9 +229,10 @@ def publish(dry=False):
 
 
 def auto():
-    """Called every few minutes. Posts once a day after POST_AT, retrying a failed post up to MAX_TRIES times."""
+    """Called every few minutes. Daily summary after POST_AT; weekly worst routes on Mondays after WEEKLY_AT.
+    Each posts once, retrying a failed post up to MAX_TRIES times."""
     now = dt.datetime.now(SYD)
-    if not configured() or (now.hour, now.minute) < POST_AT:
+    if not configured():
         return
     try:
         with open(STATE) as fh:
@@ -172,16 +241,30 @@ def auto():
         state = {}
     fb = state.setdefault("facebook", {})
     today = now.date().isoformat()
-    tries = fb.get("summary_tries", {}).get(today, 0)
-    if fb.get("summary") == today or tries >= MAX_TRIES:
-        return
-    if publish():
-        fb["summary"] = today
-    else:
-        fb["summary_tries"] = {today: tries + 1}
-    os.makedirs(OUT_DIR, exist_ok=True)
-    with open(STATE, "w") as fh:
-        json.dump(state, fh, indent=1)
+    due = []
+    if now.weekday() == 0 and (now.hour, now.minute) >= WEEKLY_AT:
+        due.append("weekly")
+    if (now.hour, now.minute) >= POST_AT:
+        due.append("summary")
+    changed = False
+    for kind in due:
+        tries = fb.get(f"{kind}_tries", {}).get(today, 0)
+        if fb.get(kind) == today or tries >= MAX_TRIES:
+            continue
+        try:
+            ok = publish(kind)
+        except SystemExit as e:  # no figures yet
+            print(e)
+            ok = False
+        if ok:
+            fb[kind] = today
+        else:
+            fb[f"{kind}_tries"] = {today: tries + 1}
+        changed = True
+    if changed:
+        os.makedirs(OUT_DIR, exist_ok=True)
+        with open(STATE, "w") as fh:
+            json.dump(state, fh, indent=1)
 
 
 def main():
@@ -191,7 +274,7 @@ def main():
         return auto()
     if not configured() and not dry:
         sys.exit("The Facebook Page isn't set up yet (add the FB_PAGE_ID and FB_PAGE_TOKEN secrets first).")
-    if not publish(dry=dry):
+    if not publish(mode if mode in ("summary", "weekly") else "summary", dry=dry):
         sys.exit(1)
 
 
