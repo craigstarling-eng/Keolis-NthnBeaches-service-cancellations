@@ -66,6 +66,36 @@ def period(daily, route_rows, dates):
             "first": min((r["date"] for r in days), default=None)}
 
 
+# Disappointed opening line when the day is bad. Aimed at the service, never at drivers or a party.
+BAD_CXL, VERY_BAD_CXL, BAD_ONTIME = 3.0, 6.0, 85.0   # % cancelled, % cancelled, % on time
+BAD_LINES = [
+    "😞 Another disappointing day for Northern Beaches bus users.",
+    "😞 Not good enough today. Commuters on the Beaches deserve better.",
+    "😔 A lot of people were left waiting at stops today.",
+    "😞 A rough day on the Beaches buses.",
+]
+VERY_BAD_LINES = [
+    "😞 A really bad day for Northern Beaches commuters. This isn't the service people are paying for.",
+    "😔 Hard to sugar-coat today: well over one in twenty services didn't run.",
+    "😞 Another very poor day on the Beaches buses. Commuters deserve far better than this.",
+]
+
+
+def tone(d, today):
+    """Return a disappointed opening line if today's figures are bad, else ''."""
+    cxl = 100 * d["cxl"] / d["sched"] if d["sched"] else 0
+    ontime = 100 * d["on"] / d["obs"] if d["obs"] >= 100 else 100
+    pick = lambda lines: lines[today.toordinal() % len(lines)]   # varies day to day
+    if cxl >= VERY_BAD_CXL:
+        return pick(VERY_BAD_LINES)
+    if cxl >= BAD_CXL:
+        return pick(BAD_LINES)
+    if ontime < BAD_ONTIME:
+        return pick(["😞 Disappointing day: too many buses running late.",
+                     "😔 Lots of late running today. Not good enough."])
+    return ""
+
+
 def figures():
     now = dt.datetime.now(SYD)
     today = now.date()
@@ -81,9 +111,11 @@ def figures():
         return f" (since {dt.date.fromisoformat(p['first']).strftime('%-d %b')})"
     ontime = lambda p, need: f", {pct(p["on"], p["obs"])} left their first stop on time" if p["obs"] >= need else ""
     when = today.strftime("%A %-d %B")
+    mood = tone(d, today)
     text = "\n".join([
         f"Northern Beaches buses – {when}",
         "",
+    ] + ([mood, ""] if mood else []) + [
         f"🚌 Today so far: {d['cxl']} Keolis services cancelled ({pct(d['cxl'], d['sched'])} of today's trips){ontime(d, 100)}.",
         f"📅 Last 7 days{since(w, 7)}: {w['cxl']:,} cancelled ({pct(w['cxl'], w['sched'])}){ontime(w, 300)}.",
         f"🗓️ Last 30 days{since(m, 30)}: {m['cxl']:,} cancelled ({pct(m['cxl'], m['sched'])}){ontime(m, 300)}.",
