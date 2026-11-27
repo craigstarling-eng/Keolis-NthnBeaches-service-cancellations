@@ -187,9 +187,22 @@ def draw_dial(im, cx, cy, r, score, label):
     d.text((cx - d.textlength(name.upper(), font=f2) / 2, cy + 42), name.upper(), font=f2, fill=txt_col)
 
 
+def grabbed_at(now):
+    """Time the figures were last collected (summary.json 'updated'), Sydney time, e.g. '5:32 pm'."""
+    try:
+        with open(os.path.join(DATA, "summary.json")) as fh:
+            t = dt.datetime.fromisoformat(json.load(fh)["updated"]).astimezone(SYD)
+        if t.date() == now.date():
+            now = t
+    except (OSError, ValueError, KeyError, TypeError):
+        pass
+    return now.strftime("%-I:%M %p").lower()
+
+
 def figures():
     now = dt.datetime.now(SYD)
     today = now.date()
+    at = grabbed_at(now)
     daily = rows("history/r8_daily.csv")
     routes = rows("history/r8_routes_daily.csv")
     span = lambda k: {(today - dt.timedelta(days=i)).isoformat() for i in range(k)}
@@ -205,7 +218,7 @@ def figures():
     mood = tone(d, today)
     show_month = m["days"] > w["days"]   # hide 30 days until there's more than a week of data
     text = "\n".join(
-        [f"🚍 Northern Beaches buses – {when} 🌊", ""]
+        [f"🚍 Northern Beaches buses – {when}, as at {at} 🌊", ""]
         + ([mood, ""] if mood else [])
         + [f"🚌 Today: {d['cxl']} cancelled ({pct(d['cxl'], d['sched'])}){ontime(d, 100)}",
            f"📅 Last 7 days: {w['cxl']:,} cancelled ({pct(w['cxl'], w['sched'])}){ontime(w, 300)}"]
@@ -218,9 +231,9 @@ def figures():
     blocks = [("Today so far", d, ""), ("Last 7 days", w, since(w, 7).strip(" ()"))]
     if show_month:
         blocks.append(("Last 30 days", m, since(m, 30).strip(" ()")))
-    alt = (f"Northern Beaches bus figures for {when}: today {d['cxl']} cancelled, last 7 days {w['cxl']}, "
+    alt = (f"Northern Beaches bus figures for {when} as at {at}: today {d['cxl']} cancelled, last 7 days {w['cxl']}, "
            f"last 30 days {m['cxl']}.")
-    return {"when": when, "short": today.strftime("%a %-d %b"), "blocks": blocks, "text": text, "alt": alt,
+    return {"when": when, "short": today.strftime("%a %-d %b"), "at": at, "blocks": blocks, "text": text, "alt": alt,
             "worst": w["worst"], "score": rating(d)[0]}
 
 
@@ -320,6 +333,7 @@ def draw_card(f, path):
     d = ImageDraw.Draw(im)
     d.text((70, 70), "Northern Beaches buses", font=font(52, True), fill="white")
     d.text((70, 140), f"Keolis cancellations · {f['short']}", font=font(34), fill="#9fc3f0")
+    d.text((70, 182), f"Figures as at {f['at']}", font=font(26), fill="#9fc3f0")
     draw_dial(im, 912, 128, 80, f["score"], "Today")
     y = 215 + 115 * (3 - len(f["blocks"]))   # centre when the 30-day box is hidden
     for label, p, note in f["blocks"]:
