@@ -148,15 +148,15 @@ def figures():
     mood = tone(d, today)
     show_month = m["days"] > w["days"]   # hide 30 days until there's more than a week of data
     text = "\n".join(
-        [f"Northern Beaches buses – {when}", ""]
+        [f"🚍 Northern Beaches buses – {when} 🌊", ""]
         + ([mood, ""] if mood else [])
         + [f"🚌 Today: {d['cxl']} cancelled ({pct(d['cxl'], d['sched'])}){ontime(d, 100)}",
            f"📅 Last 7 days: {w['cxl']:,} cancelled ({pct(w['cxl'], w['sched'])}){ontime(w, 300)}"]
         + ([f"🗓️ Last 30 days: {m['cxl']:,} cancelled ({pct(m['cxl'], m['sched'])}){ontime(m, 300)}"] if show_month else [])
-        + ([f"Worst route this week: {w['worst'][0]} ({w['worst'][1]})"] if w["worst"] else [])
+        + ([f"🚩 Worst route this week: {w['worst'][0]} ({w['worst'][1]})"] if w["worst"] else [])
         + ["",
-           "Keolis Region 8 only. School & charter services excluded.",
-           f"Full figures: {SITE}",
+           "ℹ️ Keolis Region 8 only. School & charter services excluded.",
+           f"👉 Full figures: {SITE}",
            f"📲 Free app: {INSTALL}"])
     blocks = [("Today so far", d, ""), ("Last 7 days", w, since(w, 7).strip(" ()"))]
     if show_month:
@@ -192,21 +192,21 @@ def weekly_figures():
     change = ""
     if p["days"] == 7 and w["days"] == 7 and p["sched"]:
         diff = 100 * w["cxl"] / w["sched"] - 100 * p["cxl"] / p["sched"]
-        change = ("Worse than the week before 📈" if diff > 0.2 else "Better than the week before 📉" if diff < -0.2 else "Similar to the week before")
+        change = ("📈 Worse than the week before" if diff > 0.2 else "📉 Better than the week before" if diff < -0.2 else "↔️ Similar to the week before")
     on = f", {pct(w['on'], w['obs'])} on time" if w["obs"] >= 300 else ""
     mood = tone(w, end, (WEEK_VERY_BAD_LINES, WEEK_BAD_LINES, WEEK_LATE_LINES))
-    bd = (f"Worst day: {dt.date.fromisoformat(bad_day['date']).strftime('%A')} "
+    bd = (f"📆 Worst day: {dt.date.fromisoformat(bad_day['date']).strftime('%A')} "
           f"({n(bad_day['cancelled'])} cancelled, {pct(n(bad_day['cancelled']), n(bad_day['scheduled']))})") if bad_day and n(bad_day["cancelled"]) else ""
     text = "\n".join(
-        [f"Northern Beaches buses – week in review, {when}{partial}", ""]
+        [f"🗓️ Northern Beaches buses – week in review 🚍 {when}{partial}", ""]
         + ([mood, ""] if mood else [])
         + [f"🚌 Last week: {w['cxl']:,} cancelled ({pct(w['cxl'], w['sched'])}){on}"]
         + ([change] if change else [])
         + ([bd] if bd else [])
-        + ([f"Worst routes: " + ", ".join(f"{rt} ({c})" for rt, c, _ in worst)] if worst else [])
+        + ([f"🚩 Worst routes: " + ", ".join(f"{rt} ({c})" for rt, c, _ in worst)] if worst else [])
         + ["",
-           "Keolis Region 8 only. School & charter services excluded.",
-           f"Full figures: {SITE}",
+           "ℹ️ Keolis Region 8 only. School & charter services excluded.",
+           f"👉 Full figures: {SITE}",
            f"📲 Free app: {INSTALL}"])
     return {"when": when + partial, "total": w, "worst": worst, "bad_day": bd, "change": change, "text": text}
 
@@ -230,7 +230,7 @@ def draw_weekly(f, path):
     y = 450
     for line in (f["bad_day"], f["change"]):
         if line:
-            d.text((70, y), line.replace(" 📈", "").replace(" 📉", ""), font=font(32), fill="#cfe0f5")
+            d.text((70, y), re.sub(r"^[^\w(]+", "", line), font=font(32), fill="#cfe0f5")
             y += 50
     y += 15
     if f["worst"]:
