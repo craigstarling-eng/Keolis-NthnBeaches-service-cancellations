@@ -1,6 +1,6 @@
 {
-  "name": "Northern Beaches Bus Tracker",
-  "short_name": "NB Buses",
+  "name": "Northern Beaches Bus Watch",
+  "short_name": "Bus Watch",
   "description": "Is my bus running? Live cancellations, lateness and reliability for Northern Beaches buses.",
   "start_url": "./#mybus",
   "scope": "./",

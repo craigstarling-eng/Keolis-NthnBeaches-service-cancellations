@@ -41,6 +41,7 @@ HOME_MAX_AGE_DAYS = 3
 OTHER_MAX_AGE_DAYS = 7
 MAX_REGION_DOWNLOADS_PER_RUN = 3
 LATE_SECONDS = 300                        # "late" = more than 5 minutes behind
+MAX_PLAUSIBLE_DELAY = 90 * 60             # readings beyond 90 min late are treated as feed glitches and ignored
 EARLY_SECONDS = -60                       # TfNSW on-time window: no more than 1 min early, 5 min late
 AM_PEAK = range(6, 9)                     # trips starting 06:00-08:59
 PM_PEAK = range(16, 19)                   # trips starting 16:00-18:59
@@ -570,6 +571,10 @@ def apply_observations(seen):
                 reg["delay"].pop(s["trip_id"], None)
                 start.pop(s["trip_id"], None)
             elif s["trip_id"] not in reg["cxl"]:
+                if s["delay"] is not None and s["delay"] > MAX_PLAUSIBLE_DELAY:
+                    s["delay"] = None
+                if s["start_delay"] is not None and s["start_delay"] > MAX_PLAUSIBLE_DELAY:
+                    s["start_delay"] = None
                 if s["delay"] is not None:
                     prev = reg["delay"].get(s["trip_id"])
                     reg["delay"][s["trip_id"]] = s["delay"] if prev is None else max(prev, s["delay"])
@@ -646,8 +651,8 @@ def home_day(home, date, cxl_rows, state):
     school_cxl = [r for r in cxl_all if r["route"] in school_names]
     cancelled = {r["trip_id"] for r in cxl_today}
     home_state = state["regions"].get(HOME_CODE, {})
-    anywhere = {t: d for t, d in home_state.get("delay", {}).items() if t not in cancelled}
-    delays = {t: d for t, d in home_state.get("start", {}).items() if t not in cancelled}
+    anywhere = {t: d for t, d in home_state.get("delay", {}).items() if t not in cancelled and d <= MAX_PLAUSIBLE_DELAY}
+    delays = {t: d for t, d in home_state.get("start", {}).items() if t not in cancelled and d <= MAX_PLAUSIBLE_DELAY}
 
     def is_peak(m, rng):
         return m is not None and (m // 60) % 24 in rng
@@ -902,6 +907,8 @@ def live_active(home, today, state, occ_now):
         if m is None or not (now_m - 180 <= m <= now_m + 60):
             continue
         s, a, o = start.get(tid), anywhere.get(tid), occ_now.get((today, tid))
+        s = None if s is not None and s > MAX_PLAUSIBLE_DELAY else s
+        a = None if a is not None and a > MAX_PLAUSIBLE_DELAY else a
         if s is None and a is None and o is None:
             continue
         out[tid] = [None if s is None else round(s / 60), None if a is None else round(a / 60), o]
@@ -1087,7 +1094,10 @@ def main():
         upsert_csv(REGIONS_DAILY, REGIONS_FIELDS, region_rows(regions, date, state), ["date", "code"],
                    keep_max=("cancelled",))
         if date == iso(today):
+            now_m = now_syd().hour * 60 + now_syd().minute
+            due = sum(1 for r in cxl_today if (hhmm_to_min(r["start_time"]) or 0) <= now_m)
             live_extra = {
+                "count_due": due, "count_ahead": daily["cancelled"] - due,
                 "scheduled": daily["scheduled"], "count": daily["cancelled"],
                 "cancel_pct": pct(daily["cancelled"], daily["scheduled"]),
                 "observed": daily["observed"], "late": daily["late"], "late_pct": pct(daily["late"], daily["observed"]),
@@ -1097,7 +1107,8 @@ def main():
                 "am": {"scheduled": daily["am_scheduled"], "cancelled": daily["am_cancelled"]},
                 "pm": {"scheduled": daily["pm_scheduled"], "cancelled": daily["pm_cancelled"]},
                 "gaps": gaps, "late_trips": late_trips,
-                "trips": [{k: r[k] for k in ("start_time", "route", "headsign", "trip_id")}
+                "trips": [{**{k: r[k] for k in ("start_time", "route", "headsign", "trip_id")},
+                           "from": ((home["trips"].get(r["trip_id"]) or [])[4:5] or [""])[0]}
                           for r in sorted(cxl_today, key=lambda r: r["start_time"] or "99")],
                 "active": live_active(home, date, load_state(date), occ_now),
                 "school_cancelled": [{k: r[k] for k in ("start_time", "route", "headsign")}

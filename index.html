@@ -9,8 +9,8 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="NB Buses">
-<title>Northern Beaches Bus Tracker</title>
+<meta name="apple-mobile-web-app-title" content="Bus Watch">
+<title>Northern Beaches Bus Watch</title>
 <meta name="description" content="Independent daily tracking of cancelled and late Keolis Northern Beaches bus services, from Transport for NSW open data.">
 <style>
 .viz-root{color-scheme:light;--bg:#f6f6f4;--surface-1:#fff;--text-primary:#191919;--text-secondary:#666;--grid:#e6e6e6;--border:#e2e2e2;
@@ -90,8 +90,8 @@ section[hidden]{display:none}
 </head>
 <body>
 <div class="viz-root">
-  <h1>Northern Beaches bus tracker</h1>
-  <p class="lede">Independent tracking of cancelled and late Keolis Northern Beaches (Region 8) bus services, built from Transport for NSW open data.</p>
+  <h1>Northern Beaches Bus Watch</h1>
+  <p class="lede">Independent tracking of cancelled and late Keolis buses on the Northern Beaches and Lower North Shore, using Transport for NSW's own live data.</p>
   <div class="sub"><span id="live" class="pill">Loading…</span> <span id="upd"></span></div>
   <div id="installBar" hidden style="margin:8px 0 0"><button class="btn primary" id="installBtn" type="button">📲 Install app</button>
   <p class="sub" id="installHelp" hidden style="margin-top:6px"></p></div>
@@ -124,9 +124,9 @@ section[hidden]{display:none}
     <div id="mbBest"></div>
   </div>
 
-  <div class="card">
+  <div class="card" id="tgWrap" hidden>
     <h2>Cancellation alerts</h2>
-    <div id="tgCard"><p class="sub">Coming soon: get a free Telegram message when your usual bus is cancelled, often hours before it's due.</p></div>
+    <div id="tgCard"></div>
   </div>
 
   <div class="card">
@@ -160,6 +160,12 @@ section[hidden]{display:none}
   <div class="tiles" id="tiles"></div>
   <p class="sub" style="margin:8px 2px 0">All figures exclude school services. Charter work isn't in the public timetable, so it's never counted. <span id="schoolNote"></span></p>
 
+  <div class="card">
+    <h2>Worst routes (last 30 days)</h2>
+    <div class="seg" id="leagueSeg"></div>
+    <p class="lede" id="leagueLede"></p>
+    <table><thead><tr><th>Route</th><th></th><th class="r">Cancelled</th><th class="r">Late</th></tr></thead><tbody id="league"></tbody></table>
+  </div>
   <!-- Share -->
   <div class="card">
     <h2>Share these numbers</h2>
@@ -184,7 +190,9 @@ section[hidden]{display:none}
   <div class="grid2">
     <div class="card" style="margin-top:14px">
       <h2>Today's cancelled trips</h2>
-      <div class="scroll"><table><thead><tr><th>Time</th><th>Route</th><th>To</th></tr></thead><tbody id="today"></tbody></table></div>
+      <p class="lede">Most cancelled routes today: <span id="todayRoutes"></span></p>
+      <details id="todayDet"><summary id="todaySum">Show every cancelled trip</summary>
+      <div class="scroll"><table><thead><tr><th>Time</th><th>Route</th><th>To</th></tr></thead><tbody id="today"></tbody></table></div></details>
       <div id="todayEmpty" class="empty" hidden>No cancellations logged yet today.</div>
     </div>
     <div class="card" style="margin-top:14px">
@@ -219,12 +227,6 @@ section[hidden]{display:none}
     <div id="routeOut"></div>
   </div>
 
-  <div class="card">
-    <h2>Worst routes (last 30 days)</h2>
-    <div class="seg" id="leagueSeg"></div>
-    <p class="lede" id="leagueLede"></p>
-    <table><thead><tr><th>Route</th><th></th><th class="r">Cancelled</th><th class="r">Late</th></tr></thead><tbody id="league"></tbody></table>
-  </div>
   <!-- Compare -->
   <div class="card">
     <h2>How the Northern Beaches compares</h2>
@@ -238,7 +240,7 @@ section[hidden]{display:none}
     <h2>Official Transport for NSW figures</h2>
     <p class="lede">On-time running is the share of trips leaving their first stop no more than 1 minute early or 5 minutes late, as published monthly by Transport for NSW.</p>
     <div class="seg" id="offSeg"></div>
-    <div class="legend"><span><span class="dot" style="background:var(--series-1)"></span>Northern Beaches (Region 8)</span><span><span class="dot" style="background:var(--muted)"></span>Average of other Sydney regions</span></div>
+    <div class="legend"><span><span class="dot" style="background:var(--series-1)"></span>Northern Beaches</span><span><span class="dot" style="background:var(--muted)"></span>Average of other Sydney regions</span></div>
     <div class="chart" id="offChart"><div class="tip" id="tip4"></div></div>
     <h2 style="margin-top:14px">On-time running, last 12 months</h2>
     <table><tbody id="offRank"></tbody></table>
@@ -322,11 +324,13 @@ section[hidden]{display:none}
         <li><b>Source.</b> Transport for NSW open data: the live bus trip-updates feed (GTFS-realtime) and the published timetables. The data is checked about every 5 minutes.</li>
         <li><b>Cancelled.</b> A trip the live feed marks as cancelled. Each trip is counted once per day.</li>
         <li><b>Cancellation rate.</b> Cancelled trips divided by trips scheduled that day in the published timetable.</li>
+        <li><b>Announced for later.</b> Keolis often marks trips as cancelled hours before they're due. Today's count includes these, shown separately from trips whose time has already passed. A trip that later runs after all is removed from the count.</li>
+        <li><b>Glitch filter.</b> Readings showing a bus more than 90 minutes behind are almost always feed errors, so they're ignored.</li>
         <li><b>School services excluded.</b> School routes (numbered like 560n, or marked as school buses in the timetable) are left out of every figure, including the comparison with other regions. Any cancelled school service is listed separately under the headline figures. Charter work isn't in the public timetable, so it's never counted.</li>
         <li><b>On time / late.</b> Measured when the bus leaves its first stop, the same point Transport for NSW uses for its official on-time running figures. On time means no more than 1 minute early or 5 minutes late. Late means more than 5 minutes late. This uses the live feed's latest reading for the first stop, checked every 5 minutes, so it's close to but not identical to the official figure.</li>
         <li><b>Late anywhere on the route.</b> Shown separately: a bus that was 5+ minutes behind timetable at any stop we checked. This is much higher than the first-stop figure, because delays build up along a route, so don't compare it with official on-time running.</li>
         <li><b>Longest waits.</b> The gap between the scheduled start of the bus before and the bus after a cancelled trip on the same route and direction.</li>
-        <li><b>Privacy.</b> This site has no logins and no tracking. In the School bus tab, a home address you type is looked up with OpenStreetMap's free address search and never stored. "Save as my bus" is stored only on your own phone. Telegram alerts store your chat number and chosen buses, encrypted, only so the bot can message you; send /stop to delete them.</li>
+        <li><b>Privacy.</b> This site has no logins and no tracking. In the School bus tab, a home address you type is looked up with OpenStreetMap's free address search and never stored. "Save as my bus" is stored only on your own phone. If Telegram alerts are switched on, they store only your chat number and chosen buses, encrypted, so the bot can message you; send /stop to delete them.</li>
         <li><b>Comparisons.</b> Every Sydney contract region is measured with exactly the same method. Operators may differ in how promptly they mark trips as cancelled in the live feed, so treat region comparisons alongside the official Transport for NSW figures.</li>
         <li><b>Limits.</b> If the live feed is down, nothing is recorded for that time. Tracking began on <span id="mStart"></span>. Marked days (strikes, storms) are shown on the charts so they can be read in context.</li>
       </ul>
@@ -387,8 +391,8 @@ function render() {
   const g0 = (L.gaps || []).find(g => g.gap_min);
   const peakS = (L.am?.scheduled || 0) + (L.pm?.scheduled || 0), peakC = (L.am?.cancelled || 0) + (L.pm?.cancelled || 0);
   $("tiles").innerHTML = [
-    ["Cancelled today", nf(L.count), L.scheduled ? `${pc(L.cancel_pct)} of ${nf(L.scheduled)} scheduled trips` : ""],
-    ["On time leaving first stop", pc(L.ontime_pct), L.observed ? `${pc(L.late_pct)} left 5+ min late${officialOtr() ? ` · official average ${officialOtr()}%` : ""}` : "No departures tracked yet"],
+    ["Cancelled today", nf(L.count), (L.count_due != null ? `${nf(L.count_due)} so far, ${nf(L.count_ahead)} announced for later · ` : "") + (L.scheduled ? `${pc(L.cancel_pct)} of today's ${nf(L.scheduled)} trips` : "")],
+    ["Buses on time", pc(L.ontime_pct), L.observed ? `${pc(L.late_pct)} left 5+ min late${officialOtr() ? ` · TfNSW's official 12-month figure: ${officialOtr()}%` : ""}` : "No departures tracked yet"],
     ["Peak-hour cancellations", nf(peakC), peakS ? `${pc(pct(peakC, peakS))} of peak trips` : ""],
     ["Longest wait caused", g0 ? g0.gap_min + " min" : "–", g0 ? `Route ${esc(g0.route)}, ${g0.from}–${g0.to}` : "No gaps yet today"],
   ].map(([l, n, s]) => `<div class="tile"><div class="l">${l}</div><div class="n">${n}</div><div class="s">${s}</div></div>`).join("");
@@ -400,7 +404,14 @@ function render() {
 
   const sc = L.school_cancelled || [];
   $("schoolNote").innerHTML = sc.length ? `<span class="warn">${sc.length} school service${sc.length === 1 ? " was" : "s were"} also cancelled today</span> (${sc.slice(0, 6).map(t => esc(t.route) + " " + esc(t.start_time)).join(", ")}${sc.length > 6 ? "…" : ""}).` : "";
-  $("today").innerHTML = (L.trips || []).map(t => `<tr><td>${esc(t.start_time)}</td><td><b>${esc(t.route)}</b></td><td>${esc(t.headsign)}</td></tr>`).join("");
+  const tripsAll = L.trips || [], nowM = nowMin() % 1440, isDue = t => hm(t.start_time) != null && hm(t.start_time) <= nowM;
+  const tRow = t => `<tr><td>${esc(t.start_time)}</td><td><b>${esc(t.route)}</b></td><td>${esc(t.headsign)}${t.from ? `<div class="sub">from ${esc(t.from)}</div>` : ""}</td></tr>`;
+  const dueT = tripsAll.filter(isDue), aheadT = tripsAll.filter(t => !isDue(t));
+  $("today").innerHTML = (dueT.length ? `<tr><th colspan="3">Already due (${dueT.length})</th></tr>` + dueT.map(tRow).join("") : "")
+    + (aheadT.length ? `<tr><th colspan="3">Announced for later today (${aheadT.length})</th></tr>` + aheadT.map(tRow).join("") : "");
+  const byR = {}; tripsAll.forEach(t => byR[t.route] = (byR[t.route] || 0) + 1);
+  $("todayRoutes").innerHTML = Object.entries(byR).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([r, n]) => `<b>${esc(r)}</b> (${n})`).join(", ") || "none yet";
+  $("todaySum").textContent = `Show all ${tripsAll.length} cancelled trips`;
   $("todayEmpty").hidden = (L.trips || []).length > 0;
   $("lateTrips").innerHTML = (L.late_trips || []).map(t => `<tr><td>${esc(t.start_time)}</td><td><b>${esc(t.route)}</b></td><td>${esc(t.headsign)}</td><td class="r">${t.late_min} min</td></tr>`).join("");
   $("lateEmpty").hidden = (L.late_trips || []).length > 0;
@@ -722,6 +733,7 @@ function alertLink(route, time, dir) {
   return `https://t.me/${BOT}` + (/^[A-Za-z0-9_-]{1,64}$/.test(p) ? `?start=${p}` : "");
 }
 function tgCard() {
+  $("tgWrap").hidden = !BOT;
   if (!BOT) return;
   $("tgCard").innerHTML = `<p class="sub">Get a free Telegram message when your usual bus is cancelled, often hours before it's due. Tap <b>🔔 Alert me</b> under any bus above, or open the bot and send your route and time, e.g. <b>199 7:30</b> or <b>B1 17:15 Mona Vale</b>.</p>
     <a class="btn primary" href="https://t.me/${BOT}" target="_blank" rel="noopener" style="margin-top:6px">Open the alerts bot</a>
@@ -737,7 +749,7 @@ const fmtT = t => { const m = hm(t); return m == null ? t : `${String(Math.floor
 function myBus() {
   tgCard();
   const cx = L.trips || [], sumEl = $("todayStrip");
-  sumEl.innerHTML = `Today so far: <b>${nf(L.count)}</b> Northern Beaches services cancelled${L.scheduled ? ` (${pc(L.cancel_pct)} of scheduled trips)` : ""}${L.ontime_pct != null ? ` · <b>${pc(L.ontime_pct)}</b> left their first stop on time` : ""}. <a href="#stats">See all stats</a>`;
+  sumEl.innerHTML = `Today: <b>${nf(L.count)}</b> services cancelled${L.count_due != null ? ` (${nf(L.count_due)} so far, ${nf(L.count_ahead)} announced for later)` : ""}${L.scheduled ? `, ${pc(L.cancel_pct)} of today's trips` : ""}${L.ontime_pct != null ? ` · <b>${pc(L.ontime_pct)}</b> of buses on time` : ""}. <a href="#stats">See all stats</a>`;
   sumEl.querySelector("a").onclick = e => { e.preventDefault(); history.replaceState(null, "", "#stats"); showTab("stats"); window.scrollTo(0, 0); };
   if (!TT || !TT.routes) { $("mbList").innerHTML = `<p class="empty">Today's timetable is loading. Check back in a few minutes.</p>`; return; }
   const routes = Object.keys(TT.routes).sort((a, b) => a.localeCompare(b, "en", {numeric: true}));
@@ -883,7 +895,7 @@ function drawShare() {
   lines.forEach((l, i) => x.fillText(l, 80, 620 + i * 70));
   x.fillStyle = "#6f8fb8"; x.font = "30px system-ui, sans-serif";
   x.font = "28px system-ui, sans-serif";
-  x.fillText("Keolis Northern Beaches (Region 8) · Data: Transport for NSW", 80, 950);
+  x.fillText("Keolis Northern Beaches · Data: Transport for NSW", 80, 950);
   x.fillText(location.host + location.pathname.replace(/index\.html$/, ""), 80, 995, 920);
   $("shareText").value = `Northern Beaches buses, ${d.title.toLowerCase()} (${d.when}): ${nf(d.cancelled)} Keolis services cancelled${d.scheduled ? ` (${pc(d.rate)} of ${nf(d.scheduled)} scheduled trips)` : ""}${d.late != null ? `, and ${pc(d.late)} of buses left their first stop 5+ minutes late` : ""}.${d.extra ? " " + d.extra + "." : ""} Data from Transport for NSW: ${location.href.split("?")[0]}`;
   $("shareOut").hidden = false;
