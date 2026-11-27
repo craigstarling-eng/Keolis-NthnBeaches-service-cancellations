@@ -25,6 +25,7 @@ h2{font-size:16px;margin:0 0 4px}
 .lede{font-size:13px;color:var(--text-secondary);margin:0 0 10px}
 .sub{color:var(--text-secondary);font-size:13px}
 .card{background:var(--surface-1);border:1px solid var(--border);border-radius:12px;padding:14px;margin-top:14px}
+.rowh{font-size:15px;margin:16px 2px 0}
 .tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:14px}
 @media(min-width:680px){.tiles{grid-template-columns:repeat(4,1fr)}}
 .tile{background:var(--surface-1);border:1px solid var(--border);border-radius:12px;padding:12px}
@@ -158,7 +159,12 @@ section[hidden]{display:none}
   <section data-tab="stats" hidden>
   <div id="history-note" class="note" hidden></div>
 
-  <div class="tiles" id="tiles"></div>
+  <h2 class="rowh">Keolis · Region 8 (headline)</h2>
+  <div class="tiles" id="tiles" style="margin-top:6px"></div>
+  <div id="cdcRow" hidden>
+    <h2 class="rowh">CDC · Region 14 routes through the Northern Beaches</h2>
+    <div class="tiles" id="cdcTiles" style="margin-top:6px"></div>
+  </div>
   <p class="sub" style="margin:8px 2px 0">All figures exclude school services. Charter work isn't in the public timetable, so it's never counted. <span id="schoolNote"></span></p>
 
   <div class="card">
@@ -171,7 +177,6 @@ section[hidden]{display:none}
     <h2>CDC NSW (Region 14) routes through the Northern Beaches</h2>
     <p class="lede">Counted separately from Keolis. Routes: <span id="cdcRoutes"></span>.</p>
     <div id="cdcNote" class="note" hidden></div>
-    <div class="tiles" id="cdcTiles"></div>
     <p class="lede" style="margin-top:10px">Most cancelled CDC routes today: <span id="cdcTop"></span></p>
     <details><summary id="cdcSum">Show every cancelled CDC trip</summary>
     <div class="scroll"><table><thead><tr><th>Time</th><th>Route</th><th>To</th></tr></thead><tbody id="cdcToday"></tbody></table></div></details>
@@ -406,9 +411,9 @@ function render() {
   const g0 = (L.gaps || []).find(g => g.gap_min);
   const peakS = (L.am?.scheduled || 0) + (L.pm?.scheduled || 0), peakC = (L.am?.cancelled || 0) + (L.pm?.cancelled || 0);
   $("tiles").innerHTML = [
-    ["Keolis trips cancelled today", nf(L.count), (L.count_due != null ? `${nf(L.count_due)} so far, ${nf(L.count_ahead)} announced for later · ` : "") + (L.scheduled ? `${pc(L.cancel_pct)} of today's ${nf(L.scheduled)} trips` : "")],
+    ["Trips cancelled today", nf(L.count), (L.count_due != null ? `${nf(L.count_due)} so far, ${nf(L.count_ahead)} announced for later · ` : "") + (L.scheduled ? `${pc(L.cancel_pct)} of today's ${nf(L.scheduled)} trips` : "") + (peakS ? ` · ${nf(peakC)} in peak hours` : "")],
     ["Buses on time", pc(L.ontime_pct), L.observed ? `${pc(L.late_pct)} left 5+ min late${officialOtr() ? ` · TfNSW's official 12-month figure: ${officialOtr()}%` : ""}` : "No departures tracked yet"],
-    ["Peak-hour cancellations", nf(peakC), peakS ? `${pc(pct(peakC, peakS))} of peak trips` : ""],
+    ["Last 7 days", S.totals["7"] ? pc(S.totals["7"].cancel_pct) : "–", S.totals["7"] ? `${nf(S.totals["7"].cancelled)} of ${nf(S.totals["7"].scheduled)} trips cancelled` : ""],
     ["Longest wait caused", g0 ? g0.gap_min + " min" : "–", g0 ? `Route ${esc(g0.route)}, ${g0.from}–${g0.to}` : "No gaps yet today"],
   ].map(([l, n, s]) => `<div class="tile"><div class="l">${l}</div><div class="n">${n}</div><div class="s">${s}</div></div>`).join("");
 
@@ -546,6 +551,7 @@ function topRoutes(trips) {
 }
 function cdcSection() {
   $("cdcCard").hidden = !CD || !CD.today || !CD.today.scheduled;
+  $("cdcRow").hidden = $("cdcCard").hidden;
   if ($("cdcCard").hidden) return;
   const t = CD.today, tr = t.trips || [], T7 = CD.totals && CD.totals["7"];
   $("cdcRoutes").textContent = (CD.routes || []).join(", ");
@@ -553,7 +559,7 @@ function cdcSection() {
   $("cdcNote").hidden = days >= 7;
   $("cdcNote").textContent = since ? `CDC tracking started ${since.toLocaleString("en-AU", {weekday: "short", day: "numeric", month: "short", hour: "numeric", minute: "2-digit", timeZone: "Australia/Sydney"})}. Trips before then aren't counted, and weekly figures become meaningful after the first week.` : "";
   $("cdcTiles").innerHTML = [
-    ["CDC trips cancelled today", nf(t.cancelled), `${nf(t.due)} so far, ${nf(t.ahead)} announced for later · ${pc(t.cancel_pct)} of ${nf(t.scheduled)} trips`],
+    ["Trips cancelled today", nf(t.cancelled), `${nf(t.due)} so far, ${nf(t.ahead)} announced for later · ${pc(t.cancel_pct)} of ${nf(t.scheduled)} trips`],
     ["Buses on time", pc(t.ontime_pct), t.observed ? `${pc(t.late_pct)} left 5+ min late` : "No departures tracked yet"],
     ["Last 7 days", T7 ? pc(T7.cancel_pct) : "–", T7 ? `${nf(T7.cancelled)} of ${nf(T7.scheduled)} trips cancelled` : ""],
     ["Longest wait caused", t.longest_gap_min ? t.longest_gap_min + " min" : "–", (t.gaps || []).find(g => g.gap_min) ? `Route ${esc(t.gaps.find(g => g.gap_min).route)}` : "No gaps yet today"],
