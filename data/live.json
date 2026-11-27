@@ -1,17 +1,19 @@
 {
- "updated": "2026-11-27T13:36:29+11:00",
+ "updated": "2026-11-27T13:41:07+11:00",
  "status": "ok",
  "date": "2026-11-27",
+ "count_due": 109,
+ "count_ahead": 95,
  "scheduled": 3416,
  "count": 204,
  "cancel_pct": 6.0,
- "observed": 1544,
- "late": 82,
- "late_pct": 5.3,
- "avg_late_min": 14.4,
- "ontime": 1462,
- "ontime_pct": 94.7,
- "anywhere_late_pct": 31.6,
+ "observed": 1558,
+ "late": 80,
+ "late_pct": 5.1,
+ "avg_late_min": 13.2,
+ "ontime": 1478,
+ "ontime_pct": 94.9,
+ "anywhere_late_pct": 31.5,
  "am": {
   "scheduled": 760,
   "cancelled": 76
@@ -132,12 +134,6 @@
  ],
  "late_trips": [
   {
-   "route": "160X",
-   "headsign": "Dee Why",
-   "start_time": "06:30",
-   "late_min": 116
-  },
-  {
    "route": "B1",
    "headsign": "Mona Vale",
    "start_time": "08:26",
@@ -168,16 +164,16 @@
    "late_min": 37
   },
   {
+   "route": "144",
+   "headsign": "Chatswood",
+   "start_time": "13:00",
+   "late_min": 37
+  },
+  {
    "route": "170X",
    "headsign": "City Wynyard",
    "start_time": "07:00",
    "late_min": 36
-  },
-  {
-   "route": "144",
-   "headsign": "Chatswood",
-   "start_time": "13:00",
-   "late_min": 34
   },
   {
    "route": "201",
@@ -220,6 +216,12 @@
    "headsign": "Warringah Mall",
    "start_time": "11:00",
    "late_min": 23
+  },
+  {
+   "route": "156",
+   "headsign": "Mona Vale",
+   "start_time": "10:54",
+   "late_min": 23
   }
  ],
  "trips": [
@@ -227,1225 +229,1429 @@
    "start_time": "06:15",
    "route": "100",
    "headsign": "Taronga Zoo via City QVB",
-   "trip_id": "2417334"
+   "trip_id": "2417334",
+   "from": "Taronga Zoo, Bradleys Head Rd"
   },
   {
    "start_time": "06:16",
    "route": "180X",
    "headsign": "City Wynyard",
-   "trip_id": "2373732"
+   "trip_id": "2373732",
+   "from": "Hall Ave before Heather St"
   },
   {
    "start_time": "06:20",
    "route": "170X",
    "headsign": "City Wynyard",
-   "trip_id": "2383243"
+   "trip_id": "2383243",
+   "from": "Manly Wharf, Belgrave St, Stand E"
   },
   {
    "start_time": "06:20",
    "route": "144",
    "headsign": "Chatswood",
-   "trip_id": "2550444"
+   "trip_id": "2550444",
+   "from": "Manly Wharf, Belgrave St, Stand G"
   },
   {
    "start_time": "06:23",
    "route": "160X",
    "headsign": "Chatswood",
-   "trip_id": "2089179"
+   "trip_id": "2089179",
+   "from": "Dee Why Shops, Pittwater Rd"
   },
   {
    "start_time": "06:27",
    "route": "180",
    "headsign": "Collaroy Plateau",
-   "trip_id": "2261595"
+   "trip_id": "2261595",
+   "from": "Warringah Mall, Green St"
   },
   {
    "start_time": "06:35",
    "route": "177",
    "headsign": "Warringah Mall",
-   "trip_id": "2700040"
+   "trip_id": "2700040",
+   "from": "Dee Why Grand Shopping Centre, Pacific Pde"
   },
   {
    "start_time": "06:38",
    "route": "199",
    "headsign": "Manly",
-   "trip_id": "2378472"
+   "trip_id": "2378472",
+   "from": "Ocean Pl at Ocean Rd"
   },
   {
    "start_time": "06:40",
    "route": "170X",
    "headsign": "City Wynyard",
-   "trip_id": "2383303"
+   "trip_id": "2383303",
+   "from": "Manly Wharf, Belgrave St, Stand E"
   },
   {
    "start_time": "06:46",
    "route": "180X",
    "headsign": "City Wynyard",
-   "trip_id": "2374474"
+   "trip_id": "2374474",
+   "from": "Hall Ave before Heather St"
   },
   {
    "start_time": "06:50",
    "route": "165X",
    "headsign": "City Wynyard",
-   "trip_id": "2374232"
+   "trip_id": "2374232",
+   "from": "Carrington Pde after Gardere Ave"
   },
   {
    "start_time": "06:50",
    "route": "280",
    "headsign": "Chatswood",
-   "trip_id": "2589908"
+   "trip_id": "2589908",
+   "from": "Warringah Mall, Green St"
   },
   {
    "start_time": "06:52",
    "route": "B1",
    "headsign": "City Wynyard",
-   "trip_id": "2378402"
+   "trip_id": "2378402",
+   "from": "Mona Vale B-Line, Barrenjoey Rd"
   },
   {
    "start_time": "06:56",
    "route": "180X",
    "headsign": "City Wynyard",
-   "trip_id": "2376473"
+   "trip_id": "2376473",
+   "from": "Hall Ave before Heather St"
   },
   {
    "start_time": "07:00",
    "route": "160X",
    "headsign": "Dee Why",
-   "trip_id": "2095666"
+   "trip_id": "2095666",
+   "from": "Chatswood Station, Stand A"
   },
   {
    "start_time": "07:00",
    "route": "160X",
    "headsign": "Chatswood",
-   "trip_id": "2378345"
+   "trip_id": "2378345",
+   "from": "Dee Why Shops, Pittwater Rd"
   },
   {
    "start_time": "07:05",
    "route": "165X",
    "headsign": "City Wynyard",
-   "trip_id": "2378837"
+   "trip_id": "2378837",
+   "from": "Carrington Pde after Gardere Ave"
   },
   {
    "start_time": "07:10",
    "route": "177X",
    "headsign": "City Wynyard",
-   "trip_id": "2700046"
+   "trip_id": "2700046",
+   "from": "Sturdee Pde after Pittwater Rd"
   },
   {
    "start_time": "07:10",
    "route": "174X",
    "headsign": "City Wynyard",
-   "trip_id": "2590180"
+   "trip_id": "2590180",
+   "from": "Warringah Rd after Pine Ave"
   },
   {
    "start_time": "07:10",
    "route": "172X",
    "headsign": "City Wynyard",
-   "trip_id": "2375742"
+   "trip_id": "2375742",
+   "from": "Warringah Mall, Pittwater Rd, Stand B"
   },
   {
    "start_time": "07:12",
    "route": "185",
    "headsign": "Narrabeen",
-   "trip_id": "2298904"
+   "trip_id": "2298904",
+   "from": "Barrenjoey Rd opp Village Park"
   },
   {
    "start_time": "07:16",
    "route": "171X",
    "headsign": "City Wynyard",
-   "trip_id": "2375024"
+   "trip_id": "2375024",
+   "from": "Balgowlah Uniting Church, Condamine St"
   },
   {
    "start_time": "07:16",
    "route": "280",
    "headsign": "Chatswood",
-   "trip_id": "2589969"
+   "trip_id": "2589969",
+   "from": "Warringah Mall, Green St"
   },
   {
    "start_time": "07:18",
    "route": "114",
    "headsign": "RNS Hospital",
-   "trip_id": "2714633"
+   "trip_id": "2714633",
+   "from": "The Esplanade at Awaba St"
   },
   {
    "start_time": "07:18",
    "route": "144",
    "headsign": "Manly",
-   "trip_id": "2378644"
+   "trip_id": "2378644",
+   "from": "Chatswood Station, Victoria Ave, Stand F"
   },
   {
    "start_time": "07:19",
    "route": "167",
    "headsign": "Manly",
-   "trip_id": "1950354"
+   "trip_id": "1950354",
+   "from": "Warringah Mall, Pittwater Rd, Stand A"
   },
   {
    "start_time": "07:21",
    "route": "B1",
    "headsign": "City Wynyard",
-   "trip_id": "2378334"
+   "trip_id": "2378334",
+   "from": "Mona Vale B-Line, Barrenjoey Rd"
   },
   {
    "start_time": "07:23",
    "route": "174X",
    "headsign": "City Wynyard",
-   "trip_id": "2590076"
+   "trip_id": "2590076",
+   "from": "Warringah Rd after Pine Ave"
   },
   {
    "start_time": "07:25",
    "route": "100",
    "headsign": "Taronga Zoo via City QVB",
-   "trip_id": "2690335"
+   "trip_id": "2690335",
+   "from": "Taronga Zoo, Bradleys Head Rd"
   },
   {
    "start_time": "07:25",
    "route": "100",
    "headsign": "Taronga Zoo via City QVB",
-   "trip_id": "2379235"
+   "trip_id": "2379235",
+   "from": "Spofforth St after Cabramatta Rd"
   },
   {
    "start_time": "07:32",
    "route": "100",
    "headsign": "Taronga Zoo via City QVB",
-   "trip_id": "2379225"
+   "trip_id": "2379225",
+   "from": "Spofforth St after Cabramatta Rd"
   },
   {
    "start_time": "07:33",
    "route": "B1",
    "headsign": "City Wynyard",
-   "trip_id": "2378449"
+   "trip_id": "2378449",
+   "from": "Mona Vale B-Line, Barrenjoey Rd"
   },
   {
    "start_time": "07:34",
    "route": "172X",
    "headsign": "City Wynyard",
-   "trip_id": "2374934"
+   "trip_id": "2374934",
+   "from": "Wakehurst Pkwy opp Seaforth Oval"
   },
   {
    "start_time": "07:34",
    "route": "168X",
    "headsign": "City Wynyard",
-   "trip_id": "2374831"
+   "trip_id": "2374831",
+   "from": "Balgowlah Rd after Condamine St"
   },
   {
    "start_time": "07:35",
    "route": "165X",
    "headsign": "City Wynyard",
-   "trip_id": "2378862"
+   "trip_id": "2378862",
+   "from": "Carrington Pde after Gardere Ave"
   },
   {
    "start_time": "07:36",
    "route": "144",
    "headsign": "Manly",
-   "trip_id": "2378228"
+   "trip_id": "2378228",
+   "from": "Chatswood Station, Victoria Ave, Stand F"
   },
   {
    "start_time": "07:38",
    "route": "199",
    "headsign": "Manly",
-   "trip_id": "2378496"
+   "trip_id": "2378496",
+   "from": "Ocean Pl at Ocean Rd"
   },
   {
    "start_time": "07:40",
    "route": "160X",
    "headsign": "Dee Why",
-   "trip_id": "2378691"
+   "trip_id": "2378691",
+   "from": "Chatswood Station, Stand A"
   },
   {
    "start_time": "07:40",
    "route": "199",
    "headsign": "Palm Beach",
-   "trip_id": "2378036"
+   "trip_id": "2378036",
+   "from": "Manly Wharf, West Esplanade, Stand B"
   },
   {
    "start_time": "07:41",
    "route": "114",
    "headsign": "RNS Hospital",
-   "trip_id": "2714681"
+   "trip_id": "2714681",
+   "from": "The Esplanade at Awaba St"
   },
   {
    "start_time": "07:45",
    "route": "165X",
    "headsign": "City Wynyard",
-   "trip_id": "2374981"
+   "trip_id": "2374981",
+   "from": "Carrington Pde after Gardere Ave"
   },
   {
    "start_time": "07:45",
    "route": "280",
    "headsign": "Warringah Mall",
-   "trip_id": "2590037"
+   "trip_id": "2590037",
+   "from": "Chatswood Station, Stand C"
   },
   {
    "start_time": "07:45",
    "route": "181X",
    "headsign": "City Wynyard",
-   "trip_id": "2378678"
+   "trip_id": "2378678",
+   "from": "Narrabeen B-Line, Pittwater Rd"
   },
   {
    "start_time": "07:48",
    "route": "100",
    "headsign": "Taronga Zoo via City QVB",
-   "trip_id": "2379228"
+   "trip_id": "2379228",
+   "from": "Spofforth St after Cabramatta Rd"
   },
   {
    "start_time": "07:51",
    "route": "172X",
    "headsign": "City Wynyard",
-   "trip_id": "2376170"
+   "trip_id": "2376170",
+   "from": "Warringah Mall, Pittwater Rd, Stand B"
   },
   {
    "start_time": "07:55",
    "route": "100",
    "headsign": "Taronga Zoo via City QVB",
-   "trip_id": "2379240"
+   "trip_id": "2379240",
+   "from": "Spofforth St after Cabramatta Rd"
   },
   {
    "start_time": "07:55",
    "route": "150X",
    "headsign": "Milsons Point",
-   "trip_id": "2421374"
+   "trip_id": "2421374",
+   "from": "Manly Wharf, Belgrave St, Stand E"
   },
   {
    "start_time": "07:59",
    "route": "167",
    "headsign": "Manly",
-   "trip_id": "1950356"
+   "trip_id": "1950356",
+   "from": "Warringah Mall, Pittwater Rd, Stand A"
   },
   {
    "start_time": "07:59",
    "route": "B1",
    "headsign": "Mona Vale",
-   "trip_id": "2415627"
+   "trip_id": "2415627",
+   "from": "Wynyard Station, Carrington St, Stand B"
   },
   {
    "start_time": "08:00",
    "route": "199",
    "headsign": "Palm Beach",
-   "trip_id": "2378220"
+   "trip_id": "2378220",
+   "from": "Manly Wharf, West Esplanade, Stand B"
   },
   {
    "start_time": "08:00",
    "route": "174X",
    "headsign": "City Wynyard",
-   "trip_id": "2589996"
+   "trip_id": "2589996",
+   "from": "Warringah Rd after Pine Ave"
   },
   {
    "start_time": "08:03",
    "route": "114",
    "headsign": "Balmoral Beach",
-   "trip_id": "2392754"
+   "trip_id": "2392754",
+   "from": "Royal North Shore Hospital, Reserve Rd"
   },
   {
    "start_time": "08:07",
    "route": "170X",
    "headsign": "City Wynyard",
-   "trip_id": "2383319"
+   "trip_id": "2383319",
+   "from": "Manly Wharf, Belgrave St, Stand E"
   },
   {
    "start_time": "08:09",
    "route": "100",
    "headsign": "Taronga Zoo via City QVB",
-   "trip_id": "2379242"
+   "trip_id": "2379242",
+   "from": "Spofforth St after Cabramatta Rd"
   },
   {
    "start_time": "08:10",
    "route": "199",
    "headsign": "Palm Beach",
-   "trip_id": "2378732"
+   "trip_id": "2378732",
+   "from": "Manly Wharf, West Esplanade, Stand B"
   },
   {
    "start_time": "08:14",
    "route": "230",
    "headsign": "North Sydney",
-   "trip_id": "2421399"
+   "trip_id": "2421399",
+   "from": "Rangers Rd before Military Rd"
   },
   {
    "start_time": "08:16",
    "route": "160X",
    "headsign": "Chatswood",
-   "trip_id": "2377902"
+   "trip_id": "2377902",
+   "from": "Dee Why Shops, Pittwater Rd"
   },
   {
    "start_time": "08:18",
    "route": "166",
    "headsign": "Manly",
-   "trip_id": "2626882"
+   "trip_id": "2626882",
+   "from": "Forestway Shopping Centre, Forest Way"
   },
   {
    "start_time": "08:18",
    "route": "114",
    "headsign": "Balmoral Beach",
-   "trip_id": "2392940"
+   "trip_id": "2392940",
+   "from": "Royal North Shore Hospital, Reserve Rd"
   },
   {
    "start_time": "08:20",
    "route": "173X",
    "headsign": "Warringah Mall",
-   "trip_id": "2374854"
+   "trip_id": "2374854",
+   "from": "Wynyard Station, Carrington St, Stand A"
   },
   {
    "start_time": "08:21",
    "route": "100",
    "headsign": "Taronga Zoo via City QVB",
-   "trip_id": "2374892"
+   "trip_id": "2374892",
+   "from": "Spofforth St after Cabramatta Rd"
   },
   {
    "start_time": "08:23",
    "route": "114",
    "headsign": "Balmoral Beach",
-   "trip_id": "2392793"
+   "trip_id": "2392793",
+   "from": "Royal North Shore Hospital, Reserve Rd"
   },
   {
    "start_time": "08:25",
    "route": "280",
    "headsign": "Warringah Mall",
-   "trip_id": "2589953"
+   "trip_id": "2589953",
+   "from": "Chatswood Station, Stand C"
   },
   {
    "start_time": "08:29",
    "route": "230",
    "headsign": "North Sydney",
-   "trip_id": "2421408"
+   "trip_id": "2421408",
+   "from": "Rangers Rd before Military Rd"
   },
   {
    "start_time": "08:30",
    "route": "144",
    "headsign": "Chatswood",
-   "trip_id": "2550469"
+   "trip_id": "2550469",
+   "from": "Manly Wharf, Belgrave St, Stand G"
   },
   {
    "start_time": "08:36",
    "route": "160X",
    "headsign": "Chatswood",
-   "trip_id": "2378537"
+   "trip_id": "2378537",
+   "from": "Dee Why Shops, Pittwater Rd"
   },
   {
    "start_time": "08:36",
    "route": "168X",
    "headsign": "City Wynyard",
-   "trip_id": "2374587"
+   "trip_id": "2374587",
+   "from": "Balgowlah Rd after Condamine St"
   },
   {
    "start_time": "08:38",
    "route": "167",
    "headsign": "Warringah Mall",
-   "trip_id": "2375331"
+   "trip_id": "2375331",
+   "from": "Manly Wharf, West Esplanade, Stand A"
   },
   {
    "start_time": "08:39",
    "route": "100",
    "headsign": "Taronga Zoo via City QVB",
-   "trip_id": "2376159"
+   "trip_id": "2376159",
+   "from": "Spofforth St after Cabramatta Rd"
   },
   {
    "start_time": "08:40",
    "route": "170X",
    "headsign": "City Wynyard",
-   "trip_id": "2383274"
+   "trip_id": "2383274",
+   "from": "Manly Wharf, Belgrave St, Stand E"
   },
   {
    "start_time": "08:40",
    "route": "B1",
    "headsign": "Mona Vale",
-   "trip_id": "2415859"
+   "trip_id": "2415859",
+   "from": "Wynyard Station, Carrington St, Stand B"
   },
   {
    "start_time": "08:44",
    "route": "114",
    "headsign": "RNS Hospital",
-   "trip_id": "2714630"
+   "trip_id": "2714630",
+   "from": "The Esplanade at Awaba St"
   },
   {
    "start_time": "08:47",
    "route": "172X",
    "headsign": "City Wynyard",
-   "trip_id": "2374170"
+   "trip_id": "2374170",
+   "from": "Sydney Rd after Kempbridge Ave"
   },
   {
    "start_time": "08:48",
    "route": "280",
    "headsign": "Chatswood",
-   "trip_id": "2590052"
+   "trip_id": "2590052",
+   "from": "Warringah Mall, Green St"
   },
   {
    "start_time": "08:50",
    "route": "144",
    "headsign": "Chatswood",
-   "trip_id": "2550483"
+   "trip_id": "2550483",
+   "from": "Manly Wharf, Belgrave St, Stand G"
   },
   {
    "start_time": "08:53",
    "route": "100",
    "headsign": "Taronga Zoo via City QVB",
-   "trip_id": "2376465"
+   "trip_id": "2376465",
+   "from": "Spofforth St after Cabramatta Rd"
   },
   {
    "start_time": "09:00",
    "route": "160X",
    "headsign": "Dee Why",
-   "trip_id": "2089276"
+   "trip_id": "2089276",
+   "from": "Chatswood Station, Stand A"
   },
   {
    "start_time": "09:00",
    "route": "199",
    "headsign": "Palm Beach",
-   "trip_id": "2378448"
+   "trip_id": "2378448",
+   "from": "Manly Wharf, West Esplanade, Stand B"
   },
   {
    "start_time": "09:00",
    "route": "144",
    "headsign": "Chatswood",
-   "trip_id": "2550486"
+   "trip_id": "2550486",
+   "from": "Manly Wharf, Belgrave St, Stand G"
   },
   {
    "start_time": "09:04",
    "route": "114",
    "headsign": "RNS Hospital",
-   "trip_id": "2714627"
+   "trip_id": "2714627",
+   "from": "The Esplanade at Awaba St"
   },
   {
    "start_time": "09:05",
    "route": "100",
    "headsign": "Taronga Zoo via City QVB",
-   "trip_id": "2374947"
+   "trip_id": "2374947",
+   "from": "Spofforth St after Cabramatta Rd"
   },
   {
    "start_time": "09:10",
    "route": "243",
    "headsign": "City Wynyard",
-   "trip_id": "2377171"
+   "trip_id": "2377171",
+   "from": "Bridgepoint Shopping Centre, Brady St"
   },
   {
    "start_time": "09:16",
    "route": "167",
    "headsign": "Manly",
-   "trip_id": "1950302"
+   "trip_id": "1950302",
+   "from": "Warringah Mall, Green St"
   },
   {
    "start_time": "09:20",
    "route": "160X",
    "headsign": "Dee Why",
-   "trip_id": "2089577"
+   "trip_id": "2089577",
+   "from": "Chatswood Station, Stand A"
   },
   {
    "start_time": "09:20",
    "route": "166",
    "headsign": "Frenchs Forest",
-   "trip_id": "1889928"
+   "trip_id": "1889928",
+   "from": "Manly Wharf, West Esplanade, Stand A"
   },
   {
    "start_time": "09:20",
    "route": "263",
    "headsign": "City Gresham St",
-   "trip_id": "2392878"
+   "trip_id": "2392878",
+   "from": "Wycombe Rd after Military Rd"
   },
   {
    "start_time": "09:20",
    "route": "177",
    "headsign": "Warringah Mall",
-   "trip_id": "2700037"
+   "trip_id": "2700037",
+   "from": "Dee Why Grand Shopping Centre, Pacific Pde"
   },
   {
    "start_time": "09:20",
    "route": "173X",
    "headsign": "Warringah Mall",
-   "trip_id": "2375590"
+   "trip_id": "2375590",
+   "from": "Wynyard Station, Carrington St, Stand A"
   },
   {
    "start_time": "09:23",
    "route": "114",
    "headsign": "Balmoral Beach",
-   "trip_id": "2392781"
+   "trip_id": "2392781",
+   "from": "Royal North Shore Hospital, Reserve Rd"
   },
   {
    "start_time": "09:36",
    "route": "167",
    "headsign": "Manly",
-   "trip_id": "1950303"
+   "trip_id": "1950303",
+   "from": "Warringah Mall, Green St"
   },
   {
    "start_time": "09:37",
    "route": "178",
    "headsign": "Cromer Hts",
-   "trip_id": "2089459"
+   "trip_id": "2089459",
+   "from": "Warringah Mall, Green St"
   },
   {
    "start_time": "09:37",
    "route": "185",
    "headsign": "Mona Vale",
-   "trip_id": "2406212"
+   "trip_id": "2406212",
+   "from": "Waterloo St before Pittwater Rd"
   },
   {
    "start_time": "09:43",
    "route": "114",
    "headsign": "Balmoral Beach",
-   "trip_id": "2392745"
+   "trip_id": "2392745",
+   "from": "Royal North Shore Hospital, Reserve Rd"
   },
   {
    "start_time": "09:45",
    "route": "199",
    "headsign": "Manly",
-   "trip_id": "2378411"
+   "trip_id": "2378411",
+   "from": "Ocean Pl at Ocean Rd"
   },
   {
    "start_time": "09:47",
    "route": "179",
    "headsign": "Warringah Mall",
-   "trip_id": "2626758"
+   "trip_id": "2626758",
+   "from": "RSL ANZAC Village, Lakeshore Dr"
   },
   {
    "start_time": "09:54",
    "route": "111",
    "headsign": "Middle Head and Chowder Bay Road",
-   "trip_id": "2376375"
+   "trip_id": "2376375",
+   "from": "South Mosman Wharf, Musgrave St"
   },
   {
    "start_time": "09:57",
    "route": "144",
    "headsign": "Manly",
-   "trip_id": "2377889"
+   "trip_id": "2377889",
+   "from": "Chatswood Station, Victoria Ave, Stand F"
   },
   {
    "start_time": "10:12",
    "route": "178",
    "headsign": "Warringah Mall",
-   "trip_id": "2626795"
+   "trip_id": "2626795",
+   "from": "Maybrook Village, Maybrook Ave"
   },
   {
    "start_time": "10:22",
    "route": "111",
    "headsign": "Chowder Bay",
-   "trip_id": "2374437"
+   "trip_id": "2374437",
+   "from": "South Mosman Wharf, Musgrave St"
   },
   {
    "start_time": "10:47",
    "route": "180",
    "headsign": "Collaroy Plateau",
-   "trip_id": "2261585"
+   "trip_id": "2261585",
+   "from": "Warringah Mall, Green St"
   },
   {
    "start_time": "11:18",
    "route": "167",
    "headsign": "Warringah Mall",
-   "trip_id": "2374061"
+   "trip_id": "2374061",
+   "from": "Manly Wharf, West Esplanade, Stand A"
   },
   {
    "start_time": "11:22",
    "route": "180",
    "headsign": "Warringah Mall",
-   "trip_id": "2255420"
+   "trip_id": "2255420",
+   "from": "Hall Ave before Heather St"
   },
   {
    "start_time": "11:30",
    "route": "230",
    "headsign": "Mosman Bay Wharf",
-   "trip_id": "2424344"
+   "trip_id": "2424344",
+   "from": "Milsons Point Wharf, Alfred St Sth"
   },
   {
    "start_time": "12:43",
    "route": "B1",
    "headsign": "City Wynyard",
-   "trip_id": "2378265"
+   "trip_id": "2378265",
+   "from": "Mona Vale B-Line, Barrenjoey Rd"
   },
   {
    "start_time": "12:50",
    "route": "199",
    "headsign": "Palm Beach",
-   "trip_id": "2378806"
+   "trip_id": "2378806",
+   "from": "Manly Wharf, West Esplanade, Stand B"
   },
   {
    "start_time": "12:55",
    "route": "199",
    "headsign": "Manly",
-   "trip_id": "2378458"
+   "trip_id": "2378458",
+   "from": "Ocean Pl at Ocean Rd"
   },
   {
    "start_time": "13:25",
    "route": "B1",
    "headsign": "City Wynyard",
-   "trip_id": "2378081"
+   "trip_id": "2378081",
+   "from": "Mona Vale B-Line, Barrenjoey Rd"
   },
   {
    "start_time": "13:38",
    "route": "144",
    "headsign": "Manly",
-   "trip_id": "2378164"
+   "trip_id": "2378164",
+   "from": "Chatswood Station, Victoria Ave, Stand F"
   },
   {
    "start_time": "13:40",
    "route": "230",
    "headsign": "Milsons Point",
-   "trip_id": "2421454"
+   "trip_id": "2421454",
+   "from": "Mosman Bay Wharf, Avenue Rd"
   },
   {
    "start_time": "13:42",
    "route": "160X",
    "headsign": "Chatswood",
-   "trip_id": "2089005"
+   "trip_id": "2089005",
+   "from": "Dee Why Shops, Pittwater Rd"
   },
   {
    "start_time": "13:56",
    "route": "167",
    "headsign": "Manly",
-   "trip_id": "1950316"
+   "trip_id": "1950316",
+   "from": "Warringah Mall, Green St"
   },
   {
    "start_time": "14:06",
    "route": "114",
    "headsign": "RNS Hospital",
-   "trip_id": "2714732"
+   "trip_id": "2714732",
+   "from": "The Esplanade at Awaba St"
   },
   {
    "start_time": "14:20",
    "route": "160X",
    "headsign": "Dee Why",
-   "trip_id": "2089160"
+   "trip_id": "2089160",
+   "from": "Chatswood Station, Stand A"
   },
   {
    "start_time": "14:20",
    "route": "199",
    "headsign": "Palm Beach",
-   "trip_id": "2378108"
+   "trip_id": "2378108",
+   "from": "Manly Wharf, West Esplanade, Stand B"
   },
   {
    "start_time": "14:22",
    "route": "199",
    "headsign": "Manly",
-   "trip_id": "2378715"
+   "trip_id": "2378715",
+   "from": "Ocean Pl at Ocean Rd"
   },
   {
    "start_time": "14:24",
    "route": "144",
    "headsign": "Manly",
-   "trip_id": "2378764"
+   "trip_id": "2378764",
+   "from": "Chatswood Station, Victoria Ave, Stand F"
   },
   {
    "start_time": "14:30",
    "route": "199",
    "headsign": "Palm Beach",
-   "trip_id": "2378692"
+   "trip_id": "2378692",
+   "from": "Manly Wharf, West Esplanade, Stand B"
   },
   {
    "start_time": "14:36",
    "route": "B1",
    "headsign": "Mona Vale",
-   "trip_id": "2415863"
+   "trip_id": "2415863",
+   "from": "Wynyard Station, Carrington St, Stand B"
   },
   {
    "start_time": "14:38",
    "route": "167",
    "headsign": "Warringah Mall",
-   "trip_id": "2376220"
+   "trip_id": "2376220",
+   "from": "Manly Wharf, West Esplanade, Stand A"
   },
   {
    "start_time": "14:41",
    "route": "166",
    "headsign": "Manly",
-   "trip_id": "2626916"
+   "trip_id": "2626916",
+   "from": "Forestway Shopping Centre, Forest Way"
   },
   {
    "start_time": "14:43",
    "route": "114",
    "headsign": "Balmoral Beach",
-   "trip_id": "2392629"
+   "trip_id": "2392629",
+   "from": "Royal North Shore Hospital, Reserve Rd"
   },
   {
    "start_time": "14:45",
    "route": "B1",
    "headsign": "City Wynyard",
-   "trip_id": "2378272"
+   "trip_id": "2378272",
+   "from": "Mona Vale B-Line, Barrenjoey Rd"
   },
   {
    "start_time": "14:50",
    "route": "144",
    "headsign": "Chatswood",
-   "trip_id": "2714683"
+   "trip_id": "2714683",
+   "from": "Manly Wharf, Belgrave St, Stand G"
   },
   {
    "start_time": "14:50",
    "route": "199",
    "headsign": "Palm Beach",
-   "trip_id": "2377937"
+   "trip_id": "2377937",
+   "from": "Manly Wharf, West Esplanade, Stand B"
   },
   {
    "start_time": "14:53",
    "route": "160X",
    "headsign": "Chatswood",
-   "trip_id": "2089829"
+   "trip_id": "2089829",
+   "from": "Dee Why Shops, Pittwater Rd"
   },
   {
    "start_time": "14:58",
    "route": "B1",
    "headsign": "City Wynyard",
-   "trip_id": "2378599"
+   "trip_id": "2378599",
+   "from": "Mona Vale B-Line, Barrenjoey Rd"
   },
   {
    "start_time": "14:59",
    "route": "144",
    "headsign": "Manly",
-   "trip_id": "2378635"
+   "trip_id": "2378635",
+   "from": "Chatswood Station, Victoria Ave, Stand F"
   },
   {
    "start_time": "15:02",
    "route": "160X",
    "headsign": "Chatswood",
-   "trip_id": "2089786"
+   "trip_id": "2089786",
+   "from": "Dee Why Shops, Pittwater Rd"
   },
   {
    "start_time": "15:02",
    "route": "173X",
    "headsign": "Warringah Mall",
-   "trip_id": "2376710"
+   "trip_id": "2376710",
+   "from": "Wynyard Station, Carrington St, Stand A"
   },
   {
    "start_time": "15:04",
    "route": "230",
    "headsign": "Milsons Point",
-   "trip_id": "2421279"
+   "trip_id": "2421279",
+   "from": "Spit Junction, Military Rd"
   },
   {
    "start_time": "15:06",
    "route": "185",
    "headsign": "Narrabeen",
-   "trip_id": "2298855"
+   "trip_id": "2298855",
+   "from": "Barrenjoey Rd opp Village Park"
   },
   {
    "start_time": "15:08",
    "route": "166",
    "headsign": "Manly",
-   "trip_id": "2626837"
+   "trip_id": "2626837",
+   "from": "Forestway Shopping Centre, Forest Way"
   },
   {
    "start_time": "15:15",
    "route": "154X",
    "headsign": "Dee Why",
-   "trip_id": "2424412"
+   "trip_id": "2424412",
+   "from": "Milsons Point Wharf, Alfred St Sth"
   },
   {
    "start_time": "15:19",
    "route": "114",
    "headsign": "RNS Hospital",
-   "trip_id": "2714730"
+   "trip_id": "2714730",
+   "from": "The Esplanade at Awaba St"
   },
   {
    "start_time": "15:22",
    "route": "160X",
    "headsign": "Chatswood",
-   "trip_id": "2089289"
+   "trip_id": "2089289",
+   "from": "Dee Why Shops, Pittwater Rd"
   },
   {
    "start_time": "15:23",
    "route": "B1",
    "headsign": "City Wynyard",
-   "trip_id": "2378810"
+   "trip_id": "2378810",
+   "from": "Mona Vale B-Line, Barrenjoey Rd"
   },
   {
    "start_time": "15:25",
    "route": "B1",
    "headsign": "Mona Vale",
-   "trip_id": "2415714"
+   "trip_id": "2415714",
+   "from": "Wynyard Station, Carrington St, Stand B"
   },
   {
    "start_time": "15:30",
    "route": "144",
    "headsign": "Chatswood",
-   "trip_id": "2714638"
+   "trip_id": "2714638",
+   "from": "Manly Wharf, Belgrave St, Stand G"
   },
   {
    "start_time": "15:34",
    "route": "156",
    "headsign": "Mccarrs Creek",
-   "trip_id": "2701397"
+   "trip_id": "2701397",
+   "from": "Mona Vale B-Line, Barrenjoey Rd"
   },
   {
    "start_time": "15:35",
    "route": "165X",
    "headsign": "South Curl Curl",
-   "trip_id": "2580059"
+   "trip_id": "2580059",
+   "from": "Wynyard Station, Jamison St, Stand U"
   },
   {
    "start_time": "15:36",
    "route": "100",
    "headsign": "Taronga Zoo via City QVB",
-   "trip_id": "2580240"
+   "trip_id": "2580240",
+   "from": "Neutral Bay Junction, Military Rd, Stand A"
   },
   {
    "start_time": "15:37",
    "route": "185",
    "headsign": "Mona Vale",
-   "trip_id": "2406215"
+   "trip_id": "2406215",
+   "from": "Waterloo St before Pittwater Rd"
   },
   {
    "start_time": "15:38",
    "route": "B1",
    "headsign": "City Wynyard",
-   "trip_id": "2378120"
+   "trip_id": "2378120",
+   "from": "Mona Vale B-Line, Barrenjoey Rd"
   },
   {
    "start_time": "15:40",
    "route": "160X",
    "headsign": "Dee Why",
-   "trip_id": "2088769"
+   "trip_id": "2088769",
+   "from": "Chatswood Station, Stand A"
   },
   {
    "start_time": "15:46",
    "route": "100",
    "headsign": "Taronga Zoo via City QVB",
-   "trip_id": "2580270"
+   "trip_id": "2580270",
+   "from": "Neutral Bay Junction, Military Rd, Stand A"
   },
   {
    "start_time": "15:49",
    "route": "B1",
    "headsign": "City Wynyard",
-   "trip_id": "2378060"
+   "trip_id": "2378060",
+   "from": "Mona Vale B-Line, Barrenjoey Rd"
   },
   {
    "start_time": "15:50",
    "route": "160X",
    "headsign": "Dee Why",
-   "trip_id": "2088970"
+   "trip_id": "2088970",
+   "from": "Chatswood Station, Stand A"
   },
   {
    "start_time": "15:50",
    "route": "199",
    "headsign": "Palm Beach",
-   "trip_id": "2378067"
+   "trip_id": "2378067",
+   "from": "Manly Wharf, West Esplanade, Stand B"
   },
   {
    "start_time": "15:54",
    "route": "156",
    "headsign": "Mccarrs Creek",
-   "trip_id": "2701402"
+   "trip_id": "2701402",
+   "from": "Mona Vale B-Line, Barrenjoey Rd"
   },
   {
    "start_time": "15:57",
    "route": "114",
    "headsign": "Balmoral Beach",
-   "trip_id": "2392676"
+   "trip_id": "2392676",
+   "from": "Royal North Shore Hospital, Reserve Rd"
   },
   {
    "start_time": "16:00",
    "route": "B1",
    "headsign": "Mona Vale",
-   "trip_id": "2415651"
+   "trip_id": "2415651",
+   "from": "Wynyard Station, Carrington St, Stand B"
   },
   {
    "start_time": "16:01",
    "route": "144",
    "headsign": "Manly",
-   "trip_id": "2378333"
+   "trip_id": "2378333",
+   "from": "Chatswood Station, Victoria Ave, Stand F"
   },
   {
    "start_time": "16:10",
    "route": "144",
    "headsign": "Chatswood",
-   "trip_id": "2714643"
+   "trip_id": "2714643",
+   "from": "Manly Wharf, Belgrave St, Stand G"
   },
   {
    "start_time": "16:10",
    "route": "160X",
    "headsign": "Dee Why",
-   "trip_id": "2089269"
+   "trip_id": "2089269",
+   "from": "Chatswood Station, Stand A"
   },
   {
    "start_time": "16:10",
    "route": "199",
    "headsign": "Palm Beach",
-   "trip_id": "2378234"
+   "trip_id": "2378234",
+   "from": "Manly Wharf, West Esplanade, Stand B"
   },
   {
    "start_time": "16:10",
    "route": "166",
    "headsign": "Frenchs Forest",
-   "trip_id": "1889795"
+   "trip_id": "1889795",
+   "from": "Manly Wharf, West Esplanade, Stand A"
   },
   {
    "start_time": "16:15",
    "route": "B1",
    "headsign": "Mona Vale",
-   "trip_id": "2415849"
+   "trip_id": "2415849",
+   "from": "Wynyard Station, Carrington St, Stand B"
   },
   {
    "start_time": "16:21",
    "route": "199",
    "headsign": "Manly",
-   "trip_id": "2377956"
+   "trip_id": "2377956",
+   "from": "Ocean Pl at Ocean Rd"
   },
   {
    "start_time": "16:26",
    "route": "B1",
    "headsign": "City Wynyard",
-   "trip_id": "2378350"
+   "trip_id": "2378350",
+   "from": "Mona Vale B-Line, Barrenjoey Rd"
   },
   {
    "start_time": "16:30",
    "route": "199",
    "headsign": "Palm Beach",
-   "trip_id": "2377874"
+   "trip_id": "2377874",
+   "from": "Manly Wharf, West Esplanade, Stand B"
   },
   {
    "start_time": "16:34",
    "route": "160X",
    "headsign": "Chatswood",
-   "trip_id": "2089846"
+   "trip_id": "2089846",
+   "from": "Dee Why Shops, Pittwater Rd"
   },
   {
    "start_time": "16:37",
    "route": "114",
    "headsign": "RNS Hospital",
-   "trip_id": "2714671"
+   "trip_id": "2714671",
+   "from": "The Esplanade at Awaba St"
   },
   {
    "start_time": "16:38",
    "route": "B1",
    "headsign": "City Wynyard",
-   "trip_id": "2378018"
+   "trip_id": "2378018",
+   "from": "Mona Vale B-Line, Barrenjoey Rd"
   },
   {
    "start_time": "16:40",
    "route": "B1",
    "headsign": "Mona Vale",
-   "trip_id": "2415845"
+   "trip_id": "2415845",
+   "from": "Wynyard Station, Carrington St, Stand B"
   },
   {
    "start_time": "16:42",
    "route": "160X",
    "headsign": "Chatswood",
-   "trip_id": "2089751"
+   "trip_id": "2089751",
+   "from": "Dee Why Shops, Pittwater Rd"
   },
   {
    "start_time": "16:42",
    "route": "B1",
    "headsign": "City Wynyard",
-   "trip_id": "2378392"
+   "trip_id": "2378392",
+   "from": "Mona Vale B-Line, Barrenjoey Rd"
   },
   {
    "start_time": "16:50",
    "route": "144",
    "headsign": "Manly",
-   "trip_id": "2377997"
+   "trip_id": "2377997",
+   "from": "Chatswood Station, Victoria Ave, Stand F"
   },
   {
    "start_time": "16:50",
    "route": "199",
    "headsign": "Palm Beach",
-   "trip_id": "2378055"
+   "trip_id": "2378055",
+   "from": "Manly Wharf, West Esplanade, Stand B"
   },
   {
    "start_time": "16:52",
    "route": "100",
    "headsign": "Taronga Zoo via City QVB",
-   "trip_id": "2580219"
+   "trip_id": "2580219",
+   "from": "Taronga Zoo, Bradleys Head Rd"
   },
   {
    "start_time": "16:55",
    "route": "B1",
    "headsign": "Mona Vale",
-   "trip_id": "2415866"
+   "trip_id": "2415866",
+   "from": "Wynyard Station, Carrington St, Stand B"
   },
   {
    "start_time": "16:57",
    "route": "114",
    "headsign": "RNS Hospital",
-   "trip_id": "2714706"
+   "trip_id": "2714706",
+   "from": "The Esplanade at Awaba St"
   },
   {
    "start_time": "16:57",
    "route": "182",
    "headsign": "Mona Vale",
-   "trip_id": "2257946"
+   "trip_id": "2257946",
+   "from": "Waterloo St before Pittwater Rd"
   },
   {
    "start_time": "17:04",
    "route": "B1",
    "headsign": "Mona Vale",
-   "trip_id": "2415761"
+   "trip_id": "2415761",
+   "from": "Wynyard Station, Carrington St, Stand B"
   },
   {
    "start_time": "17:15",
    "route": "100",
    "headsign": "Taronga Zoo via City QVB",
-   "trip_id": "2690333"
+   "trip_id": "2690333",
+   "from": "Taronga Zoo, Bradleys Head Rd"
   },
   {
    "start_time": "17:17",
    "route": "114",
    "headsign": "Balmoral Beach",
-   "trip_id": "2392635"
+   "trip_id": "2392635",
+   "from": "Royal North Shore Hospital, Reserve Rd"
   },
   {
    "start_time": "17:21",
    "route": "144",
    "headsign": "Manly",
-   "trip_id": "2378231"
+   "trip_id": "2378231",
+   "from": "Chatswood Station, Victoria Ave, Stand F"
   },
   {
    "start_time": "17:25",
    "route": "165X",
    "headsign": "South Curl Curl",
-   "trip_id": "2580317"
+   "trip_id": "2580317",
+   "from": "Wynyard Station, Jamison St, Stand U"
   },
   {
    "start_time": "17:30",
    "route": "160X",
    "headsign": "Dee Why",
-   "trip_id": "2089046"
+   "trip_id": "2089046",
+   "from": "Chatswood Station, Stand A"
   },
   {
    "start_time": "17:37",
    "route": "114",
    "headsign": "Balmoral Beach",
-   "trip_id": "2392652"
+   "trip_id": "2392652",
+   "from": "Royal North Shore Hospital, Reserve Rd"
   },
   {
    "start_time": "17:38",
    "route": "280",
    "headsign": "Chatswood",
-   "trip_id": "2590116"
+   "trip_id": "2590116",
+   "from": "Warringah Mall, Green St"
   },
   {
    "start_time": "17:40",
    "route": "176X",
    "headsign": "Dee Why",
-   "trip_id": "2580282"
+   "trip_id": "2580282",
+   "from": "Wynyard Station, Carrington St, Stand D"
   },
   {
    "start_time": "17:40",
    "route": "B1",
    "headsign": "Mona Vale",
-   "trip_id": "2415637"
+   "trip_id": "2415637",
+   "from": "Wynyard Station, Carrington St, Stand B"
   },
   {
    "start_time": "17:42",
    "route": "174X",
    "headsign": "Narraweena",
-   "trip_id": "2589936"
+   "trip_id": "2589936",
+   "from": "Wynyard Station, Carrington St, Stand D"
   },
   {
    "start_time": "17:50",
    "route": "B1",
    "headsign": "City Wynyard",
-   "trip_id": "2374048"
+   "trip_id": "2374048",
+   "from": "Mona Vale B-Line, Barrenjoey Rd"
   },
   {
    "start_time": "17:52",
    "route": "B1",
    "headsign": "Mona Vale",
-   "trip_id": "2415710"
+   "trip_id": "2415710",
+   "from": "Wynyard Station, Carrington St, Stand B"
   },
   {
    "start_time": "17:55",
    "route": "B1",
    "headsign": "City Wynyard",
-   "trip_id": "2377122"
+   "trip_id": "2377122",
+   "from": "Mona Vale B-Line, Barrenjoey Rd"
   },
   {
    "start_time": "17:56",
    "route": "B1",
    "headsign": "Mona Vale",
-   "trip_id": "2415689"
+   "trip_id": "2415689",
+   "from": "Wynyard Station, Carrington St, Stand B"
   },
   {
    "start_time": "17:57",
    "route": "185",
    "headsign": "Mona Vale",
-   "trip_id": "2406252"
+   "trip_id": "2406252",
+   "from": "Waterloo St before Pittwater Rd"
   },
   {
    "start_time": "18:03",
    "route": "199",
    "headsign": "Manly",
-   "trip_id": "2378748"
+   "trip_id": "2378748",
+   "from": "Ocean Pl at Ocean Rd"
   },
   {
    "start_time": "18:20",
    "route": "176X",
    "headsign": "Dee Why",
-   "trip_id": "2580267"
+   "trip_id": "2580267",
+   "from": "Wynyard Station, Carrington St, Stand D"
   },
   {
    "start_time": "18:35",
    "route": "280",
    "headsign": "Warringah Mall",
-   "trip_id": "2590128"
+   "trip_id": "2590128",
+   "from": "Chatswood Station, Stand C"
   },
   {
    "start_time": "18:39",
    "route": "243",
    "headsign": "Spit Jn",
-   "trip_id": "2392974"
+   "trip_id": "2392974",
+   "from": "Wynyard Station, York St, Stand K"
   },
   {
    "start_time": "18:40",
    "route": "199",
    "headsign": "Palm Beach",
-   "trip_id": "2376331"
+   "trip_id": "2376331",
+   "from": "Manly Wharf, West Esplanade, Stand B"
   },
   {
    "start_time": "18:40",
    "route": "144",
    "headsign": "Chatswood",
-   "trip_id": "2714719"
+   "trip_id": "2714719",
+   "from": "Manly Wharf, Belgrave St, Stand G"
   },
   {
    "start_time": "18:55",
    "route": "144",
    "headsign": "Manly",
-   "trip_id": "2378442"
+   "trip_id": "2378442",
+   "from": "Chatswood Station, Victoria Ave, Stand F"
   },
   {
    "start_time": "19:29",
    "route": "280",
    "headsign": "Chatswood",
-   "trip_id": "2590018"
+   "trip_id": "2590018",
+   "from": "Warringah Mall, Green St"
   },
   {
    "start_time": "19:36",
    "route": "144",
    "headsign": "Manly",
-   "trip_id": "2378129"
+   "trip_id": "2378129",
+   "from": "Chatswood Station, Victoria Ave, Stand F"
   },
   {
    "start_time": "19:50",
    "route": "199",
    "headsign": "Palm Beach",
-   "trip_id": "2375790"
+   "trip_id": "2375790",
+   "from": "Manly Wharf, West Esplanade, Stand B"
   },
   {
    "start_time": "19:51",
    "route": "162",
    "headsign": "Manly",
-   "trip_id": "1973510"
+   "trip_id": "1973510",
+   "from": "Sydney Rd after Kempbridge Ave"
   },
   {
    "start_time": "20:15",
    "route": "280",
    "headsign": "Warringah Mall",
-   "trip_id": "2589838"
+   "trip_id": "2589838",
+   "from": "Chatswood Station, Stand C"
   },
   {
    "start_time": "21:14",
    "route": "199",
    "headsign": "Manly",
-   "trip_id": "2374599"
+   "trip_id": "2374599",
+   "from": "Ocean Pl at Ocean Rd"
   },
   {
    "start_time": "21:20",
    "route": "199",
    "headsign": "Palm Beach",
-   "trip_id": "2376350"
+   "trip_id": "2376350",
+   "from": "Manly Wharf, West Esplanade, Stand B"
   },
   {
    "start_time": "23:09",
    "route": "160X",
    "headsign": "Chatswood",
-   "trip_id": "2087902"
+   "trip_id": "2087902",
+   "from": "Dee Why Shops, Pittwater Rd"
   },
   {
    "start_time": "23:40",
    "route": "160X",
    "headsign": "Dee Why",
-   "trip_id": "2087861"
+   "trip_id": "2087861",
+   "from": "Chatswood Station, Stand A"
   }
  ],
  "active": {
@@ -1479,6 +1685,11 @@
    0,
    null
   ],
+  "1890163": [
+   0,
+   0,
+   null
+  ],
   "1890238": [
    8,
    16,
@@ -1487,11 +1698,6 @@
   "1890239": [
    0,
    6,
-   null
-  ],
-  "1890788": [
-   null,
-   7,
    null
   ],
   "1890957": [
@@ -1551,11 +1757,11 @@
   ],
   "1950315": [
    0,
-   0,
+   4,
    1
   ],
   "1950317": [
-   1,
+   0,
    2,
    null
   ],
@@ -1592,7 +1798,7 @@
   "1973301": [
    0,
    0,
-   null
+   1
   ],
   "1973440": [
    1,
@@ -1617,6 +1823,11 @@
   "1973453": [
    0,
    1,
+   null
+  ],
+  "1973454": [
+   0,
+   0,
    null
   ],
   "2042233": [
@@ -1657,7 +1868,7 @@
   "2088009": [
    1,
    2,
-   1
+   null
   ],
   "2088108": [
    0,
@@ -1672,7 +1883,7 @@
   "2088387": [
    12,
    19,
-   1
+   null
   ],
   "2088547": [
    0,
@@ -1719,14 +1930,19 @@
    11,
    null
   ],
+  "2089059": [
+   0,
+   0,
+   null
+  ],
   "2089066": [
    1,
    1,
    null
   ],
   "2089075": [
-   14,
-   14,
+   16,
+   16,
    null
   ],
   "2089083": [
@@ -1772,7 +1988,7 @@
   "2089262": [
    12,
    16,
-   1
+   null
   ],
   "2089271": [
    null,
@@ -1799,6 +2015,11 @@
    6,
    null
   ],
+  "2089351": [
+   0,
+   0,
+   null
+  ],
   "2089362": [
    0,
    0,
@@ -1817,7 +2038,7 @@
   "2089389": [
    0,
    4,
-   1
+   null
   ],
   "2089416": [
    0,
@@ -1885,7 +2106,7 @@
    null
   ],
   "2089715": [
-   5,
+   7,
    8,
    null
   ],
@@ -1911,7 +2132,7 @@
   ],
   "2089833": [
    0,
-   3,
+   4,
    1
   ],
   "2089834": [
@@ -2030,7 +2251,7 @@
    null
   ],
   "2257963": [
-   0,
+   1,
    1,
    null
   ],
@@ -2045,7 +2266,7 @@
    null
   ],
   "2261553": [
-   12,
+   2,
    12,
    null
   ],
@@ -2056,7 +2277,7 @@
   ],
   "2261578": [
    0,
-   4,
+   6,
    1
   ],
   "2261584": [
@@ -2092,7 +2313,7 @@
   "2261694": [
    0,
    0,
-   null
+   1
   ],
   "2261711": [
    0,
@@ -2112,6 +2333,11 @@
   "2261736": [
    0,
    7,
+   null
+  ],
+  "2261742": [
+   0,
+   0,
    null
   ],
   "2261746": [
@@ -2192,7 +2418,7 @@
   "2373674": [
    0,
    8,
-   1
+   2
   ],
   "2373717": [
    3,
@@ -2277,7 +2503,7 @@
   "2374611": [
    0,
    0,
-   null
+   1
   ],
   "2374686": [
    0,
@@ -2329,20 +2555,30 @@
    8,
    null
   ],
+  "2375278": [
+   2,
+   2,
+   null
+  ],
   "2375279": [
-   0,
+   1,
    1,
    null
   ],
   "2375409": [
-   0,
-   0,
+   1,
+   1,
    1
+  ],
+  "2375499": [
+   0,
+   0,
+   null
   ],
   "2375575": [
    0,
    0,
-   null
+   1
   ],
   "2375707": [
    0,
@@ -2370,8 +2606,8 @@
    null
   ],
   "2375897": [
-   0,
-   0,
+   2,
+   2,
    null
   ],
   "2375931": [
@@ -2382,12 +2618,7 @@
   "2375945": [
    3,
    3,
-   null
-  ],
-  "2375964": [
-   null,
-   1,
-   null
+   1
   ],
   "2376108": [
    0,
@@ -2442,11 +2673,11 @@
   "2377103": [
    0,
    0,
-   null
+   1
   ],
   "2377220": [
-   0,
-   0,
+   1,
+   1,
    null
   ],
   "2377350": [
@@ -2487,11 +2718,11 @@
   "2377685": [
    0,
    5,
-   1
+   null
   ],
-  "2377895": [
-   null,
-   6,
+  "2377884": [
+   0,
+   0,
    null
   ],
   "2377901": [
@@ -2522,7 +2753,7 @@
   "2377926": [
    0,
    0,
-   null
+   1
   ],
   "2377927": [
    0,
@@ -2547,12 +2778,12 @@
   "2377975": [
    0,
    5,
-   2
+   null
   ],
   "2377976": [
    0,
-   3,
-   null
+   7,
+   1
   ],
   "2377983": [
    0,
@@ -2602,16 +2833,11 @@
   "2378026": [
    0,
    8,
-   1
+   2
   ],
   "2378034": [
    0,
    0,
-   null
-  ],
-  "2378041": [
-   null,
-   8,
    null
   ],
   "2378044": [
@@ -2682,7 +2908,7 @@
   "2378181": [
    0,
    0,
-   null
+   1
   ],
   "2378192": [
    0,
@@ -2787,7 +3013,7 @@
   "2378430": [
    0,
    10,
-   1
+   null
   ],
   "2378451": [
    0,
@@ -2797,11 +3023,6 @@
   "2378453": [
    0,
    3,
-   null
-  ],
-  "2378460": [
-   null,
-   9,
    null
   ],
   "2378475": [
@@ -2899,6 +3120,11 @@
    2,
    null
   ],
+  "2378638": [
+   0,
+   0,
+   null
+  ],
   "2378673": [
    0,
    2,
@@ -2934,10 +3160,15 @@
    3,
    null
   ],
-  "2378828": [
+  "2378816": [
    0,
    0,
    null
+  ],
+  "2378828": [
+   0,
+   0,
+   1
   ],
   "2378839": [
    0,
@@ -2991,7 +3222,7 @@
   ],
   "2388833": [
    0,
-   2,
+   3,
    1
   ],
   "2388839": [
@@ -3011,7 +3242,7 @@
   ],
   "2388861": [
    0,
-   6,
+   7,
    1
   ],
   "2388871": [
@@ -3092,7 +3323,7 @@
   "2389253": [
    1,
    2,
-   1
+   null
   ],
   "2389255": [
    null,
@@ -3199,6 +3430,11 @@
    3,
    null
   ],
+  "2406256": [
+   0,
+   0,
+   null
+  ],
   "2406258": [
    4,
    18,
@@ -3247,11 +3483,6 @@
   "2415655": [
    null,
    4,
-   null
-  ],
-  "2415656": [
-   null,
-   0,
    null
   ],
   "2415658": [
@@ -3321,7 +3552,7 @@
   ],
   "2415724": [
    0,
-   6,
+   7,
    1
   ],
   "2415731": [
@@ -3336,7 +3567,7 @@
   ],
   "2415755": [
    0,
-   4,
+   7,
    2
   ],
   "2415769": [
@@ -3351,7 +3582,7 @@
   ],
   "2415794": [
    0,
-   7,
+   8,
    1
   ],
   "2415795": [
@@ -3435,8 +3666,8 @@
    null
   ],
   "2421322": [
-   3,
-   3,
+   5,
+   5,
    null
   ],
   "2421349": [
@@ -3462,11 +3693,16 @@
   "2421364": [
    5,
    6,
-   1
+   null
   ],
   "2421366": [
+   4,
    5,
-   5,
+   null
+  ],
+  "2421368": [
+   0,
+   0,
    null
   ],
   "2421413": [
@@ -3480,8 +3716,8 @@
    null
   ],
   "2421459": [
-   1,
-   1,
+   2,
+   2,
    null
   ],
   "2421477": [
@@ -3605,7 +3841,7 @@
    null
   ],
   "2428401": [
-   1,
+   0,
    1,
    null
   ],
@@ -3621,7 +3857,7 @@
   ],
   "2428423": [
    0,
-   0,
+   4,
    null
   ],
   "2428425": [
@@ -3652,7 +3888,7 @@
   "2428447": [
    0,
    1,
-   1
+   2
   ],
   "2428465": [
    1,
@@ -3680,6 +3916,11 @@
    null
   ],
   "2428522": [
+   0,
+   0,
+   null
+  ],
+  "2428531": [
    0,
    0,
    null
@@ -3736,7 +3977,7 @@
   ],
   "2457001": [
    0,
-   1,
+   2,
    1
   ],
   "2457002": [
@@ -3780,14 +4021,14 @@
    null
   ],
   "2580089": [
-   0,
-   0,
+   1,
+   1,
    null
   ],
   "2580096": [
    0,
    0,
-   1
+   null
   ],
   "2580119": [
    0,
@@ -3802,7 +4043,7 @@
   "2580146": [
    3,
    6,
-   2
+   1
   ],
   "2580151": [
    0,
@@ -3812,7 +4053,7 @@
   "2580155": [
    1,
    3,
-   1
+   null
   ],
   "2580156": [
    3,
@@ -3884,11 +4125,6 @@
    8,
    null
   ],
-  "2580265": [
-   null,
-   4,
-   null
-  ],
   "2589802": [
    3,
    6,
@@ -3917,7 +4153,7 @@
   "2589878": [
    0,
    4,
-   2
+   null
   ],
   "2589889": [
    0,
@@ -3969,9 +4205,14 @@
    0,
    null
   ],
+  "2590186": [
+   0,
+   0,
+   null
+  ],
   "2618135": [
-   0,
-   0,
+   4,
+   4,
    1
   ],
   "2618136": [
@@ -4062,17 +4303,17 @@
   "2626765": [
    12,
    12,
-   null
+   1
   ],
   "2626786": [
    0,
    2,
-   null
+   1
   ],
   "2626787": [
    0,
    1,
-   null
+   1
   ],
   "2626808": [
    null,
@@ -4212,7 +4453,7 @@
   "2700031": [
    1,
    6,
-   1
+   null
   ],
   "2701405": [
    7,
@@ -4257,10 +4498,10 @@
   "2714615": [
    0,
    6,
-   1
+   null
   ],
   "2714619": [
-   1,
+   0,
    1,
    null
   ],
@@ -4269,15 +4510,15 @@
    3,
    null
   ],
+  "2714622": [
+   0,
+   0,
+   null
+  ],
   "2714631": [
    1,
-   7,
-   1
-  ],
-  "2714634": [
-   null,
-   7,
-   null
+   9,
+   2
   ],
   "2714640": [
    0,
@@ -4312,7 +4553,7 @@
   "2714654": [
    3,
    3,
-   null
+   1
   ],
   "2714661": [
    4,
@@ -4338,6 +4579,11 @@
    1,
    4,
    1
+  ],
+  "2714676": [
+   0,
+   0,
+   null
   ],
   "2714678": [
    0,
@@ -4371,7 +4617,7 @@
   ],
   "2714695": [
    0,
-   2,
+   4,
    1
   ],
   "2714703": [
@@ -4411,7 +4657,7 @@
   ],
   "2714728": [
    0,
-   34,
+   37,
    1
   ],
   "2714731": [
