@@ -25,6 +25,7 @@ DATA = os.path.join(HERE, "..", "data")
 OUT_DIR = os.path.join(DATA, "social")
 STATE = os.path.join(OUT_DIR, "posted.json")
 SITE = "https://nbbuswatch.github.io/"
+INSTALL = SITE + "install/"
 SYD = ZoneInfo("Australia/Sydney")
 FB_API = "https://graph.facebook.com/v26.0"
 PAGE_ID = "1455302057670675"   # Northern Beaches Bus Watch (public)
@@ -91,6 +92,7 @@ def figures():
         "Keolis Downer Northern Beaches (Region 8) services only. Other operators, school and charter services are left out. Today's count includes cancellations already listed for tonight.",
         "",
         f"Check your bus and see the full figures: {SITE}",
+        f"📲 Get the free app on your phone: {INSTALL}",
     ])
     blocks = [("Today so far", d, ""), ("Last 7 days", w, since(w, 7).strip(" ()")),
               ("Last 30 days", m, since(m, 30).strip(" ()"))]
@@ -135,6 +137,7 @@ def weekly_figures():
         "School and charter services are left out.",
         "",
         f"Check your route: {SITE}",
+        f"📲 Get the free app on your phone: {INSTALL}",
     ])
     return {"when": when + partial, "total": w, "worst": worst, "text": text}
 
