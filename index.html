@@ -91,8 +91,8 @@ section[hidden]{display:none}
 <body>
 <div class="viz-root">
   <h1>Northern Beaches Bus Watch</h1>
-  <p class="lede">Independent tracking of cancelled and late Keolis buses on the Northern Beaches and Lower North Shore, using Transport for NSW's own live data.</p>
-  <p class="note" style="margin:0 0 10px;border-style:solid"><b>Keolis Downer Northern Beaches (Sydney bus Region 8) only.</b> Buses run by other operators, such as CDC NSW in the Forest district (Region 14), aren't counted.</p>
+  <p class="lede">Independent tracking of cancelled and late buses on the Northern Beaches and Lower North Shore, using Transport for NSW's own live data.</p>
+  <p class="note" style="margin:0 0 10px;border-style:solid"><b>Headline figures are Keolis Downer Northern Beaches (Sydney bus Region 8) only.</b> CDC NSW routes that also run through the Northern Beaches (Region 14, mainly the Forest district) are tracked separately, and are marked "(CDC)" in My bus.</p>
   <div class="sub"><span id="live" class="pill">Loading…</span> <span id="upd"></span></div>
   <div id="installBar" hidden style="margin:8px 0 0"><button class="btn primary" id="installBtn" type="button">📲 Install app</button>
   <p class="sub" id="installHelp" hidden style="margin-top:6px"></p></div>
@@ -166,6 +166,17 @@ section[hidden]{display:none}
     <div class="seg" id="leagueSeg"></div>
     <p class="lede" id="leagueLede"></p>
     <table><thead><tr><th>Route</th><th></th><th class="r">Cancelled</th><th class="r">Late</th></tr></thead><tbody id="league"></tbody></table>
+  </div>
+  <div class="card" id="cdcCard" hidden>
+    <h2>CDC NSW (Region 14) routes through the Northern Beaches</h2>
+    <p class="lede">Counted separately from Keolis. Routes: <span id="cdcRoutes"></span>.</p>
+    <div id="cdcNote" class="note" hidden></div>
+    <div class="tiles" id="cdcTiles"></div>
+    <p class="lede" style="margin-top:10px">Most cancelled CDC routes today: <span id="cdcTop"></span></p>
+    <details><summary id="cdcSum">Show every cancelled CDC trip</summary>
+    <div class="scroll"><table><thead><tr><th>Time</th><th>Route</th><th>To</th></tr></thead><tbody id="cdcToday"></tbody></table></div></details>
+    <h2 style="margin-top:12px">Worst CDC routes (last 30 days)</h2>
+    <table><thead><tr><th>Route</th><th></th><th class="r">Cancelled</th><th class="r">Late</th></tr></thead><tbody id="cdcLeague"></tbody></table>
   </div>
   <!-- Share -->
   <div class="card">
@@ -322,7 +333,7 @@ section[hidden]{display:none}
     <details open>
       <summary>How this is measured</summary>
       <ul class="sub" style="padding-left:18px">
-        <li><b>What's covered.</b> Only services run by Keolis Downer Northern Beaches under Sydney bus contract Region 8. Other operators' buses on the Northern Beaches, such as CDC NSW (Region 14), aren't included in any figure except the region comparison.</li>
+        <li><b>What's covered.</b> The headline figures are services run by Keolis Downer Northern Beaches under Sydney bus contract Region 8. CDC NSW (Region 14) routes with at least one stop in the Northern Beaches council area are tracked separately with the same method, and never added into the Keolis figures. Other CDC routes, and other operators, aren't included except in the region comparison.</li>
         <li><b>Source.</b> Transport for NSW open data: the live bus trip-updates feed (GTFS-realtime) and the published timetables. The data is checked about every 5 minutes.</li>
         <li><b>Cancelled.</b> A trip the live feed marks as cancelled. Each trip is counted once per day.</li>
         <li><b>Cancellation rate.</b> Cancelled trips divided by trips scheduled that day in the published timetable.</li>
@@ -353,7 +364,7 @@ section[hidden]{display:none}
   <p class="sub">Source: Transport for NSW open data, licensed CC BY 4.0. Updates about every 5 minutes.</p>
 </div>
 <script>
-let S, L, R, G, O, TT, TS, E = [], BOT = null;
+let S, L, R, G, O, TT, TS, CD = null, E = [], BOT = null;
 let state = {off: 60, metric: "rate", range: 30, peak: "30", reg: "d30", share: "today", route: null, league: "cxl"};
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -370,6 +381,7 @@ async function load() {
   G = await j("data/regions.json").catch(() => ({}));
   E = (await j("events.json").catch(() => ({events: []}))).events || [];
   O = await j("data/official/official.json").catch(() => null);
+  CD = await j("data/cdc.json").catch(() => null);
   if (!TT || TT.date !== L.date) TT = await j("data/timetable_today.json").catch(() => null);
   if (!TS) TS = await j("data/trip_stats.json").catch(() => null);
   if (BOT === null) BOT = ((await j("data/telegram.json").catch(() => ({}))) || {}).bot || "";
@@ -406,13 +418,9 @@ function render() {
 
   const sc = L.school_cancelled || [];
   $("schoolNote").innerHTML = sc.length ? `<span class="warn">${sc.length} school service${sc.length === 1 ? " was" : "s were"} also cancelled today</span> (${sc.slice(0, 6).map(t => esc(t.route) + " " + esc(t.start_time)).join(", ")}${sc.length > 6 ? "…" : ""}).` : "";
-  const tripsAll = L.trips || [], nowM = nowMin() % 1440, isDue = t => hm(t.start_time) != null && hm(t.start_time) <= nowM;
-  const tRow = t => `<tr><td>${esc(t.start_time)}</td><td><b>${esc(t.route)}</b></td><td>${esc(t.headsign)}${t.from ? `<div class="sub">from ${esc(t.from)}</div>` : ""}</td></tr>`;
-  const dueT = tripsAll.filter(isDue), aheadT = tripsAll.filter(t => !isDue(t));
-  $("today").innerHTML = (dueT.length ? `<tr><th colspan="3">Already due (${dueT.length})</th></tr>` + dueT.map(tRow).join("") : "")
-    + (aheadT.length ? `<tr><th colspan="3">Announced for later today (${aheadT.length})</th></tr>` + aheadT.map(tRow).join("") : "");
-  const byR = {}; tripsAll.forEach(t => byR[t.route] = (byR[t.route] || 0) + 1);
-  $("todayRoutes").innerHTML = Object.entries(byR).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([r, n]) => `<b>${esc(r)}</b> (${n})`).join(", ") || "none yet";
+  const tripsAll = L.trips || [];
+  $("today").innerHTML = cancelRows(tripsAll);
+  $("todayRoutes").innerHTML = topRoutes(tripsAll);
   $("todaySum").textContent = `Show all ${tripsAll.length} cancelled trips`;
   $("todayEmpty").hidden = (L.trips || []).length > 0;
   $("lateTrips").innerHTML = (L.late_trips || []).map(t => `<tr><td>${esc(t.start_time)}</td><td><b>${esc(t.route)}</b></td><td>${esc(t.headsign)}</td><td class="r">${t.late_min} min</td></tr>`).join("");
@@ -448,6 +456,7 @@ function render() {
   $("regEmpty").hidden = regs.filter(r => !r.home).length > 0;
 
   officialSection();
+  cdcSection();
   myBus();
   hourChart();
   const names7 = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"], wv = S.by_weekday_avg, wmx = Math.max(1, ...wv.map(v => v || 0));
@@ -521,6 +530,38 @@ function routeDetail() {
   const dd = r.daily.slice(-30);
   bars($("routeChart"), $("tip3"), dd.map(d => { const x = new Date(d[0] + "T12:00:00"); return x.getDate() + "/" + (x.getMonth() + 1); }), dd.map(d => d[2]),
     i => `<b>${dfmt(dd[i][0])}</b><br>${dd[i][2]} cancelled of ${dd[i][1]}<br>Left 5+ min late: ${dd[i][4]} of ${dd[i][3]}`, Math.max(1, Math.ceil(dd.length / 6)));
+}
+
+function cancelRows(trips) {
+  const nowM = nowMin() % 1440, isDue = t => hm(t.start_time) != null && hm(t.start_time) <= nowM;
+  const tRow = t => `<tr><td>${esc(t.start_time)}</td><td><b>${esc(t.route)}</b></td><td>${esc(t.headsign)}${t.from ? `<div class="sub">from ${esc(t.from)}</div>` : ""}</td></tr>`;
+  const dueT = trips.filter(isDue), aheadT = trips.filter(t => !isDue(t));
+  return (dueT.length ? `<tr><th colspan="3">Already due (${dueT.length})</th></tr>` + dueT.map(tRow).join("") : "")
+    + (aheadT.length ? `<tr><th colspan="3">Announced for later today (${aheadT.length})</th></tr>` + aheadT.map(tRow).join("") : "");
+}
+function topRoutes(trips) {
+  const byR = {}; trips.forEach(t => byR[t.route] = (byR[t.route] || 0) + 1);
+  return Object.entries(byR).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([r, n]) => `<b>${esc(r)}</b> (${n})`).join(", ") || "none yet";
+}
+function cdcSection() {
+  $("cdcCard").hidden = !CD || !CD.today || !CD.today.scheduled;
+  if ($("cdcCard").hidden) return;
+  const t = CD.today, tr = t.trips || [], T7 = CD.totals && CD.totals["7"];
+  $("cdcRoutes").textContent = (CD.routes || []).join(", ");
+  const since = CD.since ? new Date(CD.since) : null, days = CD.days_tracked || 1;
+  $("cdcNote").hidden = days >= 7;
+  $("cdcNote").textContent = since ? `CDC tracking started ${since.toLocaleString("en-AU", {weekday: "short", day: "numeric", month: "short", hour: "numeric", minute: "2-digit", timeZone: "Australia/Sydney"})}. Trips before then aren't counted, and weekly figures become meaningful after the first week.` : "";
+  $("cdcTiles").innerHTML = [
+    ["CDC trips cancelled today", nf(t.cancelled), `${nf(t.due)} so far, ${nf(t.ahead)} announced for later · ${pc(t.cancel_pct)} of ${nf(t.scheduled)} trips`],
+    ["Buses on time", pc(t.ontime_pct), t.observed ? `${pc(t.late_pct)} left 5+ min late` : "No departures tracked yet"],
+    ["Last 7 days", T7 ? pc(T7.cancel_pct) : "–", T7 ? `${nf(T7.cancelled)} of ${nf(T7.scheduled)} trips cancelled` : ""],
+    ["Longest wait caused", t.longest_gap_min ? t.longest_gap_min + " min" : "–", (t.gaps || []).find(g => g.gap_min) ? `Route ${esc(t.gaps.find(g => g.gap_min).route)}` : "No gaps yet today"],
+  ].map(([l, n, x]) => `<div class="tile"><div class="l">${l}</div><div class="n">${n}</div><div class="s">${x}</div></div>`).join("");
+  $("cdcTop").innerHTML = topRoutes(tr);
+  $("cdcSum").textContent = `Show all ${tr.length} cancelled CDC trips`;
+  $("cdcToday").innerHTML = cancelRows(tr);
+  const lg = CD.league || [];
+  $("cdcLeague").innerHTML = lg.length ? lg.map(r => `<tr><td><b>${esc(r.route)}</b></td><td class="sub">${nf(r.cancelled)} of ${nf(r.scheduled)} cancelled</td><td class="r"><b>${pc(r.cancel_pct)}</b></td><td class="r">${pc(r.late_pct)}</td></tr>`).join("") : `<tr><td class="empty">Not enough data yet</td></tr>`;
 }
 
 function officialOtr() {
@@ -751,7 +792,7 @@ const fmtT = t => { const m = hm(t); return m == null ? t : `${String(Math.floor
 function myBus() {
   tgCard();
   const cx = L.trips || [], sumEl = $("todayStrip");
-  sumEl.innerHTML = `Today: <b>${nf(L.count)}</b> services cancelled${L.count_due != null ? ` (${nf(L.count_due)} so far, ${nf(L.count_ahead)} announced for later)` : ""}${L.scheduled ? `, ${pc(L.cancel_pct)} of today's trips` : ""}${L.ontime_pct != null ? ` · <b>${pc(L.ontime_pct)}</b> of buses on time` : ""}. <a href="#stats">See all stats</a>`;
+  sumEl.innerHTML = `Today: <b>${nf(L.count)}</b> Keolis services cancelled${L.count_due != null ? ` (${nf(L.count_due)} so far, ${nf(L.count_ahead)} announced for later)` : ""}${L.scheduled ? `, ${pc(L.cancel_pct)} of today's trips` : ""}${L.ontime_pct != null ? ` · <b>${pc(L.ontime_pct)}</b> of buses on time` : ""}${CD && CD.today && CD.today.scheduled ? `. CDC routes through the Beaches: <b>${nf(CD.today.cancelled)}</b> cancelled` : ""}. <a href="#stats">See all stats</a>`;
   sumEl.querySelector("a").onclick = e => { e.preventDefault(); history.replaceState(null, "", "#stats"); showTab("stats"); window.scrollTo(0, 0); };
   if (!TT || !TT.routes) { $("mbList").innerHTML = `<p class="empty">Today's timetable is loading. Check back in a few minutes.</p>`; return; }
   const routes = Object.keys(TT.routes).sort((a, b) => a.localeCompare(b, "en", {numeric: true}));
@@ -771,7 +812,7 @@ function myBus() {
   $("mbTime").onchange = e => { mb.time = e.target.value; myBus(); };
   $("mbSave").onclick = () => { try { localStorage.setItem("nbbus.mybus", JSON.stringify({...mb, time: mb.time || $("mbTime").value})); $("mbSave").textContent = "Saved ✓"; setTimeout(() => $("mbSave").textContent = "Save as my bus", 1500); } catch (e) { $("mbSave").textContent = "Couldn't save on this device"; } };
 
-  const cset = new Set(cx.map(t => t.trip_id)), act = L.active || {}, now = nowMin();
+  const cset = new Set([...cx.map(t => t.trip_id), ...((CD && CD.today && CD.today.trips) || []).map(t => "c:" + t.trip_id)]), act = L.active || {}, now = nowMin();
   let centre = mb.time ? hm(mb.time) : now; if (mb.time && centre < 240) centre += 1440;
   const list = trips.filter(t => !mb.dir || t[2] === mb.dir);
   const win = list.filter(t => { const m = hm(t[1]); return m >= centre - 30 && m <= centre + 90; });

@@ -36,6 +36,16 @@ STATIC_DIR = os.path.join(CACHE, "static")
 STATE_DIR = os.path.join(CACHE, "state")
 
 HOME_CODE = "GSBC008"                     # Keolis Northern Beaches
+CROSS_CODE = "GSBC014"                    # CDC NSW (Forest district): only its routes through the Northern Beaches are tracked
+DETAILED = {HOME_CODE, CROSS_CODE}
+NB_SUBURBS = {s.lower() for s in (
+    "Allambie Heights", "Avalon Beach", "Avalon", "Balgowlah", "Balgowlah Heights", "Bayview", "Beacon Hill", "Belrose",
+    "Bilgola Beach", "Bilgola Plateau", "Bilgola", "Brookvale", "Church Point", "Clareville", "Clontarf", "Collaroy",
+    "Collaroy Plateau", "Cromer", "Curl Curl", "North Curl Curl", "South Curl Curl", "Davidson", "Dee Why",
+    "Duffys Forest", "Elanora Heights", "Fairlight", "Forestville", "Frenchs Forest", "Freshwater", "Ingleside",
+    "Killarney Heights", "Manly", "Manly Vale", "Mona Vale", "Narrabeen", "North Narrabeen", "Narraweena", "Newport",
+    "North Balgowlah", "North Manly", "Oxford Falls", "Palm Beach", "Queenscliff", "Seaforth", "Terrey Hills",
+    "Warriewood", "Wheeler Heights", "Whale Beach", "Cottage Point")}
 REGION_CODES = [f"GSBC{n:03d}" for n in range(1, 16)] + ["SBSC006"]
 HOME_MAX_AGE_DAYS = 3
 OTHER_MAX_AGE_DAYS = 7
@@ -56,6 +66,8 @@ def is_school_route(route):
     return route.get("route_type", "") in SCHOOL_ROUTE_TYPES or bool(SCHOOL_NAME.match(route.get("route_short_name", "").strip()))
 
 CXL_LOG = os.path.join(DATA, "cancellations.csv")
+CDC_CXL_LOG = os.path.join(DATA, "cdc_cancellations.csv")
+CDC_FILE = os.path.join(DATA, "cdc.json")
 CXL_FIELDS = ["service_date", "trip_id", "route", "start_time", "headsign", "first_seen", "school", "reinstated"]
 # Days when tracking began part-way through: only trips starting after this time are counted,
 # so the rate isn't diluted by trips we never had the chance to see.
@@ -69,6 +81,11 @@ R8_DAILY_FIELDS = ["date", "scheduled", "cancelled", "observed", "late",
 R8_ROUTES = os.path.join(HIST, "r8_routes_daily.csv")
 R8_ROUTES_FIELDS = ["date", "route", "scheduled", "cancelled", "observed", "late", "ontime"]
 REGIONS_DAILY = os.path.join(HIST, "regions_daily.csv")
+CDC_DAILY = os.path.join(HIST, "cdc_nb_daily.csv")
+CDC_DAILY_FIELDS = ["date", "scheduled", "cancelled", "observed", "late", "ontime", "longest_gap_min"]
+CDC_ROUTES = os.path.join(HIST, "cdc_nb_routes_daily.csv")
+CDC_ROUTES_FIELDS = ["date", "route", "scheduled", "cancelled", "observed", "late", "ontime"]
+CDC_START = os.path.join(HIST, "cdc_tracking_start.txt")
 TIMETABLE = os.path.join(DATA, "timetable_today.json")
 TRIP_STATS = os.path.join(DATA, "trip_stats.json")
 TRIPS_HIST = os.path.join(HIST, "trips")
@@ -349,6 +366,11 @@ def build_school(z, school_routes, routes):
     print(f"  school finder: {len(out_trips)} school services, {len(schools)} schools")
 
 
+def nb_stop(name):
+    """True if a TfNSW stop name ('X Rd after Y St, Suburb') is in the Northern Beaches council area."""
+    return name.rsplit(",", 1)[-1].strip().lower() in NB_SUBURBS if "," in name else False
+
+
 def build_region(hdr, code, detailed):
     print(f"Downloading timetable {code}{' (detailed)' if detailed else ''}...")
     z = gtfs_zip(hdr, code)
@@ -382,7 +404,9 @@ def build_region(hdr, code, detailed):
         "scheduled_by_date": dict(per_date),
     }
     if detailed:
-        first = {}
+        first, nb_routes = {}, set()
+        all_stops = {x["stop_id"]: (x.get("stop_name") or "").strip() for x in zrows(z, "stops.txt")}
+        nb_stops = {sid for sid, nm in all_stops.items() if nb_stop(nm)}
         for st in zrows(z, "stop_times.txt"):
             tid = st["trip_id"]
             if tid not in trips:
@@ -393,19 +417,22 @@ def build_region(hdr, code, detailed):
                 continue
             if tid not in first or seq < first[tid][0]:
                 first[tid] = (seq, st.get("departure_time") or st.get("arrival_time") or "", st.get("stop_id", ""))
-        want_stops = {f[2] for f in first.values()}
-        stop_names = {x["stop_id"]: (x.get("stop_name") or "").strip() for x in zrows(z, "stops.txt") if x["stop_id"] in want_stops}
+            if st.get("stop_id") in nb_stops:
+                nb_routes.add(trips[tid][0])
+        stop_names = all_stops
         for tid, (_, t, sid_) in first.items():
             trips[tid][2] = t[:5]
             trips[tid].append(stop_names.get(sid_, ""))
         out["routes"] = routes
         out["trips"] = trips
         out["services"] = {k: sorted(v) for k, v in active.items()}
-        try:
-            build_school(z, school_set, routes)
-        except Exception as exc:  # the school finder is a bonus; never break tracking
-            print("school data not built:", exc)
-    print(f"  {out['name']}: {len(routes)} routes")
+        out["nb_routes"] = sorted(nb_routes - school_set)
+        if code == HOME_CODE:
+            try:
+                build_school(z, school_set, routes)
+            except Exception as exc:  # the school finder is a bonus; never break tracking
+                print("school data not built:", exc)
+    print(f"  {out['name']}: {len(routes)} routes" + (f", {len(out.get('nb_routes', []))} through the Northern Beaches" if detailed else ""))
     return out
 
 
@@ -416,17 +443,18 @@ def load_regions(hdr):
         path = os.path.join(STATIC_DIR, f"{code}.json")
         cached = read_json(path, None)
         home = code == HOME_CODE
-        max_age = HOME_MAX_AGE_DAYS if home else OTHER_MAX_AGE_DAYS
+        detailed = code in DETAILED
+        max_age = HOME_MAX_AGE_DAYS if detailed else OTHER_MAX_AGE_DAYS
         stale = True
         if cached:
             try:
-                stale = (cached.get("v") != STATIC_VERSION or
+                stale = (cached.get("v") != STATIC_VERSION or (detailed and "trips" not in cached) or
                          (now_syd() - dt.datetime.fromisoformat(cached["built"])).days >= max_age)
             except (KeyError, ValueError):
                 pass
-        if stale and (home or downloads < MAX_REGION_DOWNLOADS_PER_RUN):
+        if stale and (detailed or downloads < MAX_REGION_DOWNLOADS_PER_RUN):
             try:
-                fresh = build_region(hdr, code, detailed=home)
+                fresh = build_region(hdr, code, detailed=detailed)
                 write_json(path, fresh)
                 cached = fresh
                 if not home:
@@ -499,7 +527,7 @@ def read_occupancy(hdr, home):
     return out
 
 
-def read_feed(hdr, prefix_to_code, home, school_routes):
+def read_feed(hdr, prefix_to_code, home, school_routes, cross=None):
     r = requests.get(f"{API}/realtime/buses", headers=hdr, timeout=120)
     r.raise_for_status()
     feed = gtfs_realtime_pb2.FeedMessage()
@@ -507,6 +535,8 @@ def read_feed(hdr, prefix_to_code, home, school_routes):
     CANCELED = gtfs_realtime_pb2.TripDescriptor.CANCELED
     today = now_syd().strftime("%Y%m%d")
     home_trips, home_routes = home["trips"], home["routes"]
+    cross_routes = (cross or {}).get("routes", {})
+    cross_trips = (cross or {}).get("trips", {})
     seen = []
     for e in feed.entity:
         if not e.HasField("trip_update"):
@@ -515,8 +545,12 @@ def read_feed(hdr, prefix_to_code, home, school_routes):
         td = tu.trip
         info = home_trips.get(td.trip_id)
         rid = td.route_id or (info[0] if info else "")
-        prefix = rid.split("_")[0] if "_" in rid else ""
-        code = HOME_CODE if (info or rid in home_routes) else prefix_to_code.get(prefix, f"agency:{prefix}" if prefix else "")
+        if rid and rid in cross_routes and rid not in home_routes:
+            info = cross_trips.get(td.trip_id)
+            code = CROSS_CODE
+        else:
+            prefix = rid.split("_")[0] if "_" in rid else ""
+            code = HOME_CODE if (info or rid in home_routes) else prefix_to_code.get(prefix, f"agency:{prefix}" if prefix else "")
         if not code:
             continue
         static_start = info[2] if info else ""
@@ -870,17 +904,23 @@ def build_outputs(today, live_extra, status):
 
 # ---------------------------------------------------------------- main
 # ---------------------------------------------------------------- My Bus data
-def write_timetable(home, today):
-    """Today's regular (non-school) trips by route, written once a day."""
-    if read_json(TIMETABLE, {}).get("date") == today:
+def write_timetable(home, today, cross=None):
+    """Today's regular (non-school) trips by route, written once a day. CDC routes through the
+    Northern Beaches are added as 'route (CDC)', with trip ids prefixed 'c:'."""
+    old = read_json(TIMETABLE, {})
+    if old.get("date") == today and (old.get("cdc") or not cross):
         return
     by_route = defaultdict(list)
     for tid, rid, hs, m in home_scheduled(home, today):
         info = home["trips"][tid]
         by_route[home["routes"].get(rid, rid)].append([tid, info[2], hs, info[4] if len(info) > 4 else ""])
+    if cross:
+        for tid, rid, hs, m in cross_scheduled(cross, today):
+            info = cross["trips"][tid]
+            by_route[cross["routes"].get(rid, rid) + " (CDC)"].append(["c:" + tid, info[2], hs, info[4] if len(info) > 4 else ""])
     for v in by_route.values():
         v.sort(key=lambda t: t[1])
-    write_json(TIMETABLE, {"date": today, "routes": dict(sorted(by_route.items()))})
+    write_json(TIMETABLE, {"date": today, "cdc": bool(cross), "routes": dict(sorted(by_route.items()))})
 
 
 def record_occupancy(occ):
@@ -897,13 +937,23 @@ def record_occupancy(occ):
         save_state(d, st)
 
 
-def live_active(home, today, state, occ_now):
+def live_active(home, today, state, occ_now, cross=None):
     """Status of trips that started in the last 3 hours or start in the next hour."""
-    reg = state["regions"].get(HOME_CODE, {})
-    start, anywhere = reg.get("start", {}), reg.get("delay", {})
     now_m = now_syd().hour * 60 + now_syd().minute
     out = {}
-    for tid, rid, hs, m in home_scheduled(home, today):
+    jobs = [(HOME_CODE, "", home_scheduled(home, today))]
+    if cross:
+        jobs.append((CROSS_CODE, "c:", cross_scheduled(cross, today)))
+    for code, pre, sched in jobs:
+        reg = state["regions"].get(code, {})
+        start, anywhere = reg.get("start", {}), reg.get("delay", {})
+        out.update(_active(sched, start, anywhere, occ_now, today, now_m, pre))
+    return out
+
+
+def _active(sched, start, anywhere, occ_now, today, now_m, pre):
+    out = {}
+    for tid, rid, hs, m in sched:
         if m is None or not (now_m - 180 <= m <= now_m + 60):
             continue
         s, a, o = start.get(tid), anywhere.get(tid), occ_now.get((today, tid))
@@ -911,7 +961,7 @@ def live_active(home, today, state, occ_now):
         a = None if a is not None and a > MAX_PLAUSIBLE_DELAY else a
         if s is None and a is None and o is None:
             continue
-        out[tid] = [None if s is None else round(s / 60), None if a is None else round(a / 60), o]
+        out[pre + tid] = [None if s is None else round(s / 60), None if a is None else round(a / 60), None if pre else o]
     return out
 
 
@@ -1022,6 +1072,141 @@ def migrate_start_measure():
         write_csv(path, fields, rows)
 
 
+# ---------------------------------------------------------------- CDC NSW routes through the Northern Beaches
+def cross_scheduled(cross, date):
+    nb = set(cross.get("nb_routes", []))
+    services = cross.get("services", {})
+    return [(tid, info[0], info[1], hhmm_to_min(info[2])) for tid, info in cross.get("trips", {}).items()
+            if info[0] in nb and date in services.get(info[3], ())]
+
+
+def cdc_start():
+    try:
+        with open(CDC_START) as f:
+            return f.read().strip()
+    except FileNotFoundError:
+        return None
+
+
+def log_cross_cancellations(cross, seen, stamp):
+    """Permanent log of cancelled CDC trips on routes through the Northern Beaches."""
+    nb = set(cross.get("nb_routes", []))
+    rows = read_csv(CDC_CXL_LOG)
+    known = {(r["service_date"], r["trip_id"]) for r in rows}
+    changed = False
+    for s in seen:
+        if s["code"] != CROSS_CODE or s["school"] or s["route_id"] not in nb:
+            continue
+        key = (s["date"], s["trip_id"])
+        if s["cancelled"] and key not in known:
+            known.add(key)
+            info = cross["trips"].get(s["trip_id"])
+            rows.append({"service_date": s["date"], "trip_id": s["trip_id"],
+                         "route": cross["routes"].get(s["route_id"], s["route_id"]),
+                         "start_time": s["start_time"] or (info[2] if info else ""),
+                         "headsign": info[1] if info else "", "first_seen": stamp, "school": "", "reinstated": ""})
+            changed = True
+    running = {(s["date"], s["trip_id"]) for s in seen
+               if s["code"] == CROSS_CODE and not s["cancelled"] and (s["delay"] is not None or s["start_delay"] is not None)}
+    for r in rows:
+        if not r.get("reinstated") and (r["service_date"], r["trip_id"]) in running:
+            r["reinstated"] = stamp
+            changed = True
+    if changed:
+        write_csv(CDC_CXL_LOG, CXL_FIELDS, rows)
+    return rows
+
+
+def cross_day(cross, date, cxl_rows, state, start_stamp):
+    routes = cross["routes"]
+    sched = cross_scheduled(cross, date)
+    cutoff = 0
+    if start_stamp and start_stamp[:10] == date:
+        cutoff = hhmm_to_min(start_stamp[11:16]) or 0
+    sched = [t for t in sched if t[3] is None or t[3] >= cutoff]
+    sched_ids = {t[0] for t in sched}
+    cxl = [r for r in cxl_rows if r["service_date"] == date and not r.get("reinstated") and r["trip_id"] in sched_ids]
+    cancelled = {r["trip_id"] for r in cxl}
+    st = state["regions"].get(CROSS_CODE, {})
+    delays = {t: d for t, d in st.get("start", {}).items() if t in sched_ids and t not in cancelled and d <= MAX_PLAUSIBLE_DELAY}
+    gaps = find_gaps(sched, cancelled, routes)
+    longest = next((g for g in gaps if g["gap_min"]), None)
+    daily = {"date": date, "scheduled": len(sched), "cancelled": len(cancelled), "observed": len(delays),
+             "late": sum(1 for d in delays.values() if d > LATE_SECONDS),
+             "ontime": sum(1 for d in delays.values() if EARLY_SECONDS <= d <= LATE_SECONDS),
+             "longest_gap_min": longest["gap_min"] if longest else ""}
+    trip_route = {t[0]: routes.get(t[1], t[1]) for t in sched}
+    r_sched = Counter(trip_route.values())
+    r_cxl = Counter(r["route"] for r in cxl)
+    r_obs, r_late, r_on = Counter(), Counter(), Counter()
+    for tid, d in delays.items():
+        rn = trip_route[tid]
+        r_obs[rn] += 1
+        r_late[rn] += d > LATE_SECONDS
+        r_on[rn] += EARLY_SECONDS <= d <= LATE_SECONDS
+    route_rows = [{"date": date, "route": rn, "scheduled": r_sched[rn], "cancelled": r_cxl[rn], "observed": r_obs[rn],
+                   "late": r_late[rn], "ontime": r_on[rn]} for rn in sorted(r_sched)]
+    return daily, route_rows, gaps[:10], cxl
+
+
+def build_cross_outputs(cross, today, today_detail):
+    rows = read_csv(CDC_DAILY)
+    tstr = iso(today)
+
+    def window(rs, days):
+        start = iso(today - dt.timedelta(days=days - 1))
+        return [r for r in rs if start <= r["date"] <= tstr]
+
+    totals = {}
+    for k, n in (("7", 7), ("30", 30)):
+        t = sum_rows(window(rows, n), ("scheduled", "cancelled", "observed", "late", "ontime"))
+        t.update(cancel_pct=pct(t["cancelled"], t["scheduled"]), late_pct=pct(t["late"], t["observed"]),
+                 ontime_pct=pct(t["ontime"], t["observed"]))
+        totals[k] = t
+    agg = defaultdict(Counter)
+    for r in window(read_csv(CDC_ROUTES), 30):
+        for f in ("scheduled", "cancelled", "observed", "late"):
+            agg[r["route"]][f] += int(r[f] or 0)
+    league = sorted(({"route": rn, **c, "cancel_pct": pct(c["cancelled"], c["scheduled"]), "late_pct": pct(c["late"], c["observed"])}
+                     for rn, c in agg.items() if c["scheduled"] >= 20), key=lambda x: (-(x["cancel_pct"] or 0), -x["cancelled"]))
+    write_json(CDC_FILE, {
+        "updated": now_syd().isoformat(timespec="seconds"), "name": "CDC NSW", "region": 14,
+        "since": cdc_start(), "days_tracked": len(rows),
+        "routes": sorted({cross["routes"].get(r, r) for r in cross.get("nb_routes", [])}, key=lambda x: (len(x), x)),
+        "today": today_detail, "totals": totals, "league": league[:10],
+        "daily": [{"date": r["date"], **{k: int(r.get(k) or 0) for k in ("scheduled", "cancelled", "observed", "late", "ontime")}} for r in rows[-90:]],
+    })
+
+
+def run_cross(cross, seen, today, stamp, dates):
+    if not cross or not cross.get("nb_routes"):
+        return
+    if not cdc_start():
+        os.makedirs(HIST, exist_ok=True)
+        with open(CDC_START, "w") as f:
+            f.write(stamp)
+    rows = log_cross_cancellations(cross, seen, stamp)
+    start_stamp = cdc_start()
+    detail = {}
+    for date in dates:
+        if start_stamp and date < start_stamp[:10]:
+            continue
+        state = load_state(date)
+        daily, route_rows, gaps, cxl = cross_day(cross, date, rows, state, start_stamp)
+        upsert_csv(CDC_DAILY, CDC_DAILY_FIELDS, [daily], ["date"])
+        upsert_csv(CDC_ROUTES, CDC_ROUTES_FIELDS, route_rows, ["date", "route"])
+        if date == iso(today):
+            now_m = now_syd().hour * 60 + now_syd().minute
+            due = sum(1 for r in cxl if (hhmm_to_min(r["start_time"]) or 0) <= now_m)
+            detail = {**daily, "cancel_pct": pct(daily["cancelled"], daily["scheduled"]),
+                      "ontime_pct": pct(daily["ontime"], daily["observed"]), "late_pct": pct(daily["late"], daily["observed"]),
+                      "due": due, "ahead": daily["cancelled"] - due, "gaps": gaps,
+                      "trips": [{"start_time": r["start_time"], "route": r["route"], "headsign": r["headsign"], "trip_id": r["trip_id"],
+                                 "from": ((cross["trips"].get(r["trip_id"]) or [])[4:5] or [""])[0]}
+                                for r in sorted(cxl, key=lambda r: r["start_time"] or "99")]}
+    build_cross_outputs(cross, today, detail)
+
+
 def main():
     os.makedirs(DATA, exist_ok=True)
     old = os.path.join(DATA, "static_r8.json")  # replaced by cache/
@@ -1030,6 +1215,7 @@ def main():
     hdr = headers()
     regions = load_regions(hdr)
     home = regions[HOME_CODE]
+    cross = regions.get(CROSS_CODE) if regions.get(CROSS_CODE, {}).get("trips") else None
     prefix_to_code, school_routes = {}, set()
     for code, reg in regions.items():
         for aid in reg.get("agencies", {}):
@@ -1041,7 +1227,7 @@ def main():
     SCHOOL_ROUTE_NAMES_CACHE.update(home["routes"].get(r, r) for r in home.get("school_routes", []))
     status = "ok"
     try:
-        seen = read_feed(hdr, prefix_to_code, home, school_routes)
+        seen = read_feed(hdr, prefix_to_code, home, school_routes, cross)
     except Exception as exc:
         seen = []
         status = f"feed error: {exc}"
@@ -1080,7 +1266,7 @@ def main():
     if occ_now:
         record_occupancy(occ_now)
     today = now_syd().date()
-    write_timetable(home, iso(today))
+    write_timetable(home, iso(today), cross)
     finalise_trips(home, cxl_rows)
     dates = sorted(set(touched) | {iso(today), iso(today - dt.timedelta(days=1))})
     dates = [d for d in dates if d >= iso(today - dt.timedelta(days=1))]
@@ -1110,10 +1296,14 @@ def main():
                 "trips": [{**{k: r[k] for k in ("start_time", "route", "headsign", "trip_id")},
                            "from": ((home["trips"].get(r["trip_id"]) or [])[4:5] or [""])[0]}
                           for r in sorted(cxl_today, key=lambda r: r["start_time"] or "99")],
-                "active": live_active(home, date, load_state(date), occ_now),
+                "active": live_active(home, date, load_state(date), occ_now, cross),
                 "school_cancelled": [{k: r[k] for k in ("start_time", "route", "headsign")}
                                      for r in sorted(school_cxl, key=lambda r: r["start_time"] or "99")],
             }
+    try:  # CDC tracking is an extra; never let it break the Keolis figures
+        run_cross(cross, seen, today, stamp, dates)
+    except Exception as exc:
+        print("CDC figures not built:", exc)
     prune_state({iso(today - dt.timedelta(days=i)) for i in range(0, 3)} | set(touched))
     build_outputs(today, live_extra, status)
     if status != "ok":
