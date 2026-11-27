@@ -10,8 +10,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="NB Buses">
-<title>Northern Beaches Bus Tracker</title>
-<meta name="description" content="Independent daily tracking of cancelled and late Keolis Northern Beaches bus services, from Transport for NSW open data.">
+<title>Sydney Bus Tracker</title>
+<meta name="description" content="Independent daily tracking of cancelled and late bus services in every Sydney region, from Transport for NSW open data.">
 <style>
 .viz-root{color-scheme:light;--bg:#f6f6f4;--surface-1:#fff;--text-primary:#191919;--text-secondary:#666;--grid:#e6e6e6;--border:#e2e2e2;
 --series-1:#257de0;--muted:#c9c9c9;--critical:#d93636;--good:#008a17;--warn:#b86e00;--event:#f2a600}
@@ -86,12 +86,16 @@ section[hidden]{display:none}
 .badge.ok{color:var(--good);border-color:var(--good)}
 .badge.warn{color:var(--warn);border-color:var(--warn)}
 .trip .meta{grid-column:2;font-size:13px;color:var(--text-secondary)}
+.regpick{display:flex;align-items:center;gap:8px;margin:0 0 10px;font-size:13px;color:var(--text-secondary)}
+.regpick select{flex:1;max-width:420px;font-size:15px;font-weight:600}
 </style>
 </head>
 <body>
 <div class="viz-root">
-  <h1>Northern Beaches bus tracker</h1>
-  <p class="lede">Independent tracking of cancelled and late Keolis Northern Beaches (Region 8) bus services, built from Transport for NSW open data.</p>
+  <h1 id="title">Sydney bus tracker</h1>
+  <label class="regpick">Region <select id="regionSel" aria-label="Choose your region"></select></label>
+  <p class="lede" id="lede">Independent tracking of cancelled and late bus services, built from Transport for NSW open data.</p>
+  <div class="note" id="regionNote" hidden></div>
   <div class="sub"><span id="live" class="pill">Loading…</span> <span id="upd"></span></div>
   <div id="installBar" hidden style="margin:8px 0 0"><button class="btn primary" id="installBtn" type="button">📲 Install app</button>
   <p class="sub" id="installHelp" hidden style="margin-top:6px"></p></div>
@@ -137,7 +141,7 @@ section[hidden]{display:none}
   <section data-tab="school" hidden>
   <div class="card">
     <h2>Find your school bus</h2>
-    <p class="lede">For school services run by Keolis on the Northern Beaches and Lower North Shore. Choose the school, then your home, to see which bus to catch and where.</p>
+    <p class="lede"><span id="scLede"></span> Choose the school, then your home, to see which bus to catch and where.</p>
     <div class="form">
       <label class="full">School<select id="scSchool"><option value="">Loading schools…</option></select></label>
       <label class="full">Home address<input id="scAddr" placeholder="e.g. 12 Pittwater Rd, Manly" autocomplete="street-address"></label>
@@ -227,7 +231,7 @@ section[hidden]{display:none}
   </div>
   <!-- Compare -->
   <div class="card">
-    <h2>How the Northern Beaches compares</h2>
+    <h2>How <span class="areaName"></span> compares</h2>
     <p class="lede">Every Sydney bus contract region, measured the same way. Ranked by share of trips cancelled.</p>
     <div class="seg" id="regSeg"></div>
     <table><thead><tr><th>Operator</th><th>Cancelled</th><th class="r">Rate</th><th class="r">Late start</th></tr></thead><tbody id="regions"></tbody></table>
@@ -238,7 +242,7 @@ section[hidden]{display:none}
     <h2>Official Transport for NSW figures</h2>
     <p class="lede">On-time running is the share of trips leaving their first stop no more than 1 minute early or 5 minutes late, as published monthly by Transport for NSW.</p>
     <div class="seg" id="offSeg"></div>
-    <div class="legend"><span><span class="dot" style="background:var(--series-1)"></span>Northern Beaches (Region 8)</span><span><span class="dot" style="background:var(--muted)"></span>Average of other Sydney regions</span></div>
+    <div class="legend"><span><span class="dot" style="background:var(--series-1)"></span><span id="offLegend"></span></span><span><span class="dot" style="background:var(--muted)"></span>Average of other Sydney regions</span></div>
     <div class="chart" id="offChart"><div class="tip" id="tip4"></div></div>
     <h2 style="margin-top:14px">On-time running, last 12 months</h2>
     <table><tbody id="offRank"></tbody></table>
@@ -267,7 +271,7 @@ section[hidden]{display:none}
   <!-- Report -->
   <div class="card" id="report">
     <h2>Report a problem or compliment a driver</h2>
-    <p class="lede">Complaints and compliments sent to Transport for NSW are recorded and counted in the official figures. Keolis also asks customers to use this channel. Fill this in, and it writes the message for you.</p>
+    <p class="lede">Complaints and compliments sent to Transport for NSW are recorded and counted in the official figures. Bus operators also ask customers to use this channel. Fill this in, and it writes the message for you.</p>
     <div class="seg" id="repType"></div>
     <div class="form">
       <label id="issueWrap">What happened
@@ -292,7 +296,7 @@ section[hidden]{display:none}
       <label id="driverWrap" hidden>Driver number (optional)<input id="fDriver" placeholder="On the driver's ID badge"></label>
       <label id="waitWrap">How long did you wait or how late were you? (optional)<input id="fWait" placeholder="e.g. waited 40 min, late for work"></label>
       <label class="full">Details<textarea id="fDetails" rows="4" placeholder="Describe what happened, in your own words."></textarea></label>
-      <div class="full sendto">
+      <div class="full sendto" id="sendWrap">
         <div class="sendto-h">Send the email to</div>
         <div id="sendList"></div>
         <span class="sub" id="sendNote"></span>
@@ -330,16 +334,16 @@ section[hidden]{display:none}
         <li><b>Comparisons.</b> Every Sydney contract region is measured with exactly the same method. Operators may differ in how promptly they mark trips as cancelled in the live feed, so treat region comparisons alongside the official Transport for NSW figures.</li>
         <li><b>Limits.</b> If the live feed is down, nothing is recorded for that time. Tracking began on <span id="mStart"></span>. Marked days (strikes, storms) are shown on the charts so they can be read in context.</li>
       </ul>
-      <p class="sub">This site is independent and not affiliated with Keolis or Transport for NSW. For official figures see <a href="https://www.transport.nsw.gov.au/data-and-research/data-and-insights/bus-performance-reports" target="_blank" rel="noopener">Transport for NSW bus performance reports</a>.</p>
+      <p class="sub">This site is independent and not affiliated with any bus operator or Transport for NSW. For official figures see <a href="https://www.transport.nsw.gov.au/data-and-research/data-and-insights/bus-performance-reports" target="_blank" rel="noopener">Transport for NSW bus performance reports</a>.</p>
     </details>
   </div>
 
   <div class="card">
     <h2>Download the data</h2>
     <ul class="sub" style="padding-left:18px">
-      <li><a href="data/cancellations.csv" download>Every cancelled trip (CSV)</a></li>
-      <li><a href="data/history/r8_daily.csv" download>Daily Northern Beaches totals (CSV)</a></li>
-      <li><a href="data/history/r8_routes_daily.csv" download>Daily totals by route (CSV)</a></li>
+      <li><a id="dlCxl" href="data/cancellations.csv" download>Every cancelled trip (CSV)</a></li>
+      <li><a id="dlDaily" href="data/history/r8_daily.csv" download>Daily totals (CSV)</a></li>
+      <li><a id="dlRoutes" href="data/history/r8_routes_daily.csv" download>Daily totals by route (CSV)</a></li>
       <li><a href="data/history/regions_daily.csv" download>Daily totals for all Sydney regions (CSV)</a></li>
     </ul>
   </div>
@@ -347,7 +351,55 @@ section[hidden]{display:none}
   <p class="sub">Source: Transport for NSW open data, licensed CC BY 4.0. Updates about every 5 minutes.</p>
 </div>
 <script>
-let S, L, R, G, O, TT, TS, E = [], BOT = null;
+let S, L, R, G, O, TT, TS, E = [], BOT = null, IDX = null, NODATA = false;
+// ---------- regions
+const HOME = "GSBC008";
+const REGION_INFO = {
+  GSBC001: {n: 1, area: "Blacktown & Penrith", op: "Busways"},
+  GSBC002: {n: 2, area: "Campbelltown, Liverpool & Camden", op: "Transit Systems"},
+  GSBC003: {n: 3, area: "Liverpool & Fairfield", op: "Transit Systems"},
+  GSBC004: {n: 4, area: "Hills District & Parramatta", op: "CDC NSW"},
+  GSBC007: {n: 7, area: "North Shore & Northern Sydney", op: "Busways"},
+  GSBC008: {n: 8, area: "Northern Beaches", op: "Keolis Downer"},
+  GSBC009: {n: 9, area: "Eastern Suburbs", op: "Transdev John Holland"},
+  GSBC010: {n: 10, area: "St George, Sutherland & Bankstown", op: "U-Go Mobility"},
+};
+let CUR = (() => { let s = null; try { s = localStorage.getItem("nbbus.region"); } catch (e) {} const q = new URLSearchParams(location.search).get("r"); const c = (q || s || HOME).toUpperCase(); return REGION_INFO[c] ? c : HOME; })();
+const RI = () => REGION_INFO[CUR];
+const AREA = () => RI().area;
+const OPNAME = () => RI().op;
+const BASE = () => CUR === HOME ? "data/" : `data/r/${CUR}/`;
+function regionPicker() {
+  const ready = new Set(((IDX || {}).regions || []).map(r => r.code));
+  const codes = Object.keys(REGION_INFO).sort((a, b) => REGION_INFO[a].area.localeCompare(REGION_INFO[b].area));
+  $("regionSel").innerHTML = codes.map(c => { const r = REGION_INFO[c]; return `<option value="${c}" ${c === CUR ? "selected" : ""}>${esc(r.area)} · R${r.n} ${esc(r.op)}${IDX && !ready.has(c) ? " (starting soon)" : ""}</option>`; }).join("");
+  $("regionSel").onchange = e => setRegion(e.target.value);
+}
+function setRegion(code) {
+  CUR = code;
+  try { localStorage.setItem("nbbus.region", code); } catch (e) {}
+  const u = new URL(location.href); if (code === HOME) u.searchParams.delete("r"); else u.searchParams.set("r", code); history.replaceState(null, "", u);
+  L = S = TT = TS = SC = mb = null; R = {}; state.route = null; sendRoute = null;
+  if (scMap) { scMap.remove(); scMap = null; } scStarted = false; $("scResults").innerHTML = ""; scHome = null;
+  $("scSchool").innerHTML = `<option value="">Loading schools…</option>`; $("scMsg").textContent = "You can also tap your home on the map.";
+  NODATA = false; $("live").textContent = "Loading…"; $("upd").textContent = "";
+  applyRegionText(); load();
+  if (location.hash === "#school") schoolInit();
+}
+function applyRegionText() {
+  const r = RI(), home = CUR === HOME;
+  $("title").textContent = `${r.area} bus tracker`;
+  document.title = `${r.area} Bus Tracker`;
+  $("lede").textContent = `Independent tracking of cancelled and late ${r.op} bus services in ${r.area} (Region ${r.n}), built from Transport for NSW open data. Choose another Sydney region above.`;
+  document.querySelectorAll(".areaName").forEach(e => e.textContent = r.area);
+  $("offLegend").textContent = `${r.area} (Region ${r.n})`;
+  $("scLede").textContent = `For school services run by ${r.op} in ${r.area} (Region ${r.n}).`;
+  $("dlCxl").href = BASE() + "cancellations.csv";
+  $("dlDaily").href = BASE() + (home ? "history/r8_daily.csv" : "history/daily.csv");
+  $("dlRoutes").href = BASE() + (home ? "history/r8_routes_daily.csv" : "history/routes_daily.csv");
+  $("sendWrap").hidden = !home; $("repMail").hidden = !home;
+  regionPicker();
+}
 let state = {off: 60, metric: "rate", range: 30, peak: "30", reg: "d30", share: "today", route: null, league: "cxl"};
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -358,14 +410,29 @@ const dfmt = (d, o) => new Date(d + "T12:00:00").toLocaleDateString("en-AU", o |
 
 async function j(path) { const r = await fetch(path + "?t=" + Date.now()); if (!r.ok) throw new Error(path); return r.json(); }
 async function load() {
-  try { [L, S] = await Promise.all([j("data/live.json"), j("data/summary.json")]); }
-  catch (e) { $("live").textContent = "No data yet"; return; }
-  R = await j("data/routes.json").catch(() => ({}));
+  const code = CUR, B = BASE();
+  if (!IDX) { IDX = await j("data/regions_index.json").catch(() => ({regions: []})); regionPicker(); }
+  let l, s;
+  try { [l, s] = await Promise.all([j(B + "live.json"), j(B + "summary.json")]); }
+  catch (e) {
+    if (code !== CUR) return;
+    $("live").textContent = "No data yet"; $("upd").textContent = "";
+    NODATA = true; showTab(location.hash.slice(1));
+    $("regionNote").hidden = false;
+    $("regionNote").innerHTML = `Full tracking for ${esc(AREA())} is just starting. Its timetable downloads over the next hour, then figures appear here. <a href="?r=${HOME}" id="backHome">Back to Northern Beaches</a>`;
+    $("backHome").onclick = e => { e.preventDefault(); setRegion(HOME); };
+    return;
+  }
+  if (code !== CUR) return;
+  L = l; S = s; $("regionNote").hidden = true;
+  if (NODATA) { NODATA = false; showTab(location.hash.slice(1)); }
+  R = await j(B + "routes.json").catch(() => ({}));
   G = await j("data/regions.json").catch(() => ({}));
   E = (await j("events.json").catch(() => ({events: []}))).events || [];
   O = await j("data/official/official.json").catch(() => null);
-  if (!TT || TT.date !== L.date) TT = await j("data/timetable_today.json").catch(() => null);
-  if (!TS) TS = await j("data/trip_stats.json").catch(() => null);
+  if (!TT || TT.date !== L.date) TT = await j(B + "timetable_today.json").catch(() => null);
+  if (!TS) TS = await j(B + "trip_stats.json").catch(() => null);
+  if (code !== CUR) return;
   if (BOT === null) BOT = ((await j("data/telegram.json").catch(() => ({}))) || {}).bot || "";
   render();
 }
@@ -430,7 +497,7 @@ function render() {
   $("league").innerHTML = LG.length ? LG.slice(0, 10).map(r => `<tr><td><b>${esc(r.route)}</b></td><td class="sub">${byLate ? `${nf(r.late)} of ${nf(r.observed)} late` : `${nf(r.cancelled)} of ${nf(r.scheduled)} cancelled`}</td><td class="r">${byLate ? pc(r.cancel_pct) : `<b>${pc(r.cancel_pct)}</b>`}</td><td class="r">${byLate ? `<b>${pc(r.late_pct)}</b>` : pc(r.late_pct)}</td></tr>`).join("") : `<tr><td class="empty">Not enough data yet</td></tr>`;
 
   seg($("regSeg"), [["today", "Today"], ["d7", "7 days"], ["d30", "30 days"]], state.reg, v => { state.reg = v; render(); });
-  const regs = (G[state.reg] || []), rmx = Math.max(1, ...regs.map(r => r.cancel_pct || 0));
+  const regs = (G[state.reg] || []).map(r => ({...r, home: r.code === CUR})), rmx = Math.max(1, ...regs.map(r => r.cancel_pct || 0));
   $("regions").innerHTML = regs.map((r, i) => `<tr class="${r.home ? "home" : ""}"><td>${i + 1}. ${esc(r.name)}${r.home ? " ◀" : ""}</td><td>${nf(r.cancelled)} <span class="sub">of ${nf(r.scheduled)}</span></td><td class="r"><span class="bar ${r.home ? "" : "muted"}" style="width:${Math.max(4, (r.cancel_pct || 0) / rmx * 60)}px;margin-right:6px"></span>${pc(r.cancel_pct)}</td><td class="r">${pc(r.late_pct)}</td></tr>`).join("");
   $("regEmpty").hidden = regs.filter(r => !r.home).length > 0;
 
@@ -510,8 +577,14 @@ function routeDetail() {
     i => `<b>${dfmt(dd[i][0])}</b><br>${dd[i][2]} cancelled of ${dd[i][1]}<br>Left 5+ min late: ${dd[i][4]} of ${dd[i][3]}`, Math.max(1, Math.ceil(dd.length / 6)));
 }
 
+function officialSeries() {
+  const by = O.by_region, n = String(RI().n);
+  if (!by) return O.otr_series;
+  return O.otr_series.map(r => { const others = Object.entries(by).filter(([k, v]) => k !== n && v[r.month] != null).map(([, v]) => v[r.month]);
+    return {month: r.month, home: (by[n] || {})[r.month] ?? null, others_avg: others.length ? Math.round(10 * others.reduce((a, b) => a + b, 0) / others.length) / 10 : null}; });
+}
 function officialOtr() {
-  const r = O && (O.otr_ranking_12m || []).find(x => x.home);
+  const r = O && (O.otr_ranking_12m || []).find(x => x.region === RI().n);
   return r ? r.otr_12m.toFixed(1) : null;
 }
 
@@ -519,7 +592,7 @@ function officialSection() {
   $("officialCard").hidden = !O || !O.otr_series.length;
   if ($("officialCard").hidden) return;
   seg($("offSeg"), [[24, "2 years"], [60, "5 years"], [999, "Since 2010"]], state.off, v => { state.off = +v; render(); });
-  const ser = O.otr_series.filter(r => r.home != null || r.others_avg != null).slice(-state.off);
+  const ser = officialSeries().filter(r => r.home != null || r.others_avg != null).slice(-state.off);
   const el = $("offChart"), tip = $("tip4"), w = el.clientWidth || 600, h = 220, p = {l: 38, r: 8, t: 12, b: 24};
   const vals = ser.flatMap(r => [r.home, r.others_avg]).filter(v => v != null);
   const lo = Math.floor(Math.min(...vals) - 1), hi = Math.min(100, Math.ceil(Math.max(...vals) + 0.5));
@@ -527,7 +600,7 @@ function officialSection() {
   let g = "";
   for (let k = 0; k <= 4; k++) { const v = lo + (hi - lo) * k / 4; g += `<line x1="${p.l}" x2="${w - p.r}" y1="${y(v)}" y2="${y(v)}" stroke="var(--grid)"/><text x="${p.l - 6}" y="${y(v) + 4}" text-anchor="end" font-size="11" fill="var(--text-secondary)">${v.toFixed(0)}%</text>`; }
   const take = ser.findIndex(r => r.month >= "2021-10");
-  if (take > 0) g += `<line x1="${x(take)}" x2="${x(take)}" y1="${p.t}" y2="${h - p.b}" stroke="var(--event)" stroke-dasharray="4 3"/><text x="${x(take) + 4}" y="${p.t + 10}" font-size="11" fill="var(--text-secondary)">Keolis takes over</text>`;
+  if (take > 0 && CUR === HOME) g += `<line x1="${x(take)}" x2="${x(take)}" y1="${p.t}" y2="${h - p.b}" stroke="var(--event)" stroke-dasharray="4 3"/><text x="${x(take) + 4}" y="${p.t + 10}" font-size="11" fill="var(--text-secondary)">Keolis takes over</text>`;
   const path = k => { let d = "", on = false; ser.forEach((r, i) => { if (r[k] == null) { on = false; return; } d += `${on ? "L" : "M"}${x(i).toFixed(1)},${y(r[k]).toFixed(1)}`; on = true; }); return d; };
   g += `<path d="${path("others_avg")}" fill="none" stroke="var(--muted)" stroke-width="2"/><path d="${path("home")}" fill="none" stroke="var(--series-1)" stroke-width="2"/>`;
   const every = Math.max(1, Math.ceil(ser.length / 6));
@@ -538,15 +611,15 @@ function officialSection() {
   const svg = el.querySelector("svg"), xh = svg.querySelector("#offX");
   const mv = e => { const r = svg.getBoundingClientRect(), cx = e.clientX - r.left, i = Math.max(0, Math.min(ser.length - 1, Math.round((cx - p.l) / ((w - p.l - p.r) / Math.max(1, ser.length - 1))))), d = ser[i];
     xh.setAttribute("x1", x(i)); xh.setAttribute("x2", x(i)); xh.setAttribute("visibility", "visible");
-    tip.innerHTML = `<b>${new Date(d.month + "-15").toLocaleDateString("en-AU", {month: "long", year: "numeric"})}</b><br><span class="dot" style="background:var(--series-1)"></span> Northern Beaches: ${d.home ?? "–"}%${d.home_operator ? ` <span class="sub">(${esc(d.home_operator)})</span>` : ""}<br><span class="dot" style="background:var(--muted)"></span> Other regions: ${d.others_avg ?? "–"}%`;
+    tip.innerHTML = `<b>${new Date(d.month + "-15").toLocaleDateString("en-AU", {month: "long", year: "numeric"})}</b><br><span class="dot" style="background:var(--series-1)"></span> ${esc(AREA())}: ${d.home ?? "–"}%<br><span class="dot" style="background:var(--muted)"></span> Other regions: ${d.others_avg ?? "–"}%`;
     tip.style.display = "block"; tip.style.left = Math.min(x(i) + 8, w - 230) + "px"; tip.style.top = "8px"; };
   svg.addEventListener("pointermove", mv); svg.addEventListener("pointerdown", mv);
   svg.addEventListener("pointerleave", () => { tip.style.display = "none"; xh.setAttribute("visibility", "hidden"); });
 
-  const rk = O.otr_ranking_12m, mx = Math.max(...rk.map(r => r.otr_12m)), mn = Math.min(...rk.map(r => r.otr_12m)) - 1;
+  const rk = O.otr_ranking_12m.map(r => ({...r, home: r.region === RI().n})), mx = Math.max(...rk.map(r => r.otr_12m)), mn = Math.min(...rk.map(r => r.otr_12m)) - 1;
   $("offRank").innerHTML = rk.map((r, i) => `<tr class="${r.home ? "home" : ""}"><td>${i + 1}. ${esc(r.operator)} <span class="sub">(Region ${r.region})</span>${r.home ? " ◀" : ""}</td><td class="r" style="width:150px;white-space:nowrap"><span class="bar ${r.home ? "" : "muted"}" style="width:${Math.max(4, (r.otr_12m - mn) / (mx - mn) * 70)}px;margin-right:6px"></span>${r.otr_12m.toFixed(1)}%</td></tr>`).join("");
   const sm = O.sydney_monthly.filter(r => r.cancelled != null).slice(-1)[0];
-  $("offCancel").innerHTML = sm ? `Transport for NSW's official cancellation rate across all Sydney buses was <b>${sm.cancelled.toFixed(1)}%</b> in ${new Date(sm.month + "-15").toLocaleDateString("en-AU", {month: "long", year: "numeric"})}. It isn't published separately for each region. This site's own Northern Beaches figure for the last 7 days is <b>${pc(S.totals["7"].cancel_pct)}</b>, measured differently (from the live feed, excluding school services), so treat the two as a guide rather than a like-for-like comparison.` : "";
+  $("offCancel").innerHTML = sm ? `Transport for NSW's official cancellation rate across all Sydney buses was <b>${sm.cancelled.toFixed(1)}%</b> in ${new Date(sm.month + "-15").toLocaleDateString("en-AU", {month: "long", year: "numeric"})}. It isn't published separately for each region. This site's own ${esc(AREA())} figure for the last 7 days is <b>${pc(S.totals["7"].cancel_pct)}</b>, measured differently (from the live feed, excluding school services), so treat the two as a guide rather than a like-for-like comparison.` : "";
   $("offSrc").textContent = `Latest official month: ${new Date(O.latest_month + "-15").toLocaleDateString("en-AU", {month: "long", year: "numeric"})}. Refreshed monthly from Transport for NSW open data.`;
 }
 
@@ -555,10 +628,10 @@ function officialSection() {
 function showTab(name) {
   const names = ["mybus", "school", "stats", "report", "about"];
   if (!names.includes(name)) name = "mybus";
-  document.querySelectorAll("section[data-tab]").forEach(sec => sec.hidden = sec.dataset.tab !== name);
+  document.querySelectorAll("section[data-tab]").forEach(sec => sec.hidden = NODATA && sec.dataset.tab !== "about" || sec.dataset.tab !== name);
   document.querySelectorAll(".tabs button").forEach(b => b.setAttribute("aria-selected", String(b.dataset.tab === name)));
-  if (S) render();
-  if (name === "school") schoolInit();
+  if (S && !NODATA) render();
+  if (name === "school" && !NODATA) schoolInit();
 }
 function tabsInit() {
   document.querySelector(".tabs").onclick = e => { const t = e.target.dataset.tab; if (t) { history.replaceState(null, "", "#" + t); showTab(t); window.scrollTo(0, 0); } };
@@ -614,11 +687,13 @@ const fmtM = m => `${String(Math.floor(m / 60) % 24).padStart(2, "0")}:${String(
 async function schoolInit() {
   if (scStarted) { if (scMap) setTimeout(() => scMap.invalidateSize(), 50); return; }
   scStarted = true;
-  try { SC = await j("data/school.json"); } catch (e) { $("scMsg").textContent = "School bus information is still being prepared. Please check back in a little while."; return; }
+  const code = CUR;
+  try { SC = await j(BASE() + "school.json"); if (code !== CUR) return; } catch (e) { $("scMsg").textContent = "School bus information is still being prepared. Please check back in a little while."; return; }
   $("scSchool").innerHTML = `<option value="">Choose a school…</option>` + Object.keys(SC.schools).sort().map(n => `<option>${esc(n)}</option>`).join("");
   try { await loadLeaflet(); } catch (e) { $("scMap").innerHTML = `<p class="empty" style="padding:10px">The map couldn't load. Results still work.</p>`; }
   if (window.leaflet && window.leaflet.map) {
     scMap = leaflet.map("scMap").setView([-33.75, 151.28], 11);
+    if (SC.stops.length) scMap.fitBounds(leaflet.latLngBounds(SC.stops.map(s => [s[1], s[2]])));
     leaflet.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {maxZoom: 19, attribution: "© OpenStreetMap contributors"}).addTo(scMap);
     scLayer = leaflet.layerGroup().addTo(scMap);
     scMap.on("click", e => { scHome = [e.latlng.lat, e.latlng.lng]; $("scAddr").value = "Point on map"; schoolFind(); });
@@ -628,9 +703,11 @@ async function schoolInit() {
     if (q && q !== "Point on map" && q !== "My location") {
       $("scMsg").textContent = "Looking up the address…";
       try {
-        const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=au&viewbox=151.15,-33.55,151.36,-33.87&bounded=1&q=${encodeURIComponent(q)}`, {headers: {"Accept-Language": "en-AU"}});
+        const la = SC.stops.map(s => s[1]), lo = SC.stops.map(s => s[2]), pad = 0.03;
+        const vb = la.length ? [Math.min(...lo) - pad, Math.max(...la) + pad, Math.max(...lo) + pad, Math.min(...la) - pad].map(v => v.toFixed(3)).join(",") : "150.5,-33.4,151.4,-34.2";
+        const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=au&viewbox=${vb}&bounded=1&q=${encodeURIComponent(q)}`, {headers: {"Accept-Language": "en-AU"}});
         const a = await r.json();
-        if (!a.length) { $("scMsg").textContent = "Couldn't find that address on the Northern Beaches or Lower North Shore. Try adding the suburb, or tap your home on the map."; return; }
+        if (!a.length) { $("scMsg").textContent = `Couldn't find that address in the ${AREA()} school bus area. Try adding the suburb, or tap your home on the map.`; return; }
         scHome = [+a[0].lat, +a[0].lon];
       } catch (e) { $("scMsg").textContent = "The address search isn't available right now. Tap your home on the map instead."; return; }
     }
@@ -716,13 +793,14 @@ function drawTrip(ti, k, sk) {
 
 // ---------- telegram alerts
 function alertLink(route, time, dir) {
-  if (!BOT) return "";
+  if (!BOT || CUR !== HOME) return "";
   const b64 = btoa(unescape(encodeURIComponent(dir))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
   const p = `${route}_${fmtT(time).replace(":", "")}_${b64}`;
   return `https://t.me/${BOT}` + (/^[A-Za-z0-9_-]{1,64}$/.test(p) ? `?start=${p}` : "");
 }
 function tgCard() {
-  if (!BOT) return;
+  $("tgCard").parentElement.hidden = CUR !== HOME;
+  if (!BOT || CUR !== HOME) return;
   $("tgCard").innerHTML = `<p class="sub">Get a free Telegram message when your usual bus is cancelled, often hours before it's due. Tap <b>🔔 Alert me</b> under any bus above, or open the bot and send your route and time, e.g. <b>199 7:30</b> or <b>B1 17:15 Mona Vale</b>.</p>
     <a class="btn primary" href="https://t.me/${BOT}" target="_blank" rel="noopener" style="margin-top:6px">Open the alerts bot</a>
     <p class="sub" style="margin-top:8px">You'll need the free Telegram app. Send /list to see your alerts or /stop to turn them all off.</p>`;
@@ -731,20 +809,21 @@ function tgCard() {
 // ---------- my bus
 const OCC = ["Empty", "Plenty of seats", "Few seats left", "Standing room only", "Very crowded", "Full", "Not taking passengers"];
 let mb = null;
+const mbKey = () => CUR === HOME ? "nbbus.mybus" : "nbbus.mybus." + CUR;
 function nowMin() { const p = new Date().toLocaleTimeString("en-GB", {timeZone: "Australia/Sydney", hour: "2-digit", minute: "2-digit", hour12: false}).split(":"); let m = +p[0] * 60 + +p[1]; if (m < 240) m += 1440; return m; }
 const hm = t => { const [h, m] = (t || "").split(":"); return h === undefined || m === undefined ? null : +h * 60 + +m; };
 const fmtT = t => { const m = hm(t); return m == null ? t : `${String(Math.floor(m / 60) % 24).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`; };
 function myBus() {
   tgCard();
   const cx = L.trips || [], sumEl = $("todayStrip");
-  sumEl.innerHTML = `Today so far: <b>${nf(L.count)}</b> Northern Beaches services cancelled${L.scheduled ? ` (${pc(L.cancel_pct)} of scheduled trips)` : ""}${L.ontime_pct != null ? ` · <b>${pc(L.ontime_pct)}</b> left their first stop on time` : ""}. <a href="#stats">See all stats</a>`;
+  sumEl.innerHTML = `Today so far: <b>${nf(L.count)}</b> ${esc(AREA())} services cancelled${L.scheduled ? ` (${pc(L.cancel_pct)} of scheduled trips)` : ""}${L.ontime_pct != null ? ` · <b>${pc(L.ontime_pct)}</b> left their first stop on time` : ""}. <a href="#stats">See all stats</a>`;
   sumEl.querySelector("a").onclick = e => { e.preventDefault(); history.replaceState(null, "", "#stats"); showTab("stats"); window.scrollTo(0, 0); };
   if (!TT || !TT.routes) { $("mbList").innerHTML = `<p class="empty">Today's timetable is loading. Check back in a few minutes.</p>`; return; }
   const routes = Object.keys(TT.routes).sort((a, b) => a.localeCompare(b, "en", {numeric: true}));
   if (!mb) {
-    let saved = null; try { saved = JSON.parse(localStorage.getItem("nbbus.mybus") || "null"); } catch (e) {}
+    let saved = null; try { saved = JSON.parse(localStorage.getItem(mbKey()) || "null"); } catch (e) {}
     const t = nowMin() % 1440;
-    mb = saved && TT.routes[saved.route] ? saved : {route: routes.includes("B1") ? "B1" : routes[0], dir: "", time: `${String(Math.floor(t / 60)).padStart(2, "0")}:${String(t % 60).padStart(2, "0")}`};
+    mb = saved && TT.routes[saved.route] ? saved : {route: CUR === HOME && routes.includes("B1") ? "B1" : routes[0], dir: "", time: `${String(Math.floor(t / 60)).padStart(2, "0")}:${String(t % 60).padStart(2, "0")}`};
     if (!saved) mb.time = "";
   }
   const trips = TT.routes[mb.route] || [], dirs = [...new Set(trips.map(t => t[2]))].sort();
@@ -755,7 +834,7 @@ function myBus() {
   $("mbRoute").onchange = e => { mb.route = e.target.value; mb.dir = ""; myBus(); };
   $("mbDir").onchange = e => { mb.dir = e.target.value; myBus(); };
   $("mbTime").onchange = e => { mb.time = e.target.value; myBus(); };
-  $("mbSave").onclick = () => { try { localStorage.setItem("nbbus.mybus", JSON.stringify({...mb, time: mb.time || $("mbTime").value})); $("mbSave").textContent = "Saved ✓"; setTimeout(() => $("mbSave").textContent = "Save as my bus", 1500); } catch (e) { $("mbSave").textContent = "Couldn't save on this device"; } };
+  $("mbSave").onclick = () => { try { localStorage.setItem(mbKey(), JSON.stringify({...mb, time: mb.time || $("mbTime").value})); $("mbSave").textContent = "Saved ✓"; setTimeout(() => $("mbSave").textContent = "Save as my bus", 1500); } catch (e) { $("mbSave").textContent = "Couldn't save on this device"; } };
 
   const cset = new Set(cx.map(t => t.trip_id)), act = L.active || {}, now = nowMin();
   let centre = mb.time ? hm(mb.time) : now; if (mb.time && centre < 240) centre += 1440;
@@ -801,6 +880,7 @@ const ROUTE_MP = {"100":"N","111":"N","114":"N","144":"MNL","150X":"MN","154X":"
   "199":"PWM","225":"N","228":"N","229":"N","230":"N","238":"N","243":"N","246":"N","249":"N","263":"N","280":"LWM","B1":"PWM","BN1":"PWM"};
 let sendTicked = null, sendRoute = null;
 function renderSendTo() {
+  if (CUR !== HOME) { sendTicked = new Set(); sendRoute = null; return; }
   const r = $("fRoute").value.trim().toUpperCase(), codes = ROUTE_MP[r];
   if (r !== sendRoute) { sendRoute = r; sendTicked = new Set([KEOLIS[0], ...(codes ? [MPS[codes[0]][0]] : [])]); }
   const mps = (codes ? [...codes] : Object.keys(MPS)).map(c => MPS[c]);
@@ -813,7 +893,7 @@ function renderSendTo() {
 }
 let mailSubj = "", mailBody = "";
 function updateMail() {
-  const to = [...sendTicked];
+  const to = [...(sendTicked || [])];
   $("repMail").href = to.length ? `mailto:${to.join(",")}?subject=${encodeURIComponent(mailSubj)}&body=${encodeURIComponent(mailBody)}` : "#";
   $("repMail").textContent = to.length ? `2. Email ${to.length === 1 ? (to[0] === KEOLIS[0] ? "Keolis" : "your MP") : to.length + " recipients"}` : "2. Tick someone to email";
 }
@@ -838,7 +918,8 @@ function makeReport() {
   const v = id => $(id).value.trim(), comp = repType === "compliment";
   const when = v("fDate") ? new Date(v("fDate") + "T12:00:00").toLocaleDateString("en-AU", {weekday: "long", day: "numeric", month: "long", year: "numeric"}) : "";
   const lines = [];
-  lines.push(comp ? "I'd like to compliment a Keolis Northern Beaches bus driver." : `I'd like to report a problem with a Keolis Northern Beaches bus service: ${v("fIssue")}.`);
+  const svc = `${OPNAME()} ${AREA()} (Region ${RI().n})`;
+  lines.push(comp ? `I'd like to compliment a ${svc} bus driver.` : `I'd like to report a problem with a ${svc} bus service: ${v("fIssue")}.`);
   lines.push("");
   if (v("fRoute")) lines.push(`Route: ${v("fRoute")}`);
   if (v("fDir")) lines.push(`Travelling towards: ${v("fDir")}`);
@@ -874,7 +955,7 @@ function shareData() {
 function drawShare() {
   const d = shareData(), c = $("shareCanvas"), x = c.getContext("2d");
   x.fillStyle = "#0f2747"; x.fillRect(0, 0, 1080, 1080);
-  x.fillStyle = "#ffffff"; x.font = "600 46px system-ui, sans-serif"; x.fillText("Northern Beaches buses", 80, 130);
+  x.fillStyle = "#ffffff"; x.font = "600 46px system-ui, sans-serif"; x.fillText(`${AREA()} buses`, 80, 130, 920);
   x.fillStyle = "#9fc3f0"; x.font = "36px system-ui, sans-serif"; x.fillText(`${d.title} · ${d.when}`, 80, 190);
   x.fillStyle = "#ffffff"; x.font = "700 230px system-ui, sans-serif"; x.fillText(nf(d.cancelled), 70, 440);
   x.font = "500 48px system-ui, sans-serif"; x.fillText("services cancelled", 80, 510);
@@ -883,16 +964,17 @@ function drawShare() {
   lines.forEach((l, i) => x.fillText(l, 80, 620 + i * 70));
   x.fillStyle = "#6f8fb8"; x.font = "30px system-ui, sans-serif";
   x.font = "28px system-ui, sans-serif";
-  x.fillText("Keolis Northern Beaches (Region 8) · Data: Transport for NSW", 80, 950);
+  x.fillText(`${OPNAME()} · Region ${RI().n} · Data: Transport for NSW`, 80, 950, 920);
   x.fillText(location.host + location.pathname.replace(/index\.html$/, ""), 80, 995, 920);
-  $("shareText").value = `Northern Beaches buses, ${d.title.toLowerCase()} (${d.when}): ${nf(d.cancelled)} Keolis services cancelled${d.scheduled ? ` (${pc(d.rate)} of ${nf(d.scheduled)} scheduled trips)` : ""}${d.late != null ? `, and ${pc(d.late)} of buses left their first stop 5+ minutes late` : ""}.${d.extra ? " " + d.extra + "." : ""} Data from Transport for NSW: ${location.href.split("?")[0]}`;
+  $("shareText").value = `${AREA()} buses, ${d.title.toLowerCase()} (${d.when}): ${nf(d.cancelled)} ${OPNAME()} services cancelled${d.scheduled ? ` (${pc(d.rate)} of ${nf(d.scheduled)} scheduled trips)` : ""}${d.late != null ? `, and ${pc(d.late)} of buses left their first stop 5+ minutes late` : ""}.${d.extra ? " " + d.extra + "." : ""} Data from Transport for NSW: ${location.href.split("#")[0]}`;
   $("shareOut").hidden = false;
 }
 $("makeShare").onclick = drawShare;
-$("dlShare").onclick = () => { const a = document.createElement("a"); a.download = `nb-buses-${L.date}-${state.share}.png`; a.href = $("shareCanvas").toDataURL("image/png"); a.click(); };
+$("dlShare").onclick = () => { const a = document.createElement("a"); a.download = `buses-${CUR}-${L.date}-${state.share}.png`; a.href = $("shareCanvas").toDataURL("image/png"); a.click(); };
 $("copyShare").onclick = async () => { try { await navigator.clipboard.writeText($("shareText").value); $("copyShare").textContent = "Copied"; setTimeout(() => $("copyShare").textContent = "Copy text", 1500); } catch (e) { $("shareText").select(); } };
 
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+applyRegionText();
 reportInit();
 tabsInit();
 load(); setInterval(load, 120000);

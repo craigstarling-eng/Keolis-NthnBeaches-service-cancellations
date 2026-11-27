@@ -93,6 +93,8 @@ def main():
         "otr_series": series,
         "otr_ranking_12m": ranking,
         "sydney_monthly": parse_perf(perf_file) if perf_file else [],
+        # every region's monthly on-time running, so the site can chart whichever region is chosen
+        "by_region": {str(n): {m: v[0] for m, v in sorted(reg.items())} for n, reg in sorted(regions.items())},
     }
     with open(OUT, "w") as f:
         json.dump(out, f, separators=(",", ":"))
