@@ -1,19 +1,19 @@
 {
- "updated": "2026-11-28T03:53:18+11:00",
- "status": "feed error: 401 Client Error:  for url: https://api.transport.nsw.gov.au/v1/gtfs/realtime/buses",
+ "updated": "2026-11-28T03:57:59+11:00",
+ "status": "ok",
  "date": "2026-11-28",
  "count_due": 0,
  "count_ahead": 0,
  "scheduled": 2596,
  "count": 0,
  "cancel_pct": 0.0,
- "observed": 13,
+ "observed": 20,
  "late": 0,
  "late_pct": 0.0,
  "avg_late_min": null,
- "ontime": 13,
+ "ontime": 20,
  "ontime_pct": 100.0,
- "anywhere_late_pct": 7.7,
+ "anywhere_late_pct": 5.0,
  "am": {
   "scheduled": 348,
   "cancelled": 0
@@ -41,6 +41,11 @@
   "2087725": [
    0,
    0,
+   1
+  ],
+  "2087946": [
+   0,
+   0,
    null
   ],
   "2087950": [
@@ -51,6 +56,11 @@
   "2088134": [
    0,
    0,
+   1
+  ],
+  "2088143": [
+   0,
+   0,
    null
   ],
   "2088156": [
@@ -58,9 +68,19 @@
    0,
    null
   ],
+  "2373735": [
+   0,
+   0,
+   null
+  ],
   "2374008": [
    0,
    10,
+   1
+  ],
+  "2374637": [
+   0,
+   0,
    null
   ],
   "2375156": [
@@ -71,7 +91,7 @@
   "2375595": [
    0,
    0,
-   null
+   1
   ],
   "2375925": [
    0,
@@ -89,6 +109,21 @@
    null
   ],
   "2420803": [
+   0,
+   0,
+   null
+  ],
+  "2420888": [
+   0,
+   0,
+   null
+  ],
+  "2424315": [
+   0,
+   0,
+   null
+  ],
+  "2713911": [
    0,
    0,
    null
