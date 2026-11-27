@@ -63,6 +63,10 @@ a{color:var(--series-1)}
 @media(min-width:680px){.form{grid-template-columns:1fr 1fr}}
 .form label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--text-secondary)}
 .form .full{grid-column:1/-1}
+.sendto{font-size:13px;color:var(--text-secondary)}
+.sendto-h{margin-bottom:6px}
+.sendto label.tick{flex-direction:row;align-items:center;gap:10px;font-size:15px;color:var(--text-primary);padding:6px 0}
+.sendto label.tick input{width:20px;height:20px;flex:none;margin:0}
 .form [hidden]{display:none}
 .form label{min-width:0}
 .form input,.form select,.form textarea{width:100%}
@@ -288,18 +292,11 @@ section[hidden]{display:none}
       <label id="driverWrap" hidden>Driver number (optional)<input id="fDriver" placeholder="On the driver's ID badge"></label>
       <label id="waitWrap">How long did you wait or how late were you? (optional)<input id="fWait" placeholder="e.g. waited 40 min, late for work"></label>
       <label class="full">Details<textarea id="fDetails" rows="4" placeholder="Describe what happened, in your own words."></textarea></label>
-      <label class="full">Send a copy to your local state MP (optional)
-        <select id="fMP">
-          <option value="">No thanks</option>
-          <option value="manly@parliament.nsw.gov.au">Manly electorate (Manly, Balgowlah, Fairlight, Seaforth…)</option>
-          <option value="wakehurst@parliament.nsw.gov.au">Wakehurst electorate (Dee Why, Collaroy, Cromer, Forestville…)</option>
-          <option value="pittwater@parliament.nsw.gov.au">Pittwater electorate (Narrabeen, Mona Vale, Newport, Avalon…)</option>
-          <option value="davidson@parliament.nsw.gov.au">Davidson electorate (Belrose, Frenchs Forest, Davidson…)</option>
-          <option value="northshore@parliament.nsw.gov.au">North Shore electorate (Mosman, Cremorne, Neutral Bay…)</option>
-          <option value="willoughby@parliament.nsw.gov.au">Willoughby electorate (Willoughby, Northbridge, Castlecrag…)</option>
-        </select>
-        <span>Not sure which? <a href="https://www.parliament.nsw.gov.au/members-and-electorates/members-and-ministers/all-members" target="_blank" rel="noopener">Find your state MP</a>.</span>
-      </label>
+      <div class="full sendto">
+        <div class="sendto-h">Send the email to</div>
+        <div id="sendList"></div>
+        <span class="sub" id="sendNote"></span>
+      </div>
     </div>
     <button class="btn primary" id="repMake" style="margin-top:12px">Write my message</button>
     <div id="repOut" hidden>
@@ -307,9 +304,9 @@ section[hidden]{display:none}
       <div class="steps">
         <button class="btn primary" id="repCopy">1. Copy message</button>
         <a class="btn" id="repTf" href="https://transportnsw.info/contact-us/feedback" target="_blank" rel="noopener">2. Open Transport for NSW feedback form</a>
-        <a class="btn" id="repMail" href="#">3. Email Keolis a copy</a>
+        <a class="btn" id="repMail" href="#">3. Email Keolis</a>
       </div>
-      <p class="sub" style="margin-top:8px">Paste the message into the Transport for NSW form (choose Buses). Prefer to call? Ring 131 500. "Email Keolis a copy" opens your own email app with the message ready, addressed to Keolis (communications@keolis.com.au), with your MP copied in if you picked one. Add your own address to keep a copy. This site doesn't store or send anything.</p>
+      <p class="sub" style="margin-top:8px">Paste the message into the Transport for NSW form (choose Buses). Prefer to call? Ring 131 500. "Email" opens your own email app with the message ready, addressed to everyone you ticked. Add your own address to keep a copy. This site doesn't store or send anything.</p>
     </div>
   </div>
   </section>
@@ -794,6 +791,33 @@ function myBus() {
 }
 
 // ---------- report / compliment
+const KEOLIS = ["communications@keolis.com.au", "Keolis Northern Beaches"];
+const MPS = {M: ["manly@parliament.nsw.gov.au", "Member for Manly"], W: ["wakehurst@parliament.nsw.gov.au", "Member for Wakehurst"],
+  P: ["pittwater@parliament.nsw.gov.au", "Member for Pittwater"], D: ["davidson@parliament.nsw.gov.au", "Member for Davidson"],
+  N: ["northshore@parliament.nsw.gov.au", "Member for North Shore"], L: ["willoughby@parliament.nsw.gov.au", "Member for Willoughby"]};
+// Electorates each route runs through (city end ignored); first = main local area, ticked by default
+const ROUTE_MP = {"100":"N","111":"N","114":"N","144":"MNL","150X":"MN","154X":"WN","155":"P","156":"P","160X":"WL",
+  "162":"M","165X":"M","166":"MW","167":"M","168X":"M","170X":"M","171X":"M","172X":"M","173X":"MW","174X":"WM","176X":"W",
+  "177":"WM","177X":"W","178":"WM","179":"W","180":"W","180X":"W","181X":"W","182":"P","185":"P","190X":"P","191":"P","192":"P",
+  "199":"PWM","225":"N","228":"N","229":"N","230":"N","238":"N","243":"N","246":"N","249":"N","263":"N","280":"LWM","B1":"PWM","BN1":"PWM"};
+let sendTicked = null, sendRoute = null;
+function renderSendTo() {
+  const r = $("fRoute").value.trim().toUpperCase(), codes = ROUTE_MP[r];
+  if (r !== sendRoute) { sendRoute = r; sendTicked = new Set([KEOLIS[0], ...(codes ? [MPS[codes[0]][0]] : [])]); }
+  const mps = (codes ? [...codes] : Object.keys(MPS)).map(c => MPS[c]);
+  $("sendList").innerHTML = [KEOLIS, ...mps].map(([em, name]) =>
+    `<label class="tick"><input type="checkbox" value="${em}"${sendTicked.has(em) ? " checked" : ""}>${name}</label>`).join("");
+  $("sendList").querySelectorAll("input").forEach(cb => cb.onchange = () => { cb.checked ? sendTicked.add(cb.value) : sendTicked.delete(cb.value); updateMail(); });
+  $("sendNote").textContent = codes ? `Local MPs picked from route ${r}. The first is where the route mostly runs.`
+    : (r ? "Couldn't match that route. Tick your local MP if you want them copied in." : "Enter the route and your local MP will be picked for you.");
+  updateMail();
+}
+let mailSubj = "", mailBody = "";
+function updateMail() {
+  const to = [...sendTicked];
+  $("repMail").href = to.length ? `mailto:${to.join(",")}?subject=${encodeURIComponent(mailSubj)}&body=${encodeURIComponent(mailBody)}` : "#";
+  $("repMail").textContent = to.length ? `3. Email ${to.length === 1 ? (to[0] === KEOLIS[0] ? "Keolis" : "your MP") : to.length + " recipients"}` : "3. Tick someone to email";
+}
 let repType = "complaint";
 function reportInit() {
   const t = new Date(); $("fDate").value = t.toLocaleDateString("en-CA", {timeZone: "Australia/Sydney"});
@@ -801,6 +825,8 @@ function reportInit() {
   $("repMake").onclick = makeReport;
   $("repCopy").onclick = async () => { try { await navigator.clipboard.writeText($("repText").value); $("repCopy").textContent = "Copied ✓"; setTimeout(() => $("repCopy").textContent = "1. Copy message", 1500); } catch (e) { $("repText").select(); } };
   $("fIssue").onchange = renderRepType;
+  $("fRoute").addEventListener("input", renderSendTo);
+  renderSendTo();
 }
 function renderRepType() {
   seg($("repType"), [["complaint", "Report a problem"], ["compliment", "Compliment a driver"]], repType, v => { repType = v; renderRepType(); });
@@ -829,10 +855,7 @@ function makeReport() {
   const text = lines.join("\n");
   $("repText").value = text;
   const subj = comp ? `Compliment: route ${v("fRoute") || ""} driver`.trim() : `Bus complaint: route ${v("fRoute") || ""} ${v("fIssue")}`.trim();
-  const mp = $("fMP").value;
-  const body = text + (mp ? "\n\nI have also reported this to Transport for NSW." : "");
-  const keolis = "communications@keolis.com.au";
-  $("repMail").href = `mailto:${keolis}?${mp ? `cc=${encodeURIComponent(mp)}&` : ""}subject=${encodeURIComponent(subj)}&body=${encodeURIComponent(body)}`;
+  mailSubj = subj; mailBody = text; updateMail();
   $("repOut").hidden = false;
   $("repText").scrollIntoView({behavior: "smooth", block: "center"});
 }
