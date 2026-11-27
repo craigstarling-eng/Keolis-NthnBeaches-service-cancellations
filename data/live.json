@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-28T03:39:30+11:00",
+ "updated": "2026-11-28T03:44:06+11:00",
  "status": "ok",
  "date": "2026-11-28",
  "count_due": 0,
@@ -7,13 +7,13 @@
  "scheduled": 2596,
  "count": 0,
  "cancel_pct": 0.0,
- "observed": 11,
+ "observed": 13,
  "late": 0,
  "late_pct": 0.0,
  "avg_late_min": null,
- "ontime": 11,
+ "ontime": 13,
  "ontime_pct": 100.0,
- "anywhere_late_pct": 9.1,
+ "anywhere_late_pct": 7.7,
  "am": {
   "scheduled": 348,
   "cancelled": 0
@@ -43,13 +43,23 @@
    0,
    null
   ],
+  "2087950": [
+   0,
+   0,
+   null
+  ],
   "2088134": [
    0,
    0,
    null
   ],
-  "2374008": [
+  "2088156": [
    0,
+   0,
+   null
+  ],
+  "2374008": [
+   2,
    10,
    null
   ],
