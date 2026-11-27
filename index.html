@@ -80,6 +80,7 @@ a{color:var(--series-1)}
 .sendto-h{margin-bottom:6px}
 .sendto label.tick{flex-direction:row;align-items:center;gap:10px;font-size:15px;color:var(--text-primary);padding:6px 0}
 .sendto label.tick input{width:20px;height:20px;flex:none;margin:0}
+.sendto label.tick.off{opacity:.4;cursor:not-allowed}
 .form [hidden]{display:none}
 .form label{min-width:0}
 .form input,.form select,.form textarea{width:100%}
@@ -958,17 +959,22 @@ let sendTicked = null, sendRoute = null;
 function renderSendTo() {
   const r = $("fRoute").value.trim().toUpperCase(), codes = ROUTE_MP[r];
   if (r !== sendRoute) { sendRoute = r; sendTicked = new Set([KEOLIS[0], ...(codes ? [MPS[codes[0]][0]] : [])]); }
-  const mps = (codes ? [...codes] : Object.keys(MPS)).map(c => MPS[c]);
-  $("sendList").innerHTML = [KEOLIS, ...mps].map(([em, name]) =>
-    `<label class="tick"><input type="checkbox" value="${em}"${sendTicked.has(em) ? " checked" : ""}>${name}</label>`).join("");
-  $("sendList").querySelectorAll("input").forEach(cb => cb.onchange = () => { cb.checked ? sendTicked.add(cb.value) : sendTicked.delete(cb.value); updateMail(); });
-  $("sendNote").textContent = codes ? `Local MPs picked from route ${r}. The first is where the route mostly runs.`
+  const mps = (codes ? [...codes] : Object.keys(MPS)).map(c => MPS[c]), comp = repType === "compliment";
+  // Compliments go to Keolis only: MPs are shown greyed out, and their ticks come back when switching to a complaint.
+  $("sendList").innerHTML = [KEOLIS, ...mps].map(([em, name]) => {
+    const k = em === KEOLIS[0], off = comp && !k, on = comp ? k : sendTicked.has(em);
+    return `<label class="tick${off ? " off" : ""}"><input type="checkbox" value="${em}"${on ? " checked" : ""}${off ? " disabled" : ""}${comp && k ? ' data-lock="1"' : ""}>${name}</label>`;
+  }).join("");
+  $("sendList").querySelectorAll("input[data-lock]").forEach(cb => cb.onclick = e => e.preventDefault()); // Keolis stays ticked for compliments
+  $("sendList").querySelectorAll("input:not([data-lock])").forEach(cb => cb.onchange = () => { cb.checked ? sendTicked.add(cb.value) : sendTicked.delete(cb.value); updateMail(); });
+  $("sendNote").textContent = comp ? "Compliments go to Keolis, who pass them on to the driver and their depot."
+    : codes ? `Local MPs picked from route ${r}. The first is where the route mostly runs.`
     : (r ? "Couldn't match that route. Tick your local MP if you want them copied in." : "Enter the route and your local MP will be picked for you.");
   updateMail();
 }
 let mailSubj = "", mailBody = "";
 function updateMail() {
-  const to = [...sendTicked];
+  const to = repType === "compliment" ? [KEOLIS[0]] : [...sendTicked];
   $("repMail").href = to.length ? `mailto:${to.join(",")}?subject=${encodeURIComponent(mailSubj)}&body=${encodeURIComponent(mailBody)}` : "#";
   $("repMail").textContent = to.length ? `2. Email ${to.length === 1 ? (to[0] === KEOLIS[0] ? "Keolis" : "your MP") : to.length + " recipients"}` : "2. Tick someone to email";
 }
@@ -988,6 +994,7 @@ function renderRepType() {
   $("issueWrap").hidden = comp; $("waitWrap").hidden = comp;
   $("driverWrap").hidden = !(comp || $("fIssue").value === "Driver conduct");
   $("fDetails").placeholder = comp ? "What did the driver do well?" : "Describe what happened, in your own words.";
+  if (sendTicked) renderSendTo();
 }
 function makeReport() {
   const v = id => $(id).value.trim(), comp = repType === "compliment";
