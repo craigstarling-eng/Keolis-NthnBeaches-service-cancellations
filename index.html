@@ -55,7 +55,7 @@ tr.home td{font-weight:650}
 .seg button,.btn,select{font:inherit;font-size:13px;padding:5px 11px;border-radius:99px;border:1px solid var(--border);background:var(--surface-1);color:var(--text-primary);cursor:pointer}
 .seg button[aria-pressed=true],.btn.primary{background:var(--text-primary);color:var(--surface-1)}
 select{border-radius:8px;padding:6px 10px;min-width:140px}
-.chart{position:relative}
+.chart{position:relative;overflow:hidden}
 .tip{position:absolute;pointer-events:none;background:var(--surface-1);border:1px solid var(--border);border-radius:8px;padding:6px 8px;font-size:12px;box-shadow:0 2px 8px #0002;display:none;white-space:nowrap;z-index:2}
 .scroll{max-height:340px;overflow:auto}
 .bar{height:8px;border-radius:0 4px 4px 0;display:inline-block;vertical-align:middle;background:var(--series-1)}
@@ -64,6 +64,7 @@ select{border-radius:8px;padding:6px 10px;min-width:140px}
 .legend{display:flex;gap:14px;font-size:12px;color:var(--text-secondary);flex-wrap:wrap;margin-bottom:4px}
 .legend span{display:flex;align-items:center;gap:6px}
 .grid2{display:grid;gap:14px}
+.grid2>*{min-width:0}
 @media(min-width:680px){.grid2{grid-template-columns:1fr 1fr}}
 .share-out{margin-top:10px}
 .share-out canvas{max-width:100%;border-radius:10px;border:1px solid var(--border)}
@@ -568,6 +569,7 @@ function render() {
 function datesBack(n) { const out = [], end = new Date(L.date + "T12:00:00"); for (let i = n - 1; i >= 0; i--) out.push(new Date(end - i * 864e5).toISOString().slice(0, 10)); return out; }
 
 function bars(el, tip, labels, vals, tipText, every, opts = {}) {
+  el.querySelector("svg")?.remove(); // measure the space without the old chart propping it open
   const w = el.clientWidth || 600, h = 210, p = {l: 38, r: 6, t: 12, b: 24}, n = vals.length;
   const vmax = Math.max(opts.minMax || 4, ...vals.map(v => v || 0));
   const step = vmax <= 4 ? 1 : vmax <= 10 ? 2.5 : Math.pow(10, Math.floor(Math.log10(vmax))) / (vmax / Math.pow(10, Math.floor(Math.log10(vmax))) < 2.5 ? 2 : 1);
@@ -669,7 +671,9 @@ function officialSection() {
   if ($("officialCard").hidden) return;
   seg($("offSeg"), [[24, "2 years"], [60, "5 years"], [999, "Since 2010"]], state.off, v => { state.off = +v; render(); });
   const ser = O.otr_series.filter(r => r.home != null || r.others_avg != null).slice(-state.off);
-  const el = $("offChart"), tip = $("tip4"), w = el.clientWidth || 600, h = 220, p = {l: 38, r: 8, t: 12, b: 24};
+  const el = $("offChart"), tip = $("tip4");
+  el.querySelector("svg")?.remove();
+  const w = el.clientWidth || 600, h = 220, p = {l: 38, r: 8, t: 12, b: 24};
   const vals = ser.flatMap(r => [r.home, r.others_avg]).filter(v => v != null);
   const lo = Math.floor(Math.min(...vals) - 1), hi = Math.min(100, Math.ceil(Math.max(...vals) + 0.5));
   const x = i => p.l + (ser.length < 2 ? 0 : i * (w - p.l - p.r) / (ser.length - 1)), y = v => p.t + (h - p.t - p.b) * (1 - (v - lo) / (hi - lo));
