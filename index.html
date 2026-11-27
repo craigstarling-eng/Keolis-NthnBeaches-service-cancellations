@@ -302,11 +302,10 @@ section[hidden]{display:none}
     <div id="repOut" hidden>
       <textarea id="repText" rows="9" style="margin-top:10px"></textarea>
       <div class="steps">
-        <button class="btn primary" id="repCopy">1. Copy message</button>
-        <a class="btn" id="repTf" href="https://transportnsw.info/contact-us/feedback" target="_blank" rel="noopener">2. Open Transport for NSW feedback form</a>
-        <a class="btn" id="repMail" href="#">3. Email Keolis</a>
+        <a class="btn primary" id="repTf" href="https://transportnsw.info/contact-us/feedback" target="_blank" rel="noopener">1. Copy &amp; open Transport for NSW form</a>
+        <a class="btn" id="repMail" href="#">2. Email Keolis</a>
       </div>
-      <p class="sub" style="margin-top:8px">Paste the message into the Transport for NSW form (choose Buses). Prefer to call? Ring 131 500. "Email" opens your own email app with the message ready, addressed to everyone you ticked. Add your own address to keep a copy. This site doesn't store or send anything.</p>
+      <p class="sub" style="margin-top:8px">Step 1 copies your message and opens the Transport for NSW form. Choose Buses, then paste it in. This is the one that gets counted in the official figures. Prefer to call? Ring 131 500. "Email" opens your own email app with the message ready, addressed to everyone you ticked. Add your own address to keep a copy. This site doesn't store or send anything.</p>
     </div>
   </div>
   </section>
@@ -816,14 +815,14 @@ let mailSubj = "", mailBody = "";
 function updateMail() {
   const to = [...sendTicked];
   $("repMail").href = to.length ? `mailto:${to.join(",")}?subject=${encodeURIComponent(mailSubj)}&body=${encodeURIComponent(mailBody)}` : "#";
-  $("repMail").textContent = to.length ? `3. Email ${to.length === 1 ? (to[0] === KEOLIS[0] ? "Keolis" : "your MP") : to.length + " recipients"}` : "3. Tick someone to email";
+  $("repMail").textContent = to.length ? `2. Email ${to.length === 1 ? (to[0] === KEOLIS[0] ? "Keolis" : "your MP") : to.length + " recipients"}` : "2. Tick someone to email";
 }
 let repType = "complaint";
 function reportInit() {
   const t = new Date(); $("fDate").value = t.toLocaleDateString("en-CA", {timeZone: "Australia/Sydney"});
   renderRepType();
   $("repMake").onclick = makeReport;
-  $("repCopy").onclick = async () => { try { await navigator.clipboard.writeText($("repText").value); $("repCopy").textContent = "Copied ✓"; setTimeout(() => $("repCopy").textContent = "1. Copy message", 1500); } catch (e) { $("repText").select(); } };
+  $("repTf").onclick = () => { navigator.clipboard?.writeText($("repText").value).then(() => { $("repTf").textContent = "Copied ✓ now paste it into the form"; }).catch(() => {}); };
   $("fIssue").onchange = renderRepType;
   $("fRoute").addEventListener("input", renderSendTo);
   renderSendTo();
