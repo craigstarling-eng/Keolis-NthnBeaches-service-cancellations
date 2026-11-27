@@ -29,7 +29,7 @@ INSTALL = SITE + "install/"
 SYD = ZoneInfo("Australia/Sydney")
 FB_API = "https://graph.facebook.com/v26.0"
 PAGE_ID = "1455302057670675"   # Northern Beaches Bus Watch (public)
-POST_AT = (17, 0)        # 5:00 pm, after the school run and as the evening peak starts
+POST_AT = (17, 30)       # 5:30 pm, mid evening peak while commuters are on the bus home
 WEEKLY_AT = (8, 0)       # Mondays 8:00 am: week in review (Monday to Sunday just gone)
 MAX_TRIES = 3
 
