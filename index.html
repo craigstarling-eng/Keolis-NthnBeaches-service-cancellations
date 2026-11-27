@@ -118,7 +118,7 @@ section[hidden]{display:none}
     <p class="lede">Choose your route, direction and roughly when you travel. Times shown are when each bus leaves the start of its route.</p>
     <div class="form">
       <label>Route<select id="mbRoute"></select></label>
-      <label>Direction<select id="mbDir"></select></label>
+      <label>Departing<select id="mbDir"></select></label>
       <label>Around<input id="mbTime" type="time"></label>
       <label>&nbsp;<button class="btn" id="mbSave" type="button">Save as my bus</button></label>
     </div>
@@ -818,7 +818,8 @@ function myBus() {
   const trips = TT.routes[mb.route] || [], dirs = [...new Set(trips.map(t => t[2]))].sort();
   if (mb.dir && !dirs.includes(mb.dir)) mb.dir = "";
   $("mbRoute").innerHTML = routes.map(r => `<option ${r === mb.route ? "selected" : ""}>${esc(r)}</option>`).join("");
-  $("mbDir").innerHTML = `<option value="">Both directions</option>` + dirs.map(d => `<option ${d === mb.dir ? "selected" : ""}>${esc(d)}</option>`).join("");
+  const origin = d => { const c = {}; trips.forEach(t => { if (t[2] === d && t[3]) { const o = t[3].split(",")[0].trim(); c[o] = (c[o] || 0) + 1; } }); return Object.keys(c).sort((x, y) => c[y] - c[x])[0] || ""; };
+  $("mbDir").innerHTML = `<option value="">All departures</option>` + dirs.map(d => { const o = origin(d); return `<option value="${esc(d)}" ${d === mb.dir ? "selected" : ""}>${o ? `${esc(o)} → ` : "To "}${esc(d)}</option>`; }).join("");
   if (document.activeElement !== $("mbTime")) $("mbTime").value = mb.time || "";
   $("mbRoute").onchange = e => { mb.route = e.target.value; mb.dir = ""; myBus(); };
   $("mbDir").onchange = e => { mb.dir = e.target.value; myBus(); };
