@@ -961,6 +961,10 @@ fetch("https://nbbuswatch.goatcounter.com/counter/TOTAL.json")
   .then(d => { if (d && d.count) { document.getElementById("visitCount").textContent = d.count; document.getElementById("visits").hidden = false; } })
   .catch(() => {});
 </script>
+<script>
+// Home-screen app opens are logged as "/app" so they show separately from website visits.
+window.goatcounter = { path: (matchMedia("(display-mode: standalone)").matches || navigator.standalone) ? "/app" : location.pathname };
+</script>
 <script data-goatcounter="https://nbbuswatch.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 </body>
 </html>
