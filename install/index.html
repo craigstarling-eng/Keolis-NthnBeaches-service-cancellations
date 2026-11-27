@@ -67,6 +67,14 @@ a{color:inherit}
     <div class="row"><button class="btn" id="copy1" type="button">Copy link to paste in your browser</button></div>
   </div>
 
+  <div class="card" id="openOut" hidden>
+    <h2>Opened this from Facebook, Messenger or another app?</h2>
+    <p class="small" style="margin:0 0 10px">Those apps hide the install option. Tap below to reopen this page in your phone's browser, then follow the steps.</p>
+    <a class="btn" id="openBtn" style="display:grid;place-items:center;text-decoration:none" href="#">Open in browser</a>
+    <p class="small" style="margin:10px 0 0">If nothing happens: tap <b>Copy link</b> below, open <b id="brName">your browser</b> yourself, and paste it into the address bar.</p>
+    <div class="row"><button class="btn ghost" id="copy3" type="button">Copy link</button></div>
+  </div>
+
   <div class="card" id="quick" hidden>
     <h2>One tap</h2>
     <button class="btn" id="installBtn" type="button">📲 Install Bus Watch</button>
@@ -153,8 +161,18 @@ a{color:inherit}
       : "Tap <b>⋮</b> (top right), then <b>Open in Chrome</b> / <b>Open in browser</b>. Or copy the link below and paste it into Chrome.";
   }
 
+  if (!standalone && (ios || android)) {
+    $("openOut").hidden = false;
+    $("brName").textContent = ios ? "Safari" : samsung ? "Samsung Internet" : "Chrome";
+    $("openBtn").textContent = ios ? "Open in Safari" : "Open in Chrome";
+    $("openBtn").href = ios
+      ? "x-safari-https://nbbuswatch.github.io/install/"
+      : "intent://nbbuswatch.github.io/install/#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=https%3A%2F%2Fnbbuswatch.github.io%2Finstall%2F;end";
+    if (inApp) $("inapp").hidden = true;
+  }
+
   let prompt = null;
-  addEventListener("beforeinstallprompt", e => { e.preventDefault(); prompt = e; $("quick").hidden = false; $("stepsTitle").textContent = "Or do it by hand"; });
+  addEventListener("beforeinstallprompt", e => { e.preventDefault(); prompt = e; $("quick").hidden = false; $("openOut").hidden = true; $("stepsTitle").textContent = "Or do it by hand"; });
   addEventListener("appinstalled", () => { $("quick").hidden = true; $("installed").hidden = false; $("steps").hidden = true; });
   $("installBtn").addEventListener("click", async () => {
     if (!prompt) return;
@@ -170,6 +188,7 @@ a{color:inherit}
     setTimeout(() => btn.textContent = old, 2500);
   };
   $("copy1").addEventListener("click", e => copy(e.currentTarget));
+  $("copy3").addEventListener("click", e => copy(e.currentTarget));
   $("copy2").addEventListener("click", e => copy(e.currentTarget));
 
   if ("serviceWorker" in navigator) navigator.serviceWorker.register("../sw.js", { scope: "../" }).catch(() => {});
