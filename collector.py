@@ -38,14 +38,12 @@ STATE_DIR = os.path.join(CACHE, "state")
 HOME_CODE = "GSBC008"                     # Keolis Northern Beaches
 CROSS_CODE = "GSBC014"                    # CDC NSW (Forest district): only its routes through the Northern Beaches are tracked
 DETAILED = {HOME_CODE, CROSS_CODE}
-NB_SUBURBS = {s.lower() for s in (
-    "Allambie Heights", "Avalon Beach", "Avalon", "Balgowlah", "Balgowlah Heights", "Bayview", "Beacon Hill", "Belrose",
-    "Bilgola Beach", "Bilgola Plateau", "Bilgola", "Brookvale", "Church Point", "Clareville", "Clontarf", "Collaroy",
-    "Collaroy Plateau", "Cromer", "Curl Curl", "North Curl Curl", "South Curl Curl", "Davidson", "Dee Why",
-    "Duffys Forest", "Elanora Heights", "Fairlight", "Forestville", "Frenchs Forest", "Freshwater", "Ingleside",
-    "Killarney Heights", "Manly", "Manly Vale", "Mona Vale", "Narrabeen", "North Narrabeen", "Narraweena", "Newport",
-    "North Balgowlah", "North Manly", "Oxford Falls", "Palm Beach", "Queenscliff", "Seaforth", "Terrey Hills",
-    "Warriewood", "Wheeler Heights", "Whale Beach", "Cottage Point")}
+NB_VERSION = 2                            # bump to rebuild the detailed timetables (Northern Beaches route list)
+# Rough outline of the Northern Beaches council area (lon, lat): Spit Bridge, coast to Palm Beach, Pittwater,
+# then the western edge past Terrey Hills, Belrose, Davidson and Forestville back down Middle Harbour.
+NB_POLY = [(151.244, -33.808), (151.262, -33.822), (151.30, -33.83), (151.36, -33.70), (151.35, -33.565), (151.27, -33.58),
+           (151.20, -33.61), (151.19, -33.66), (151.205, -33.70), (151.195, -33.735), (151.195, -33.75), (151.205, -33.765),
+           (151.215, -33.785), (151.235, -33.80)]
 REGION_CODES = [f"GSBC{n:03d}" for n in range(1, 16)] + ["SBSC006"]
 HOME_MAX_AGE_DAYS = 3
 OTHER_MAX_AGE_DAYS = 7
@@ -366,9 +364,15 @@ def build_school(z, school_routes, routes):
     print(f"  school finder: {len(out_trips)} school services, {len(schools)} schools")
 
 
-def nb_stop(name):
-    """True if a TfNSW stop name ('X Rd after Y St, Suburb') is in the Northern Beaches council area."""
-    return name.rsplit(",", 1)[-1].strip().lower() in NB_SUBURBS if "," in name else False
+def nb_stop(lat, lon):
+    """True if a point is inside the Northern Beaches council area outline."""
+    inside, j = False, len(NB_POLY) - 1
+    for i, (xi, yi) in enumerate(NB_POLY):
+        xj, yj = NB_POLY[j]
+        if (yi > lat) != (yj > lat) and lon < (xj - xi) * (lat - yi) / (yj - yi) + xi:
+            inside = not inside
+        j = i
+    return inside
 
 
 def build_region(hdr, code, detailed):
@@ -405,8 +409,14 @@ def build_region(hdr, code, detailed):
     }
     if detailed:
         first, nb_routes = {}, set()
-        all_stops = {x["stop_id"]: (x.get("stop_name") or "").strip() for x in zrows(z, "stops.txt")}
-        nb_stops = {sid for sid, nm in all_stops.items() if nb_stop(nm)}
+        all_stops, nb_stops = {}, set()
+        for x in zrows(z, "stops.txt"):
+            all_stops[x["stop_id"]] = (x.get("stop_name") or "").strip()
+            try:
+                if nb_stop(float(x["stop_lat"]), float(x["stop_lon"])):
+                    nb_stops.add(x["stop_id"])
+            except (KeyError, ValueError):
+                pass
         for st in zrows(z, "stop_times.txt"):
             tid = st["trip_id"]
             if tid not in trips:
@@ -427,6 +437,7 @@ def build_region(hdr, code, detailed):
         out["trips"] = trips
         out["services"] = {k: sorted(v) for k, v in active.items()}
         out["nb_routes"] = sorted(nb_routes - school_set)
+        out["nb_v"] = NB_VERSION
         if code == HOME_CODE:
             try:
                 build_school(z, school_set, routes)
@@ -448,7 +459,7 @@ def load_regions(hdr):
         stale = True
         if cached:
             try:
-                stale = (cached.get("v") != STATIC_VERSION or (detailed and "trips" not in cached) or
+                stale = (cached.get("v") != STATIC_VERSION or (detailed and cached.get("nb_v") != NB_VERSION) or
                          (now_syd() - dt.datetime.fromisoformat(cached["built"])).days >= max_age)
             except (KeyError, ValueError):
                 pass
