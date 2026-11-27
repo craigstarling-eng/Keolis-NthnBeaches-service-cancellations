@@ -2,8 +2,7 @@
 
   python tools/post_social.py auto       -> run by the collector every 5 min; posts the afternoon summary once a day
   python tools/post_social.py summary    -> post the summary now
-  python tools/post_social.py weekly     -> post last week's worst routes now (Mondays 9am automatically)
-  python tools/post_social.py friday     -> post the week in review now (replaces the daily post on Fridays)
+  python tools/post_social.py weekly     -> post last week's review now (Mondays 8am automatically)
   add --dry-run to only build the image and text (saved in data/social/)
 
 One post a day at POST_AT (Sydney time): today so far, the last 7 days and the last 30 days, with a link to the site.
@@ -31,7 +30,7 @@ SYD = ZoneInfo("Australia/Sydney")
 FB_API = "https://graph.facebook.com/v26.0"
 PAGE_ID = "1455302057670675"   # Northern Beaches Bus Watch (public)
 POST_AT = (17, 0)        # 5:00 pm, after the school run and as the evening peak starts
-WEEKLY_AT = (9, 0)       # Mondays 9:00 am: worst routes of the week just gone
+WEEKLY_AT = (8, 0)       # Mondays 8:00 am: week in review (Monday to Sunday just gone)
 MAX_TRIES = 3
 
 
@@ -97,21 +96,21 @@ LATE_LINES = [
 
 WEEK_BAD_LINES = [
     "😞 Another disappointing week for Beaches bus users.",
-    "😞 Not good enough this week. Commuters deserve better.",
+    "😞 Not good enough last week. Commuters deserve better.",
     "😔 A week of too many no-shows at Beaches bus stops.",
     "😕 Not the service the Beaches should be getting.",
-    "😞 Another week that fell short.",
+    "😞 Last week fell short. Again.",
 ]
 WEEK_VERY_BAD_LINES = [
     "😞 A really bad week for Beaches commuters.",
-    "😔 Hard to sugar-coat this one: well over one in twenty services didn't run this week.",
-    "😠 Not acceptable. Far too many services didn't run this week.",
+    "😔 Hard to sugar-coat this one: well over one in twenty services didn't run last week.",
+    "😠 Not acceptable. Far too many services didn't run last week.",
     "😞 A very poor week. Commuters deserve far better.",
 ]
 WEEK_LATE_LINES = [
     "😞 Disappointing week: too many buses running late.",
-    "😔 Lots of late running this week. Not good enough.",
-    "😕 If your bus was late this week, you weren't alone.",
+    "😔 Lots of late running last week. Not good enough.",
+    "😕 If your bus was late last week, you weren't alone.",
 ]
 
 
@@ -168,56 +167,16 @@ def figures():
 
 
 def weekly_figures():
-    """Monday to Sunday just gone: totals, change on the week before, and the five worst routes."""
+    """Monday morning week in review: Monday to Sunday just gone, compared with the week before."""
     today = dt.datetime.now(SYD).date()
     end = today - dt.timedelta(days=today.weekday() + 1)          # last Sunday
-    week = {(end - dt.timedelta(days=i)).isoformat() for i in range(7)}
+    week = [(end - dt.timedelta(days=i)).isoformat() for i in range(7)]
     prev = {(end - dt.timedelta(days=i)).isoformat() for i in range(7, 14)}
-    daily = rows("history/r8_daily.csv")
-    routes = rows("history/r8_routes_daily.csv")
-    w, p = period(daily, routes, week), period(daily, routes, prev)
-    if not w["sched"]:
-        sys.exit("No figures for last week yet; nothing to post.")
-    per = {}
-    for r in routes:
-        if r["date"] in week:
-            a = per.setdefault(r["route"], [0, 0])
-            a[0] += n(r["scheduled"]); a[1] += n(r["cancelled"])
-    worst = sorted(((rt, c, sc) for rt, (sc, c) in per.items() if c and sc >= 20), key=lambda x: (-x[1], -x[1] / x[2]))[:5]
-    first = dt.date.fromisoformat(min(d for d in week)).strftime("%-d %b")
-    when = f"{first} – {end.strftime('%-d %b')}"
-    partial = f" ({w['days']} days tracked)" if w["days"] < 7 else ""
-    change = ""
-    if p["days"] == 7 and w["days"] == 7 and p["cxl"]:
-        diff = w["cxl"] - p["cxl"]
-        change = f" That's {abs(diff)} {'more' if diff > 0 else 'fewer'} than the week before." if diff else " Same as the week before."
-    lines = [f"{i}. Route {rt}: {c} cancelled ({pct(c, sc)} of its trips)" for i, (rt, c, sc) in enumerate(worst, 1)]
-    text = "\n".join([
-        f"Worst Northern Beaches bus routes, week of {when}{partial} 🚌",
-        "",
-        f"{w['cxl']:,} Keolis services were cancelled ({pct(w['cxl'], w['sched'])} of scheduled trips).{change}",
-        "",
-        "Most cancelled routes:",
-        *lines,
-        "",
-        "School and charter services are left out.",
-        "",
-        f"Check your route: {SITE}",
-        f"📲 Get the free app on your phone: {INSTALL}",
-    ])
-    return {"when": when + partial, "total": w, "worst": worst, "text": text}
-
-
-def friday_figures():
-    """Friday's week in review (Saturday to today), replacing the daily post on Fridays."""
-    today = dt.datetime.now(SYD).date()
-    week = [(today - dt.timedelta(days=i)).isoformat() for i in range(7)]
-    prev = {(today - dt.timedelta(days=i)).isoformat() for i in range(7, 14)}
     daily = rows("history/r8_daily.csv")
     routes = rows("history/r8_routes_daily.csv")
     w, p = period(daily, routes, set(week)), period(daily, routes, prev)
     if not w["sched"]:
-        sys.exit("No figures for this week yet; nothing to post.")
+        sys.exit("No figures for last week yet; nothing to post.")
     per = {}
     for r in routes:
         if r["date"] in week:
@@ -228,20 +187,20 @@ def friday_figures():
     days = {r["date"]: r for r in daily if r["date"] in week and n(r["scheduled"])}
     bad_day = max(days.values(), key=lambda r: n(r["cancelled"]) / n(r["scheduled"]), default=None)
     first = dt.date.fromisoformat(w["first"] or week[-1])
-    when = f"{first.strftime('%-d %b')} – {today.strftime('%-d %b')}"
+    when = f"{first.strftime('%-d %b')} – {end.strftime('%-d %b')}"
     partial = f" ({w['days']} days tracked)" if w["days"] < 7 else ""
     change = ""
     if p["days"] == 7 and w["days"] == 7 and p["sched"]:
         diff = 100 * w["cxl"] / w["sched"] - 100 * p["cxl"] / p["sched"]
-        change = ("Up on last week 📈" if diff > 0.2 else "Down on last week 📉" if diff < -0.2 else "Similar to last week")
+        change = ("Worse than the week before 📈" if diff > 0.2 else "Better than the week before 📉" if diff < -0.2 else "Similar to the week before")
     on = f", {pct(w['on'], w['obs'])} on time" if w["obs"] >= 300 else ""
-    mood = tone(w, today, (WEEK_VERY_BAD_LINES, WEEK_BAD_LINES, WEEK_LATE_LINES))
+    mood = tone(w, end, (WEEK_VERY_BAD_LINES, WEEK_BAD_LINES, WEEK_LATE_LINES))
     bd = (f"Worst day: {dt.date.fromisoformat(bad_day['date']).strftime('%A')} "
           f"({n(bad_day['cancelled'])} cancelled, {pct(n(bad_day['cancelled']), n(bad_day['scheduled']))})") if bad_day and n(bad_day["cancelled"]) else ""
     text = "\n".join(
         [f"Northern Beaches buses – week in review, {when}{partial}", ""]
         + ([mood, ""] if mood else [])
-        + [f"🚌 This week: {w['cxl']:,} cancelled ({pct(w['cxl'], w['sched'])}){on}"]
+        + [f"🚌 Last week: {w['cxl']:,} cancelled ({pct(w['cxl'], w['sched'])}){on}"]
         + ([change] if change else [])
         + ([bd] if bd else [])
         + ([f"Worst routes: " + ", ".join(f"{rt} ({c})" for rt, c, _ in worst)] if worst else [])
@@ -252,14 +211,14 @@ def friday_figures():
     return {"when": when + partial, "total": w, "worst": worst, "bad_day": bd, "change": change, "text": text}
 
 
-def draw_friday(f, path):
+def draw_weekly(f, path):
     im = Image.new("RGB", (1080, 1080), "#0f2747")
     d = ImageDraw.Draw(im)
     d.text((70, 70), "Week in review", font=font(56, True), fill="white")
     d.text((70, 145), f"Keolis Northern Beaches · {f['when']}", font=font(32), fill="#9fc3f0")
     t = f["total"]
     d.rounded_rectangle((60, 215, 1020, 420), radius=24, fill="#16335c")
-    d.text((95, 240), "This week", font=font(36, True), fill="#9fc3f0")
+    d.text((95, 240), "Last week", font=font(36, True), fill="#9fc3f0")
     d.text((92, 290), f"{t['cxl']:,}", font=font(96, True), fill="white")
     x = 110 + d.textlength(f"{t['cxl']:,}", font=font(96, True))
     d.text((x, 310), "cancelled", font=font(36), fill="white")
@@ -286,28 +245,6 @@ def draw_friday(f, path):
             d.text((1000 - d.textlength(lab, font=font(32, True)), y + 28), lab, font=font(32, True), fill="white")
             y += 108
     d.text((70, 970), "Keolis Region 8 only · School & charter excluded · Data: TfNSW", font=font(26), fill="#6f8fb8")
-    d.text((70, 1010), SITE.replace("https://", "").rstrip("/"), font=font(24), fill="#6f8fb8")
-    im.save(path, "PNG", optimize=True)
-
-
-def draw_weekly(f, path):
-    im = Image.new("RGB", (1080, 1080), "#0f2747")
-    d = ImageDraw.Draw(im)
-    d.text((70, 70), "Worst routes last week", font=font(56, True), fill="white")
-    d.text((70, 145), f"Keolis Northern Beaches · {f['when']}", font=font(32), fill="#9fc3f0")
-    t = f["total"]
-    d.text((70, 215), f"{t['cxl']:,} cancelled · {pct(t['cxl'], t['sched'])} of {t['sched']:,} trips", font=font(38, True), fill="white")
-    top = max((c for _, c, _ in f["worst"]), default=1)
-    y = 310
-    for rt, c, sc in f["worst"]:
-        d.rounded_rectangle((60, y, 1020, y + 105), radius=20, fill="#16335c")
-        d.text((90, y + 22), rt, font=font(52, True), fill="white")
-        w = int(420 * c / top)
-        d.rounded_rectangle((300, y + 30, 300 + max(w, 8), y + 75), radius=8, fill="#e8a33d")
-        lab = f"{c}  ({pct(c, sc)})"
-        d.text((1000 - d.textlength(lab, font=font(32, True)), y + 33), lab, font=font(32, True), fill="white")
-        y += 120
-    d.text((70, 970), "Cancelled trips (share of route's trips) · School & charter excluded", font=font(24), fill="#6f8fb8")
     d.text((70, 1010), SITE.replace("https://", "").rstrip("/"), font=font(24), fill="#6f8fb8")
     im.save(path, "PNG", optimize=True)
 
@@ -363,12 +300,9 @@ def configured():
 def publish(kind="summary", dry=False):
     os.makedirs(OUT_DIR, exist_ok=True)
     img = os.path.join(OUT_DIR, f"{kind}.png")
-    if kind == "weekly":
+    if kind == "weekly":   # Monday morning week in review
         f = weekly_figures()
         draw_weekly(f, img)
-    elif kind == "friday":
-        f = friday_figures()
-        draw_friday(f, img)
     else:
         f = figures()
         draw_card(f, img)
@@ -383,7 +317,7 @@ def publish(kind="summary", dry=False):
 
 
 def auto():
-    """Called every few minutes. Daily summary after POST_AT; weekly worst routes on Mondays after WEEKLY_AT.
+    """Called every few minutes. Daily summary after POST_AT; week in review on Mondays after WEEKLY_AT.
     Each posts once, retrying a failed post up to MAX_TRIES times."""
     now = dt.datetime.now(SYD)
     if not configured():
@@ -399,7 +333,7 @@ def auto():
     if now.weekday() == 0 and (now.hour, now.minute) >= WEEKLY_AT:
         due.append("weekly")
     if (now.hour, now.minute) >= POST_AT:
-        due.append("friday" if now.weekday() == 4 else "summary")   # Fridays: week in review instead
+        due.append("summary")
     changed = False
     for kind in due:
         tries = fb.get(f"{kind}_tries", {}).get(today, 0)
@@ -428,7 +362,7 @@ def main():
         return auto()
     if not configured() and not dry:
         sys.exit("The Facebook Page isn't set up yet (add the FB_PAGE_ID and FB_PAGE_TOKEN secrets first).")
-    if not publish(mode if mode in ("summary", "weekly", "friday") else "summary", dry=dry):
+    if not publish(mode if mode in ("summary", "weekly") else "summary", dry=dry):
         sys.exit(1)
 
 
