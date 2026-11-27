@@ -1,6 +1,6 @@
 {
- "updated": "2026-11-28T03:48:42+11:00",
- "status": "ok",
+ "updated": "2026-11-28T03:53:18+11:00",
+ "status": "feed error: 401 Client Error:  for url: https://api.transport.nsw.gov.au/v1/gtfs/realtime/buses",
  "date": "2026-11-28",
  "count_due": 0,
  "count_ahead": 0,
