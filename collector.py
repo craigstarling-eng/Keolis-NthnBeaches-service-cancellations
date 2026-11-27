@@ -753,6 +753,16 @@ def home_day(home, date, cxl_rows, state):
              "am_observed": am_o, "am_late": am_l, "pm_observed": pm_o, "pm_late": pm_l, "late_minutes": late_minutes,
              "ontime": sum(1 for d in delays.values() if EARLY_SECONDS <= d <= LATE_SECONDS),
              "anywhere_observed": len(anywhere), "anywhere_late": sum(1 for d in anywhere.values() if d > LATE_SECONDS)}
+    # Last 60 minutes, for the live status dial on the site.
+    now = now_syd()
+    now_m = now.hour * 60 + now.minute + 1440 * (now.date() - dt.date.fromisoformat(date)).days
+    in_hour = lambda m: m is not None and now_m - 60 < m <= now_m
+    h_sched = {t[0] for t in sched if in_hour(t[3])}
+    h_cxl = sum(1 for r in cxl_today if in_hour(hhmm_to_min(r["start_time"])))
+    h_delays = [d for t, d in delays.items() if t in h_sched]
+    daily["_hour"] = {"scheduled": len(h_sched), "cancelled": h_cxl, "observed": len(h_delays),
+                      "ontime": sum(1 for d in h_delays if EARLY_SECONDS <= d <= LATE_SECONDS),
+                      "late": sum(1 for d in h_delays if d > LATE_SECONDS)}
     return daily, route_rows, gaps[:12], late_trips, cxl_today, school_cxl
 
 
@@ -1285,6 +1295,7 @@ def main():
     for date in dates:
         state = touched.get(date) or load_state(date)
         daily, route_rows, gaps, late_trips, cxl_today, school_cxl = home_day(home, date, cxl_rows, state)
+        hour = daily.pop("_hour", None)
         upsert_csv(R8_DAILY, R8_DAILY_FIELDS, [daily], ["date"],
                    keep_max=())
         upsert_csv(R8_ROUTES, R8_ROUTES_FIELDS, route_rows, ["date", "route"])
@@ -1303,7 +1314,7 @@ def main():
                 "anywhere_late_pct": pct(daily["anywhere_late"], daily["anywhere_observed"]),
                 "am": {"scheduled": daily["am_scheduled"], "cancelled": daily["am_cancelled"]},
                 "pm": {"scheduled": daily["pm_scheduled"], "cancelled": daily["pm_cancelled"]},
-                "gaps": gaps, "late_trips": late_trips,
+                "gaps": gaps, "late_trips": late_trips, "last_hour": hour,
                 "trips": [{**{k: r[k] for k in ("start_time", "route", "headsign", "trip_id")},
                            "from": ((home["trips"].get(r["trip_id"]) or [])[4:5] or [""])[0]}
                           for r in sorted(cxl_today, key=lambda r: r["start_time"] or "99")],

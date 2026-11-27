@@ -99,6 +99,11 @@ section[hidden]{display:none}
 .badge.ok{color:var(--good);border-color:var(--good)}
 .badge.warn{color:var(--warn);border-color:var(--warn)}
 .trip .meta{grid-column:2;font-size:13px;color:var(--text-secondary)}
+.dial{text-align:center;padding:10px 14px 12px}
+.dial svg{width:100%;max-width:360px;display:block;margin:0 auto}
+.dial .lvl{font-size:22px;font-weight:750;margin-top:2px}
+.dial .act{font-size:15px;font-weight:600;margin-top:2px}
+.dial .why{font-size:13px;color:var(--text-secondary);margin-top:4px}
 </style>
 </head>
 <body>
@@ -108,6 +113,7 @@ section[hidden]{display:none}
   <div id="wx" class="wx" hidden></div>
   <p class="note" style="margin:0 0 10px;border-style:solid"><b>Headline figures are Keolis Downer Northern Beaches (Sydney bus Region 8) only.</b> CDC NSW routes that also run through the Northern Beaches (Region 14, mainly the Forest district) are tracked separately, and are marked "(CDC)" in My bus.</p>
   <div class="sub"><span id="live" class="pill">Loading…</span> <span id="upd"></span></div>
+  <div id="dial" class="card dial" aria-live="polite"></div>
   <div id="installBar" hidden style="margin:8px 0 0"><button class="btn primary" id="installBtn" type="button">📲 Install app</button>
   <p class="sub" id="installHelp" hidden style="margin-top:6px"></p> <a class="sub" href="install/">How to install</a></div>
 <nav class="tabs" role="tablist">
@@ -412,10 +418,71 @@ function seg(el, opts, cur, cb) {
   el.onclick = e => { const v = e.target.dataset.v; if (v !== undefined) cb(v); };
 }
 
+// Live status dial: worse of cancellations and on-time running over the last hour.
+// Bands anchor on the TfNSW contract on-time target (95%) and match the 3% / 6% cut-offs used in the daily posts.
+const DIAL = [
+  ["Good", "#2e9e3e", "Buses running normally"],
+  ["Fair", "#f2c200", "Minor disruption"],
+  ["Poor", "#f08a00", "Expect some waits"],
+  ["Bad", "#d62d20", "Allow extra time"],
+  ["Extremely bad", "#8e0e0e", "Have a backup plan"],
+];
+const CXL_STEPS = [1, 3, 6, 10];      // % cancelled: upper edge of Good, Fair, Poor, Bad
+const OTR_STEPS = [95, 90, 85, 75];   // % on time: lower edge of Good, Fair, Poor, Bad
+function dialScore(cxl, otr) {
+  // returns a position 0..5 (band index + fraction through the band)
+  const pos = (v, steps, up) => {
+    const e = [up ? 0 : 100, ...steps, up ? 20 : 50];
+    for (let i = 0; i < 5; i++) {
+      const lo = e[i], hi = e[i + 1];
+      if (up ? v < hi : v > hi) return i + (v - lo) / (hi - lo);
+    }
+    return 4.97;
+  };
+  const a = pos(cxl, CXL_STEPS, true), b = otr == null ? 0 : pos(otr, OTR_STEPS, false);
+  return Math.max(0, Math.min(4.97, Math.max(a, b)));
+}
+function renderDial() {
+  const h = L.last_hour, el = $("dial");
+  let cxl, otr, why, grey = false;
+  if (h && h.scheduled >= 30) {
+    cxl = 100 * h.cancelled / h.scheduled;
+    otr = h.observed >= 20 ? 100 * h.ontime / h.observed : null;
+    why = `Last hour: ${nf(h.cancelled)} of ${nf(h.scheduled)} trips cancelled` + (otr != null ? ` · ${pc(otr)} on time` : "");
+  } else if (!h && L.scheduled) {
+    cxl = L.cancel_pct || 0; otr = L.observed >= 20 ? L.ontime_pct : null;
+    why = `Today so far: ${pc(L.cancel_pct)} cancelled` + (otr != null ? ` · ${pc(otr)} on time` : "");
+  } else { grey = true; why = "Not enough buses running right now to rate the service."; }
+  const C = 160, Y = 165, R = 128, RO = 152;
+  const pt = (deg, r) => [C + r * Math.cos(deg * Math.PI / 180), Y - r * Math.sin(deg * Math.PI / 180)];
+  let svg = `<svg viewBox="0 0 320 180" role="img" aria-label="Service status dial">
+    <path d="M${C - RO} ${Y} A${RO} ${RO} 0 0 1 ${C + RO} ${Y} Z" fill="#141414"/>`;
+  DIAL.forEach(([name, col], i) => {
+    const a0 = 180 - i * 36, a1 = a0 - 36, [x0, y0] = pt(a0, R), [x1, y1] = pt(a1, R);
+    svg += `<path d="M${C} ${Y} L${x0} ${y0} A${R} ${R} 0 0 1 ${x1} ${y1} Z" fill="${grey ? "#9a9a9a" : col}" stroke="#141414" stroke-width="2"/>`;
+    const [lx0, ly0] = pt(a0 - 1, 140), [lx1, ly1] = pt(a1 + 1, 140);
+    svg += `<path id="dl${i}" d="M${lx0} ${ly0} A140 140 0 0 1 ${lx1} ${ly1}" fill="none"/>
+      <text font-size="${name.length > 6 ? 9.5 : 11}" font-weight="800" fill="#fff" letter-spacing=".5"><textPath href="#dl${i}" startOffset="50%" text-anchor="middle">${name.toUpperCase()}</textPath></text>`;
+  });
+  svg += `<rect x="${C - RO}" y="${Y}" width="${RO * 2}" height="10" fill="#141414"/>`;
+  let lvl = null;
+  if (!grey) {
+    const s = dialScore(cxl, otr), ang = 180 - s * 36, [nx, ny] = pt(ang, R - 8);
+    const [bx1, by1] = pt(ang + 90, 7), [bx2, by2] = pt(ang - 90, 7);
+    svg += `<polygon points="${nx},${ny} ${bx1},${by1} ${bx2},${by2}" fill="#fff" stroke="#141414" stroke-width="2.5" stroke-linejoin="round"/>`;
+    lvl = DIAL[Math.floor(s)];
+  }
+  svg += `<circle cx="${C}" cy="${Y}" r="14" fill="#fff" stroke="#141414" stroke-width="2.5"/></svg>`;
+  el.innerHTML = svg + (lvl
+    ? `<div class="lvl" style="color:${lvl[0] === "Fair" ? "#9a7a00" : lvl[1]}">${lvl[0]}</div><div class="act">${lvl[2]}</div>`
+    : `<div class="lvl" style="color:var(--text-secondary)">No rating</div>`) + `<div class="why">${why}</div>`;
+}
+
 function render() {
   const upd = new Date(L.updated), mins = Math.round((Date.now() - upd) / 60000), fresh = mins <= 30 && L.status === "ok";
   $("live").innerHTML = `<span class="dot" style="background:var(${fresh ? "--good" : "--critical"})"></span>${fresh ? "Live" : "Delayed"}`;
   $("upd").textContent = `Updated ${upd.toLocaleTimeString("en-AU", {hour: "numeric", minute: "2-digit", timeZone: "Australia/Sydney"})} (${mins} min ago)${L.status !== "ok" ? " · " + L.status : ""}`;
+  try { renderDial(); } catch (e) { $("dial").hidden = true; }
   const days = S.days_tracked || 1;
   $("history-note").hidden = days >= 7;
   $("history-note").textContent = `Building history: ${days} day${days === 1 ? "" : "s"} tracked so far. Weekly and monthly figures become meaningful after the first week. Today's figures started part-way through the first day.`;
