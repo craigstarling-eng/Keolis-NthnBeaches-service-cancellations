@@ -1,4 +1,4 @@
 date,scheduled,cancelled,observed,late,am_scheduled,am_cancelled,pm_scheduled,pm_cancelled,longest_gap_min,longest_gap_route,am_observed,am_late,pm_observed,pm_late,late_minutes,ontime,anywhere_observed,anywhere_late
 2026-11-26,2000,123,116,13,0,0,765,48,218,182 to Powderworks Rd,0,0,0,0,169,103,1496,721
 2026-11-27,3416,236,3022,297,760,76,748,53,130,177 to Warringah Mall,683,38,695,109,4039,2725,3119,1441
-2026-11-28,2596,1,941,48,348,1,460,0,56,230 to Mosman Bay Wharf,347,9,0,0,619,893,943,303
+2026-11-28,2596,1,953,49,348,1,460,0,56,230 to Mosman Bay Wharf,347,9,0,0,641,904,955,309
