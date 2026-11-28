@@ -38,7 +38,7 @@ STATE_DIR = os.path.join(CACHE, "state")
 HOME_CODE = "GSBC008"                     # Keolis Northern Beaches
 CROSS_CODE = "GSBC014"                    # CDC NSW (Forest district): only its routes through the Northern Beaches are tracked
 DETAILED = {HOME_CODE, CROSS_CODE}
-NB_VERSION = 2                            # bump to rebuild the detailed timetables (Northern Beaches route list)
+NB_VERSION = 3                            # bump to rebuild the detailed timetables (Northern Beaches route list)
 # Rough outline of the Northern Beaches council area (lon, lat): Spit Bridge, coast to Palm Beach, Pittwater,
 # then the western edge past Terrey Hills, Belrose, Davidson and Forestville back down Middle Harbour.
 NB_POLY = [(151.244, -33.808), (151.262, -33.822), (151.30, -33.83), (151.36, -33.70), (151.35, -33.565), (151.27, -33.58),
@@ -288,6 +288,52 @@ def tidy_schools(raw):
     return out
 
 
+NEARBY_FILE = os.path.join(DATA, "stops.json")
+
+
+def build_nearby(z, school_routes, routes, active_services):
+    """Stops with locations, plus each trip's stopping pattern (stop + minutes after the trip starts),
+    for the Near me tab. Regular (non-school) services only; patterns are shared between trips."""
+    trips = {}
+    for t in zrows(z, "trips.txt"):
+        if t["route_id"] in routes and t["route_id"] not in school_routes and t["service_id"] in active_services:
+            trips[t["trip_id"]] = [routes[t["route_id"]], []]
+    for st in zrows(z, "stop_times.txt"):
+        tr = trips.get(st["trip_id"])
+        if tr is None:
+            continue
+        m = hhmm_to_min((st.get("departure_time") or st.get("arrival_time") or "")[:5])
+        try:
+            tr[1].append((int(st["stop_sequence"]), st["stop_id"], m))
+        except ValueError:
+            pass
+    used = {sid for _, seq in trips.values() for _, sid, _ in seq}
+    stops = {}
+    for x in zrows(z, "stops.txt"):
+        if x["stop_id"] in used:
+            try:
+                stops[x["stop_id"]] = [(x.get("stop_name") or "").strip(), round(float(x["stop_lat"]), 5), round(float(x["stop_lon"]), 5)]
+            except (KeyError, ValueError):
+                pass
+    stop_ids = sorted(stops)
+    sidx = {s: i for i, s in enumerate(stop_ids)}
+    pats, pat_id, trip_pat = [], {}, {}
+    for tid, (route, seq) in trips.items():
+        seq.sort()
+        seq = [(sid, m) for _, sid, m in seq if sid in sidx and m is not None]
+        if not seq:
+            continue
+        m0 = seq[0][1]
+        key = (route, tuple((sidx[sid], m - m0) for sid, m in seq))
+        if key not in pat_id:
+            pat_id[key] = len(pats)
+            pats.append([route, [x for pair in key[1] for x in pair]])
+        trip_pat[tid] = pat_id[key]
+    write_json(NEARBY_FILE, {"built": iso(now_syd().date()), "stops": [stops[s] for s in stop_ids],
+                             "pats": pats, "trips": trip_pat})
+    print(f"  near me: {len(stop_ids)} stops, {len(pats)} stopping patterns, {len(trip_pat)} trips")
+
+
 def build_school(z, school_routes, routes):
     """All school services in the region, with stops, times and route shapes, for the School bus tab."""
     if not school_routes:
@@ -443,6 +489,10 @@ def build_region(hdr, code, detailed):
                 build_school(z, school_set, routes)
             except Exception as exc:  # the school finder is a bonus; never break tracking
                 print("school data not built:", exc)
+            try:
+                build_nearby(z, school_set, routes, set(active))
+            except Exception as exc:  # the Near me tab is a bonus; never break tracking
+                print("near me data not built:", exc)
     print(f"  {out['name']}: {len(routes)} routes" + (f", {len(out.get('nb_routes', []))} through the Northern Beaches" if detailed else ""))
     return out
 

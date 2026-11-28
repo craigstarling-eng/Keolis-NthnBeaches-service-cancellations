@@ -101,6 +101,10 @@ section[hidden]{display:none}
 .badge.ok{color:var(--good);border-color:var(--good)}
 .badge.warn{color:var(--warn);border-color:var(--warn)}
 .trip .meta{grid-column:2;font-size:13px;color:var(--text-secondary)}
+.nstop{margin-top:14px;padding-top:10px;border-top:2px solid var(--grid)}
+.nstop h3{font-size:16px;margin:0}
+.nstop .d{font-size:13px;color:var(--text-secondary);margin:2px 0 4px}
+.rt{display:inline-block;min-width:44px;text-align:center;font-weight:800;font-size:13px;padding:2px 6px;border-radius:6px;background:var(--text-primary);color:var(--surface-1);margin-right:6px}
 .status-row{display:flex;gap:10px;align-items:stretch;margin:0 0 10px}
 .status-side{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:8px}
 .status-side .wx{margin:0}
@@ -129,6 +133,7 @@ section[hidden]{display:none}
   <p class="sub" id="installHelp" hidden style="margin-top:6px"></p> <a class="sub" href="install/">How to install</a></div>
 <nav class="tabs" role="tablist">
     <button role="tab" data-tab="mybus">My bus</button>
+    <button role="tab" data-tab="near">Near me</button>
     <button role="tab" data-tab="school">School bus</button>
     <button role="tab" data-tab="stats">Stats</button>
     <button role="tab" data-tab="report">Report</button>
@@ -164,6 +169,19 @@ section[hidden]{display:none}
   <div class="card" id="appCard">
     <h2>Use it like an app</h2>
     <p class="sub"><b>Android (Chrome):</b> tap ⋮ then <b>Install app</b> or <b>Add to Home screen</b>.<br><b>iPhone (Safari):</b> tap the Share button then <b>Add to Home Screen</b>.<br>It then opens straight to My bus, full screen, with its own icon.<br><a href="install/">Step-by-step install guide</a></p>
+  </div>
+  </section>
+  <section data-tab="near" hidden>
+  <div class="card">
+    <h2>Buses near me</h2>
+    <p class="lede">Your closest Keolis stops and the next hour of buses from each, with cancellations and live delays.</p>
+    <div class="form">
+      <label>&nbsp;<button class="btn primary" id="nrLoc" type="button">📍 Use my location</button></label>
+      <label>Or search a stop or street<input id="nrQ" type="search" placeholder="e.g. Pittwater Rd, Dee Why" autocomplete="off"></label>
+    </div>
+    <p class="sub" id="nrMsg" style="margin-top:8px">Your location stays on your phone. It's only used to find stops and is never sent or saved.</p>
+    <div id="nrList" style="margin-top:6px"></div>
+    <p class="sub" style="margin-top:10px">Times are scheduled times at the stop, adjusted for live delays where the bus is reporting. Keolis (Region 8) services only. School buses are in the School bus tab.</p>
   </div>
   </section>
   <section data-tab="school" hidden>
@@ -558,6 +576,7 @@ function render() {
   officialSection();
   cdcSection();
   myBus();
+  if (NR.pos && !document.querySelector('section[data-tab="near"]').hidden) nearRender();
   hourChart();
   const names7 = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"], wv = S.by_weekday_avg, wmx = Math.max(1, ...wv.map(v => v || 0));
   $("wd").innerHTML = wv.map((v, i) => `<tr><td style="width:50px">${names7[i]}</td><td><span class="bar" style="width:${v == null ? 0 : Math.max(3, v / wmx * 100)}%"></span></td><td class="r" style="width:60px">${v == null ? "–" : v.toFixed(1)}</td></tr>`).join("");
@@ -711,17 +730,18 @@ function officialSection() {
 
 // ---------- tabs
 function showTab(name) {
-  const names = ["mybus", "school", "stats", "report", "about"];
+  const names = ["mybus", "near", "school", "stats", "report", "about"];
   if (!names.includes(name)) name = "mybus";
   document.querySelectorAll("section[data-tab]").forEach(sec => sec.hidden = sec.dataset.tab !== name);
   document.querySelectorAll(".tabs button").forEach(b => b.setAttribute("aria-selected", String(b.dataset.tab === name)));
   if (S) render();
   if (name === "school") schoolInit();
+  if (name === "near") nearInit();
 }
 function tabsInit() {
   document.querySelector(".tabs").onclick = e => { const t = e.target.dataset.tab; if (t) { history.replaceState(null, "", "#" + t); showTab(t); window.scrollTo(0, 0); } };
   addEventListener("hashchange", () => showTab(location.hash.slice(1)));
-  document.querySelectorAll('a[href="#stats"],a[href="#report"],a[href="#about"],a[href="#mybus"],a[href="#school"]').forEach(a => a.onclick = e => { e.preventDefault(); history.replaceState(null, "", a.getAttribute("href")); showTab(a.getAttribute("href").slice(1)); window.scrollTo(0, 0); });
+  document.querySelectorAll('a[href="#stats"],a[href="#report"],a[href="#about"],a[href="#mybus"],a[href="#near"],a[href="#school"]').forEach(a => a.onclick = e => { e.preventDefault(); history.replaceState(null, "", a.getAttribute("href")); showTab(a.getAttribute("href").slice(1)); window.scrollTo(0, 0); });
   showTab(location.hash.slice(1));
 }
 
@@ -947,6 +967,80 @@ function myBus() {
   near.sort((a, b) => (a.s[1] / a.s[0]) - (b.s[1] / b.s[0]) || ((a.s[2] ? a.s[3] / a.s[2] : 0) - (b.s[2] ? b.s[3] / b.s[2] : 0)));
   $("mbBest").innerHTML = near.length ? `<table><thead><tr><th>Leaves</th><th>Towards</th><th class="r">Cancelled</th><th class="r">Left late</th></tr></thead><tbody>${near.slice(0, 5).map(({t, s}) => `<tr><td><b>${fmtT(t[1])}</b></td><td>${esc(t[2])}</td><td class="r">${s[1]} of ${s[0]}</td><td class="r">${s[2] ? Math.round(100 * s[3] / s[2]) + "%" : "–"}</td></tr>`).join("")}</tbody></table>`
     : `<p class="empty">Not enough history yet. This fills in after about a week of tracking${TS && TS.days ? ` (${TS.days} day${TS.days === 1 ? "" : "s"} so far)` : ""}.</p>`;
+}
+
+
+// ---------- near me
+const NR = {data: null, idx: null, pos: null, label: "", busy: false};
+async function nearData() {
+  if (NR.data) return NR.data;
+  NR.data = await j("data/stops.json").catch(() => null);
+  if (NR.data) {   // stop -> [[pattern, minutes after start], ...]
+    NR.idx = NR.data.stops.map(() => []);
+    NR.data.pats.forEach(([, flat], p) => { for (let i = 0; i < flat.length; i += 2) NR.idx[flat[i]].push([p, flat[i + 1]]); });
+  }
+  return NR.data;
+}
+function nearInit() {
+  if (NR.inited) return; NR.inited = true;
+  $("nrLoc").onclick = () => {
+    if (!navigator.geolocation) { $("nrMsg").textContent = "Your browser can't share its location. Search for a stop instead."; return; }
+    $("nrMsg").textContent = "Finding you…";
+    navigator.geolocation.getCurrentPosition(p => { NR.pos = [p.coords.latitude, p.coords.longitude]; NR.label = "you"; nearRender(); },
+      e => { $("nrMsg").textContent = e.code === 1 ? "Location is blocked. Allow it for this site in your browser settings, or search for a stop instead." : "Couldn't get your location. Try again, or search for a stop."; },
+      {enableHighAccuracy: true, timeout: 15000, maximumAge: 60000});
+  };
+  let tmr; $("nrQ").oninput = () => { clearTimeout(tmr); tmr = setTimeout(nearSearch, 350); };
+}
+async function nearSearch() {
+  const q = $("nrQ").value.trim().toLowerCase(); if (q.length < 3) return;
+  const D = await nearData(); if (!D) { $("nrMsg").textContent = "Stop locations are still being built. Check back in an hour or so."; return; }
+  const words = q.split(/[\s,]+/).filter(Boolean);
+  const hit = D.stops.findIndex(([n]) => { const l = n.toLowerCase(); return words.every(w => l.includes(w)); });
+  if (hit < 0) { $("nrMsg").textContent = `No stop matching "${$("nrQ").value.trim()}".`; $("nrList").innerHTML = ""; return; }
+  NR.pos = [D.stops[hit][1], D.stops[hit][2]]; NR.label = D.stops[hit][0]; nearRender();
+}
+async function nearRender() {
+  if (!NR.pos) return;
+  const D = await nearData();
+  if (!D) { $("nrMsg").textContent = "Stop locations are still being built. Check back in an hour or so."; return; }
+  if (!TT || !TT.routes) { $("nrMsg").textContent = "Today's timetable is still loading."; return; }
+  const [la, lo] = NR.pos;
+  let near = D.stops.map((s, i) => [i, distM([la, lo], [s[1], s[2]])]).filter(([i, d]) => d <= 800 && NR.idx[i].length).sort((a, b) => a[1] - b[1]).slice(0, 6);
+  if (!near.length) {
+    $("nrMsg").textContent = NR.label === "you" ? "No Keolis stops within 800 m of you. Bus Watch covers the Northern Beaches and Lower North Shore." : "No buses use that stop today.";
+    $("nrList").innerHTML = ""; return;
+  }
+  // today's trips by pattern
+  const byPat = {}, now = nowMin();
+  Object.entries(TT.routes).forEach(([route, trips]) => trips.forEach(t => { const p = D.trips[t[0]]; if (p != null) (byPat[p] = byPat[p] || []).push([t, route]); }));
+  const cset = new Set((L.trips || []).map(t => t.trip_id)), act = L.active || {};
+  $("nrMsg").textContent = NR.label === "you" ? `Showing the ${near.length} stops closest to you.` : `Showing stops near ${NR.label}.`;
+  $("nrList").innerHTML = near.map(([i, d]) => {
+    const [name] = D.stops[i], deps = [];
+    NR.idx[i].forEach(([p, off]) => (byPat[p] || []).forEach(([t, route]) => {
+      const start = hm(t[1]); if (start == null) return;
+      const a = act[t[0]], delay = a && a[1] != null ? a[1] : a && a[0] != null ? a[0] : 0, at = start + off;
+      if (at + delay < now - 1 || at > now + 60) return;
+      const cx = cset.has(t[0]), live = a && (a[1] != null ? a[1] : a[0]);
+      deps.push({t, route, at, a, cx, exp: !cx && live != null && Math.abs(live) > 1 ? at + live : at});
+    }));
+    deps.sort((x, y) => x.exp - y.exp);
+    const seen = new Set(), list = deps.filter(x => { const k = x.t[0]; if (seen.has(k)) return false; seen.add(k); return true; }).slice(0, 8);
+    const walk = Math.max(1, Math.round(d / 80));
+    const rows = list.length ? list.map(x => {
+      const a = x.a, live = a && (a[1] != null ? a[1] : a[0]);
+      let badge;
+      if (x.cx) badge = `<span class="badge bad">Cancelled</span>`;
+      else if (live != null) badge = live > 3 ? `<span class="badge warn">${live} min late</span>` : live < -1 ? `<span class="badge warn">${-live} min early</span>` : `<span class="badge ok">On time</span>`;
+      else badge = `<span class="badge">Scheduled</span>`;
+      if (a && a[2] != null && a[2] >= 3) badge += `<span class="badge warn">${OCC[a[2]] || ""}</span>`;
+      const exp = x.exp, mins = exp - now;
+      const when = mins <= 0 ? "Due" : mins < 60 ? `${mins} min` : fmtM(exp);
+      return `<div class="trip"><div class="t">${x.cx ? `<s>${fmtM(x.at)}</s>` : when}</div><div><span class="rt">${esc(x.route)}</span>${badge}<div class="meta">To ${esc(x.t[2])} · scheduled ${fmtM(x.at)}</div></div></div>`;
+    }).join("") : `<p class="empty">No buses from this stop in the next hour.</p>`;
+    return `<div class="nstop"><h3>${esc(name)}</h3><div class="d">${d < 1000 ? Math.round(d / 10) * 10 + " m" : (d / 1000).toFixed(1) + " km"} · about ${walk} min walk${NR.label === "you" ? "" : " from " + esc(NR.label)}</div>${rows}</div>`;
+  }).join("");
 }
 
 // ---------- report / compliment
