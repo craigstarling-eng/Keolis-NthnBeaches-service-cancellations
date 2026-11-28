@@ -148,15 +148,15 @@ def rfs():
             if ":" in part:
                 k, v = part.split(":", 1)
                 fields[k.strip().upper()] = re.sub(r"<[^>]+>", "", v).strip()
-        loc = fields.get("LOCATION", "").split(",")[0]
-        sub, info = locate(p.get("title", "") + " " + loc, prefer=loc)
-        if not info:
-            council = fields.get("COUNCIL AREA", "")
-            from regions import region_for_lga, clean_lga
-            reg = region_for_lga(council)
-            info = [reg, clean_lga(council)] if reg else None
-        if not info:
+        # Trust the council area first: titles can name places that share a Sydney suburb's name.
+        from regions import region_for_lga, clean_lga
+        council = fields.get("COUNCIL AREA", "")
+        reg = region_for_lga(council)
+        if not reg:
             continue
+        loc = fields.get("LOCATION", "").split(",")[0].strip()
+        sub = loc.upper() if loc.upper() in SUBURBS else None
+        info = [reg, clean_lga(council)]
         try:
             when = dt.datetime.strptime(p.get("pubDate", ""), "%d/%m/%Y %I:%M:%S %p").replace(tzinfo=TZ)
         except ValueError:
