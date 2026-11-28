@@ -437,7 +437,7 @@ section[hidden]{display:none}
   <p class="sub" id="visits" hidden>👀 <b id="visitCount"></b> visits to this site</p>
 </div>
 <script>
-let S, L, R, G, O, TT, TS, CD = null, E = [], BOT = null, F = null;
+let S, L, R, G, O, TT, TS, CD = null, E = [], BOT = null, F = null, DEP = null;
 let state = {off: 60, metric: "rate", range: 30, peak: "30", reg: "d30", share: "today", route: null, league: "cxl"};
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -458,6 +458,7 @@ async function load() {
   if (!TT || TT.date !== L.date) TT = await j("data/timetable_today.json").catch(() => null);
   if (!TS) TS = await j("data/trip_stats.json").catch(() => null);
   F = await j("data/fleet.json").catch(() => null);
+  DEP = await j("data/depots.json").catch(() => null);
   if (BUS.q) busLookup(BUS.q, false);
   if (BOT === null) BOT = ((await j("data/telegram.json").catch(() => ({}))) || {}).bot || "";
   render();
@@ -996,8 +997,12 @@ function myBus() {
 
 // ---------- find a bus by fleet number (and the bus running each trip)
 const BUS = {q: "", map: null, layer: null, idx: null, idxFor: null};
+// DEP: fleet number -> [depot, 0 best guess | 1 seen at the depot | 2 confirmed]
+const depotOf = b => DEP && DEP.buses ? DEP.buses[b] : null;
+const depotLine = b => { const d = depotOf(b); if (!d) return `<div class="meta">🏠 Depot: not worked out yet</div>`;
+  return `<div class="meta">🏠 <b>${esc(d[0])} depot</b>${d[1] === 2 ? "" : d[1] === 1 ? " · seen at the depot" : " · best guess from where it starts and finishes its day"}</div>`; };
 const fleetOf = tid => F && F.date === (L && L.date) && F.trips ? F.trips[tid] : null;
-const fleetTag = tid => { const b = fleetOf(tid); return b ? `<a class="fleet" href="#bus=${esc(b)}" data-bus="${esc(b)}" title="Look up bus ${esc(b)}">🚌 ${esc(b)}</a>` : ""; };
+const fleetTag = tid => { const b = fleetOf(tid), d = b && depotOf(b); return b ? `<a class="fleet" href="#bus=${esc(b)}" data-bus="${esc(b)}" title="Look up bus ${esc(b)}${d ? " (" + esc(d[0]) + " depot)" : ""}">🚌 ${esc(b)}</a>` : ""; };
 function tripIndex() {   // trip id -> [route, start, headsign, first stop]
   if (BUS.idxFor === TT) return BUS.idx;
   BUS.idx = {}; BUS.idxFor = TT;
@@ -1022,10 +1027,11 @@ async function busLookup(raw, scroll) {
     const occ = a && a[2] != null ? `<span class="badge ${a[2] >= 3 ? "warn" : ""}">${OCC[a[2]] || ""}</span>` : "";
     html += `<div class="trip"><div class="t"><span class="sub" style="display:block;font-size:11px;font-weight:600">BUS</span>${esc(num)}</div><div><span class="rt">${esc(route)}</span>${late}${occ}
       <div class="meta">To <b>${esc(hs)}</b>${from ? ` · left ${esc(from)}` : ""} at ${fmtT(start)}</div>
+      ${depotLine(num)}
       <div class="meta">Position from ${ago <= 1 ? "just now" : ago + " min ago"} · <a href="https://www.google.com/maps/search/?api=1&query=${now[1]},${now[2]}" target="_blank" rel="noopener">Open in Google Maps</a></div></div></div>
       <div id="busMap" style="height:220px;border-radius:10px;margin-top:8px;border:1px solid var(--border)"></div>`;
   } else {
-    html += `<p class="sub">Bus ${esc(num)} isn't on a timetabled trip right now (it may be between trips, out of service or back at the depot).</p>`;
+    html += `<p class="sub">Bus ${esc(num)} isn't on a timetabled trip right now (it may be between trips, out of service or back at the depot).</p>${depotLine(num)}`;
   }
   if (today.length) html += `<h2 style="margin-top:12px;font-size:15px">Trips bus ${esc(num)} has run today</h2>` + today.map(t => { const [r, st, hs] = idx[t]; return `<div class="trip" style="padding:6px 0"><div class="t" style="font-size:15px">${fmtT(st)}</div><div><span class="rt">${esc(r)}</span> To ${esc(hs)}</div></div>`; }).join("");
   out.innerHTML = html;

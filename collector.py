@@ -15,6 +15,7 @@ import datetime as dt
 import gzip
 import io
 import json
+import math
 import os
 import re
 import statistics
@@ -565,6 +566,13 @@ def service_date(feed_date, feed_start, static_start, today):
 
 
 FLEET_FILE = os.path.join(DATA, "fleet.json")
+DEPOT_FILE = os.path.join(DATA, "depots.json")              # fleet number -> depot, for the site
+DEPOT_VOTES = os.path.join(HIST, "depot_votes.json")        # daily evidence the depot guess is built from
+DEPOT_MANUAL = os.path.join(DATA, "depots_manual.json")     # hand-confirmed depots, e.g. {"1666": "Mona Vale"}: always win
+DEPOTS = {"V": ("Brookvale", -33.766419, 151.269782), "F": ("Mona Vale", -33.67454, 151.30756),
+          "N": ("North Sydney", -33.82891, 151.21856)}
+DEPOT_DAYS = 21                           # how many days of evidence to weigh
+DEPOT_SEEN = set()                        # (fleet number, depot code) seen parked at / leaving a depot this run
 VEHICLES = {}   # (service date, trip id as used on the site) -> [fleet number, lat, lon, unix time], filled by read_occupancy
 
 
@@ -591,6 +599,11 @@ def read_occupancy(hdr, home, cross=None):
         if not info and tid in cross_trips:
             info, pre = cross_trips[tid], "c:"
         if not info:
+            label = (v.vehicle.label or "").strip()
+            if label and v.HasField("position"):   # a bus not on a passenger trip: is it at one of the depots?
+                for code, (_, dlat, dlon) in DEPOTS.items():
+                    if km_between(v.position.latitude, v.position.longitude, dlat, dlon) <= 0.25:
+                        DEPOT_SEEN.add((label, code))
             continue
         d = service_date(v.trip.start_date, v.trip.start_time, info[2], today)
         label = (v.vehicle.label or "").strip()
@@ -616,6 +629,98 @@ def write_fleet(today):
             now[label] = [tid, lat, lon, ts]
     save_state(today, state)
     write_json(FLEET_FILE, {"date": today, "updated": now_syd().isoformat(timespec="seconds"), "now": now, "trips": trips})
+    try:   # depots are an extra on top of the bus finder
+        write_depots(today, trips)
+    except Exception as exc:
+        print("depots not worked out:", exc)
+
+
+def km_between(lat1, lon1, lat2, lon2):
+    return math.hypot((lat1 - lat2) * 111.0, (lon1 - lon2) * 92.5)   # close enough at Sydney's latitude
+
+
+def depot_zone(lat, lon):
+    """Which depot's patch a terminus is in, or None where it says nothing (the CBD, Chatswood and beyond).
+    Mona Vale runs the routes north of Narrabeen, North Sydney the lower north shore, Brookvale the rest."""
+    if lat > -33.712:
+        return "F"
+    if lat < -33.851:
+        return None
+    _, nlat, nlon = DEPOTS["N"]
+    if km_between(lat, lon, nlat, nlon) <= 4:
+        return "N"
+    _, blat, blon = DEPOTS["V"]
+    if km_between(lat, lon, blat, blon) <= 9:
+        return "V"
+    return None
+
+
+def write_depots(today, trips):
+    """Work out which depot each Keolis bus runs from. Buses start and finish the day near their depot, so
+    each day the first trip's starting point and the last trip's end point each give one vote; a bus seen
+    sitting at a depot between trips gives a stronger vote. The guess comes from the last few weeks of votes.
+    Anything in data/depots_manual.json overrides the guess."""
+    stops = read_json(NEARBY_FILE, None)
+    if not stops or not stops.get("trips"):
+        return
+    pats, pts, tix = stops["pats"], stops["stops"], stops["trips"]
+    per_bus = defaultdict(list)
+    for tid, bus in trips.items():
+        if tid in tix:   # CDC ("c:") and school trips aren't in the Keolis stop patterns
+            flat = pats[tix[tid]][1]
+            if flat:
+                per_bus[bus].append((tid, flat))
+    votes = read_json(DEPOT_VOTES, {})
+    for bus, ts in per_bus.items():
+        starts = []
+        for tid, flat in ts:
+            info = HOME_TRIPS.get(tid)
+            starts.append((hhmm_to_min(info[2]) if info and info[2] else 9999, flat))
+        starts.sort(key=lambda x: x[0])
+        day = Counter()
+        a, z = pts[starts[0][1][0]], pts[starts[-1][1][-2]]
+        for p in (a, z):
+            c = depot_zone(p[1], p[2])
+            if c:
+                day[c] += 1
+        old = votes.get(bus, {}).get(today, {})
+        for c in DEPOTS:   # depot sightings already logged today are kept
+            if old.get(c + "!"):
+                day[c + "!"] = 1
+        votes.setdefault(bus, {})[today] = dict(day)
+    for bus, code in DEPOT_SEEN:
+        if bus in votes or bus in per_bus:
+            votes.setdefault(bus, {}).setdefault(today, {})[code + "!"] = 1
+    cutoff = iso(now_syd().date() - dt.timedelta(days=DEPOT_DAYS))
+    out = {}
+    for bus in list(votes):
+        votes[bus] = {d: v for d, v in votes[bus].items() if d > cutoff}
+        if not votes[bus]:
+            del votes[bus]
+            continue
+        score, seen = Counter(), Counter()
+        for v in votes[bus].values():
+            for k, n in v.items():
+                if k.endswith("!"):
+                    seen[k[0]] += 1
+                    score[k[0]] += 4 * n
+                else:
+                    score[k] += n
+        if not score:
+            continue
+        (best, top), total = score.most_common(1)[0], sum(score.values())
+        if seen and seen.most_common(1)[0][0] == best:
+            out[bus] = [DEPOTS[best][0], 1]            # seen at that depot
+        elif total >= 2 and top / total >= 0.6:
+            out[bus] = [DEPOTS[best][0], 0]            # best guess from where it starts and finishes
+    for bus, name in read_json(DEPOT_MANUAL, {}).items():
+        if not str(bus).startswith("_") and isinstance(name, str) and name.strip():
+            out[str(bus)] = [name.strip(), 2]          # confirmed by hand
+    write_json(DEPOT_VOTES, votes)
+    write_json(DEPOT_FILE, {"updated": now_syd().isoformat(timespec="seconds"), "buses": out})
+
+
+HOME_TRIPS = {}
 
 
 def read_feed(hdr, prefix_to_code, home, school_routes, cross=None):
@@ -1366,6 +1471,7 @@ def main():
     print(f"Feed trips: {len(seen)}; new home cancellations: {len(new)}")
 
     touched = apply_observations(seen)
+    HOME_TRIPS.update(home["trips"])
     occ_now = read_occupancy(hdr, home, cross) if status == "ok" else {}
     if occ_now:
         record_occupancy(occ_now)
