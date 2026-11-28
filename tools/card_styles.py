@@ -1,6 +1,6 @@
 """Pool of 20 light, colourful designs for the Facebook post images.
 
-4 layouts x 5 colour themes. The daily post rotates through them by date (a different layout every day);
+10 different layouts x 2 colourways. The daily post rotates through them by date (a different layout every day);
 the Monday weekly post uses the day's theme colours on its own layout.
 
   python tools/card_styles.py   -> renders every style with today's figures into data/social/styles/
@@ -30,6 +30,30 @@ def F(size, w="Regular"):
             dv = f"/usr/share/fonts/truetype/dejavu/DejaVuSans{'' if w in ('Regular', 'Medium') else '-Bold'}.ttf"
             _fonts[key] = ImageFont.truetype(dv, size) if os.path.exists(dv) else ImageFont.load_default(size)
     return _fonts[key]
+
+
+def FA(size):
+    """Anton, tall condensed poster font."""
+    key = (size, "anton")
+    if key not in _fonts:
+        p = os.path.join(FONT_DIR, "Anton-Regular.ttf")
+        _fonts[key] = ImageFont.truetype(p, size) if os.path.exists(p) else F(size, "Black")
+    return _fonts[key]
+
+
+def FS(size, bold=True):
+    """Newspaper serif."""
+    key = (size, "serif", bold)
+    if key not in _fonts:
+        p = os.path.join(FONT_DIR, f"LiberationSerif-{'Bold' if bold else 'Regular'}.ttf")
+        _fonts[key] = ImageFont.truetype(p, size) if os.path.exists(p) else F(size, "Bold" if bold else "Regular")
+    return _fonts[key]
+
+
+def fitf(dr, text, mk, size, maxw, minsize=14):
+    while size > minsize and dr.textlength(text, font=mk(size)) > maxw:
+        size -= 2
+    return mk(size)
 
 
 def rgb(h):
@@ -156,9 +180,11 @@ def L_beach(D, t):
 
 def L_status(D, t):
     rc = D["rcol"]
+    soft = t.get("soft")
+    ink = mix(rc, "#000000", .25) if soft else "white"
     im = Image.new("RGBA", (1080, 1080), t["bg"])
     dr = ImageDraw.Draw(im)
-    dr.rectangle((0, 0, 1080, 470), fill=rc)
+    dr.rectangle((0, 0, 1080, 470), fill=mix(rc, "#ffffff", .82) if soft else rc)
     ov = Image.new("RGBA", im.size, (0, 0, 0, 0))
     od = ImageDraw.Draw(ov)
     tex = t["tex"]
@@ -176,15 +202,20 @@ def L_status(D, t):
         bus(od, 560, 200, 170, (255, 255, 255, 26), (255, 255, 255, 0), (255, 255, 255, 26), None)
     elif tex == "split":
         od.polygon([(620, 0), (1080, 0), (1080, 470), (380, 470)], fill=(255, 255, 255, 22))
+    elif tex == "rings":
+        for k in range(6):
+            r = 120 + k * 90
+            od.ellipse((900 - r, 120 - r, 900 + r, 120 + r), outline=rgb(rc) + (40,), width=10)
+    od.rectangle((0, 470, 1080, 1080), fill=(0, 0, 0, 0))
     im.alpha_composite(ov)
     dr = ImageDraw.Draw(im)
-    bus(dr, 70, 70, 38, "white", rc, "white", None)
-    dr.text((175, 66), "NORTHERN BEACHES BUS WATCH", font=F(27, "ExtraBold"), fill="white")
-    dr.text((175, 102), f"{D['when']} · as at {D['at']}", font=F(24, "SemiBold"), fill="white")
-    dr.text((70, 165), "Today's service was", font=F(40, "SemiBold"), fill="white")
-    dr.text((66, 325), D["rating"].upper(), font=fit(dr, D["rating"].upper(), "Black", 132, 940), fill="white", anchor="ls")
+    bus(dr, 70, 70, 38, ink, mix(rc, "#ffffff", .82) if soft else rc, ink, None)
+    dr.text((175, 66), "NORTHERN BEACHES BUS WATCH", font=F(27, "ExtraBold"), fill=ink)
+    dr.text((175, 102), f"{D['when']} · as at {D['at']}", font=F(24, "SemiBold"), fill=ink)
+    dr.text((70, 165), "Today's service was", font=F(40, "SemiBold"), fill=ink)
+    dr.text((66, 325), D["rating"].upper(), font=fit(dr, D["rating"].upper(), "Black", 132, 940), fill=ink, anchor="ls")
     sub = f"{D['cxl']} trips cancelled" + (f" · {D['on_pct']:.0f}% on time" if D["on_pct"] is not None else "")
-    dr.text((70, 365), sub, font=F(36, "Bold"), fill="white")
+    dr.text((70, 365), sub, font=F(36, "Bold"), fill=ink)
     card(im, (820, 40, 1020, 190), 26, alpha=45)
     dial(im, 920, 122, 62, D["score"], "Today")
     dr = card(im, (60, 500, 1020, 950), 30)
@@ -273,33 +304,258 @@ def L_bigdial(D, t):
     return im
 
 
+def _stats(D):
+    on = f"{D['on_pct']:.0f}%" if D["on_pct"] is not None else "–"
+    wr = D["worst"][0] if D["worst"] else "–"
+    wn = f"{D['worst'][1]} cancelled" if D["worst"] else "none today"
+    return on, wr, wn
+
+
+def L_ticket(D, t):
+    on, wr, wn = _stats(D)
+    im = Image.new("RGBA", (1080, 1080), t["bg"])
+    dr = ImageDraw.Draw(im)
+    for y in range(0, 1080, 60):   # subtle diagonal pattern
+        dr.line((0, y, y, 0), fill=mix(t["bg"], "#ffffff", .35), width=14)
+    for y in range(0, 1080, 60):
+        dr.line((1080 - y, 1080, 1080, 1080 - y), fill=mix(t["bg"], "#ffffff", .35), width=14)
+    x0, y0, x1, y1 = 90, 80, 990, 1000
+    card(im, (x0, y0, x1, y1), 34, t["paper"], 20, 10, 60)
+    dr = ImageDraw.Draw(im)
+    dr.rounded_rectangle((x0, y0, x1, y0 + 120), 34, fill=t["acc"])
+    dr.rectangle((x0, y0 + 60, x1, y0 + 120), fill=t["acc"])
+    bus(dr, x0 + 45, y0 + 38, 30, "white", t["acc"], "white", None)
+    dr.text((x0 + 130, y0 + 60), "BUS WATCH DAILY TICKET", font=F(36, "Black"), fill="white", anchor="lm")
+    dr.text((x1 - 40, y0 + 60), "No. " + D["when"].split()[1].zfill(2), font=F(26, "Bold"), fill="white", anchor="rm")
+    rows = [("DATE", D["when"]), ("CHECKED AT", D["at"]), ("SERVICE", D["rating"].upper()),
+            ("TRIPS CANCELLED", f"{D['cxl']:,}  ({D['cxl_pct']})"), ("ON TIME", on), ("WORST ROUTE", f"{wr}  ({wn})"),
+            ("LAST 7 DAYS", f"{D['wk_cxl']:,} cancelled ({D['wk_pct']})")]
+    y = y0 + 160
+    for lab, val in rows:
+        dr.text((x0 + 60, y), lab, font=F(24, "Bold"), fill=t["muted"])
+        col = D["rcol"] if lab == "SERVICE" else NAVY
+        dr.text((x1 - 60, y - 6), val, font=fit(dr, val, "ExtraBold", 36, 560), fill=col, anchor="ra")
+        y += 72
+        dr.line((x0 + 60, y - 22, x1 - 60, y - 22), fill=mix(t["paper"], "#000000", .08), width=2)
+    # perforation + notches
+    py = 760
+    for x in range(x0 + 30, x1 - 20, 28):
+        dr.line((x, py, x + 14, py), fill=t["muted"], width=3)
+    dr.ellipse((x0 - 30, py - 30, x0 + 30, py + 30), fill=t["bg"])
+    dr.ellipse((x1 - 30, py - 30, x1 + 30, py + 30), fill=t["bg"])
+    dial(im, x0 + 190, py + 130, 85, D["score"], "Today", ring=t["paper"])
+    dr = ImageDraw.Draw(im)
+    import random
+    rnd = random.Random(D["when"])
+    bx = x0 + 420
+    while bx < x1 - 70:
+        wdt = rnd.choice((3, 5, 8))
+        dr.rectangle((bx, py + 50, bx + wdt, py + 160), fill=NAVY)
+        bx += wdt + rnd.choice((4, 6, 9))
+    dr.text(((x0 + 420 + x1 - 70) / 2, py + 192), SITE, font=F(26, "Bold"), fill=NAVY, anchor="mm")
+    dr.text((540, 1040), FOOT, font=F(22, "SemiBold"), fill=t["foot"], anchor="mm")
+    return im
+
+
+def L_paper(D, t):
+    on, wr, wn = _stats(D)
+    im = Image.new("RGBA", (1080, 1080), t["bg"])
+    dr = ImageDraw.Draw(im)
+    dr.text((540, 85), "The Beaches Bus Watch", font=FS(70), fill=NAVY, anchor="mm")
+    dr.line((60, 140, 1020, 140), fill=NAVY, width=4)
+    dr.line((60, 148, 1020, 148), fill=NAVY, width=1)
+    dr.text((60, 170), D["when"].upper(), font=F(22, "Bold"), fill=GREY)
+    dr.text((1020, 170), f"LATE EDITION · {D['at'].upper()}", font=F(22, "Bold"), fill=GREY, anchor="ra")
+    dr.line((60, 205, 1020, 205), fill=NAVY, width=1)
+    dr.text((60, 235), "BUSES", font=F(26, "ExtraBold"), fill=t["acc"])
+    noun = "bus trip" if D["cxl"] == 1 else "bus trips"
+    head = f"{D['cxl']:,} {noun} cancelled"
+    dr.text((60, 275), head, font=fitf(dr, head, FS, 104, 960), fill=NAVY)
+    sub = f"Service rated {D['rating'].lower()} across the Northern Beaches today"
+    dr.text((60, 410), sub, font=fitf(dr, sub, lambda z: FS(z, False), 40, 960), fill=GREY)
+    dr.line((60, 480, 1020, 480), fill=NAVY, width=2)
+    # left column: by the numbers
+    dr.text((60, 505), "BY THE NUMBERS", font=F(24, "ExtraBold"), fill=t["acc"])
+    items = [(D["cxl_pct"], "of scheduled trips cancelled"), (on, "of tracked buses on time"),
+             (D["am"][0], "cancelled in the morning peak"), (D["pm"][0], "cancelled in the evening peak"),
+             (f"{D['wk_cxl']:,}", f"cancelled over the last 7 days ({D['wk_pct']})")]
+    y = 550
+    for big, txt in items:
+        dr.text((60, y), big, font=FS(46), fill=NAVY)
+        dr.text((250, y + 14), txt, font=fit(dr, txt, "Medium", 26, 330), fill=GREY)
+        y += 74
+    dr.line((610, 500, 610, 910), fill=mix(t["bg"], "#000000", .25), width=1)
+    # right column
+    dr.text((640, 505), "TODAY'S RATING", font=F(24, "ExtraBold"), fill=t["acc"])
+    dial(im, 830, 680, 120, D["score"], "Today", ring=t["bg"])
+    dr = ImageDraw.Draw(im)
+    dr.text((640, 790), "WORST ROUTE", font=F(24, "ExtraBold"), fill=t["acc"])
+    dr.text((640, 825), wr, font=FS(64), fill=NAVY)
+    dr.text((640 + dr.textlength(wr, font=FS(64)) + 20, 852), wn, font=F(26, "Medium"), fill=GREY)
+    dr.line((60, 930, 1020, 930), fill=NAVY, width=2)
+    footer(dr, 955, GREY, NAVY)
+    return im
+
+
+def L_poster(D, t):
+    on, wr, wn = _stats(D)
+    im = Image.new("RGBA", (1080, 1080), t["bg"])
+    dr = ImageDraw.Draw(im)
+    dr.ellipse((700, -200, 1300, 400), fill=mix(t["bg"], "#ffffff", .3))
+    dr.ellipse((-250, 700, 350, 1300), fill=mix(t["bg"], t["ink"], .08))
+    dr.text((70, 70), "TODAY ON THE", font=F(40, "Black"), fill=t["ink"])
+    dr.text((70, 118), "NORTHERN BEACHES", font=F(40, "Black"), fill=t["ink"])
+    dr.text((70, 175), f"{D['when']} · as at {D['at']}", font=F(26, "SemiBold"), fill=t["ink"])
+    card(im, (800, 50, 1020, 215), 28, alpha=40)
+    dial(im, 910, 140, 70, D["score"], "Today")
+    dr = ImageDraw.Draw(im)
+    num = f"{D['cxl']:,}"
+    dr.text((60, 640), num, font=fitf(dr, num, FA, 470, 960), fill=t["ink"], anchor="ls")
+    dr.text((70, 650), "BUS TRIPS CANCELLED", font=FA(92), fill=t["hot"])
+    pills = [f"{D['cxl_pct']} of trips", f"{on} on time", f"Worst: {wr}"]
+    x = 70
+    for ptxt in pills:
+        w_ = dr.textlength(ptxt, font=F(32, "ExtraBold")) + 60
+        dr.rounded_rectangle((x, 800, x + w_, 870), 35, fill=t["ink"])
+        dr.text((x + w_ / 2, 835), ptxt, font=F(32, "ExtraBold"), fill=t["bg"], anchor="mm")
+        x += w_ + 20
+    wk = f"Last 7 days: {D['wk_cxl']:,} cancelled ({D['wk_pct']})"
+    dr.text((70, 900), wk, font=F(30, "Bold"), fill=t["ink"])
+    footer(dr, 965, mix(t["ink"], t["bg"], .3), t["ink"])
+    return im
+
+
+def L_donut(D, t):
+    on, wr, wn = _stats(D)
+    im = Image.new("RGBA", (1080, 1080), t["bg"])
+    dr = ImageDraw.Draw(im)
+    dr.text((70, 65), "Where did today's", font=F(50, "ExtraBold"), fill=NAVY)
+    dr.text((70, 125), "buses go?", font=F(50, "ExtraBold"), fill=t["acc"])
+    dr.text((70, 200), f"Northern Beaches · {D['when']} · as at {D['at']}", font=F(26, "SemiBold"), fill=GREY)
+    card(im, (810, 50, 1020, 210), 28, alpha=40)
+    dial(im, 915, 135, 66, D["score"], "Today")
+    dr = card(im, (60, 260, 1020, 700), 34)
+    cx, cy, r = 280, 480, 160
+    ran = 1 - D["cxl_f"]
+    dr.pieslice((cx - r, cy - r, cx + r, cy + r), -90, -90 + 360 * ran, fill=t["acc"])
+    dr.pieslice((cx - r, cy - r, cx + r, cy + r), -90 + 360 * ran, 270, fill=t["hot"])
+    dr.ellipse((cx - 100, cy - 100, cx + 100, cy + 100), fill="white")
+    dr.text((cx, cy - 18), D["cxl_pct"], font=F(52, "Black"), fill=t["hot"], anchor="mm")
+    dr.text((cx, cy + 30), "cancelled", font=F(26, "SemiBold"), fill=GREY, anchor="mm")
+    lx = 510
+    y = 320
+    for col, big, lab in ((t["acc"], f"{D['sched'] - D['cxl']:,}", "trips ran"), (t["hot"], f"{D['cxl']:,}", "trips cancelled"),
+                          ("#2e9e3e", on, "buses on time")):
+        dr.rounded_rectangle((lx, y + 14, lx + 34, y + 48), 9, fill=col)
+        dr.text((lx + 56, y), big, font=F(56, "Black"), fill=NAVY)
+        dr.text((lx + 60, y + 70), lab, font=F(26, "SemiBold"), fill=GREY)
+        y += 120
+    dr = card(im, (60, 730, 1020, 935), 34)
+    dr.text((100, 760), "Cancelled by time of day", font=F(30, "ExtraBold"), fill=NAVY)
+    for i, (lab, (pv, n_)) in enumerate((("Morning peak", D["am"]), ("Evening peak", D["pm"]))):
+        y = 815 + i * 56
+        frac = float(pv.rstrip("%")) / 10 if pv not in ("–", "") else 0
+        dr.text((100, y), lab, font=F(26, "SemiBold"), fill=GREY)
+        bar(dr, 330, y + 4, 520, 26, frac, t["hot"], mix(t["hot"], "#ffffff", .85))
+        dr.text((990, y), pv, font=F(28, "ExtraBold"), fill=NAVY, anchor="ra")
+    footer(dr, 960, "#7c8a9a", NAVY)
+    return im
+
+
+def L_route(D, t):
+    on, wr, wn = _stats(D)
+    im = Image.new("RGBA", (1080, 1080), t["bg"])
+    dr = ImageDraw.Draw(im)
+    dr.rectangle((0, 0, 1080, 210), fill=t["line"])
+    bus(dr, 70, 60, 46, "white", t["line"], "white", None)
+    dr.text((200, 58), "Today's bus run", font=F(54, "Black"), fill="white")
+    sub = f"{D['when']} · as at {D['at']}"
+    dr.text((200, 128), sub, font=fit(dr, sub, "SemiBold", 28, 570), fill="white")
+    stops = [("Morning peak", f"{D['am'][0]} cancelled", f"{D['am'][1]} trips cancelled"),
+             ("Evening peak", f"{D['pm'][0]} cancelled", f"{D['pm'][1]} trips cancelled"),
+             ("All day", f"{D['cxl']:,} cancelled", f"{D['cxl_pct']} of {D['sched']:,} · {on} on time"),
+             ("Worst route", wr, wn),
+             ("Last 7 days", f"{D['wk_cxl']:,} cancelled", D["wk_pct"] + (f" · {D['wk_on']} on time" if D["wk_on"] else ""))]
+    lx = 130
+    dr.line((lx, 230, lx, 940), fill=t["line"], width=18)
+    y = 250
+    for i, (lab, big, small) in enumerate(stops):
+        dr.ellipse((lx - 26, y + 40, lx + 26, y + 92), fill="white", outline=t["line"], width=10)
+        dr = card(im, (200, y, 1020, y + 128), 24, alpha=35)
+        dr.text((235, y + 22), lab.upper(), font=F(24, "ExtraBold"), fill=t["line"])
+        dr.text((235, y + 56), big, font=fit(dr, big, "Black", 48, 420), fill=NAVY)
+        dr.text((990, y + 76), small, font=fit(dr, small, "SemiBold", 26, 330), fill=GREY, anchor="ra")
+        y += 140
+    card(im, (800, 20, 1040, 190), 28, alpha=30)
+    dial(im, 920, 108, 74, D["score"], "Today")
+    dr = ImageDraw.Draw(im)
+    footer(dr, 962, "#7c8a9a", NAVY)
+    return im
+
+
+def L_bento(D, t):
+    on, wr, wn = _stats(D)
+    im = Image.new("RGBA", (1080, 1080), t["bg"])
+    dr = ImageDraw.Draw(im)
+    dr.text((60, 55), "Northern Beaches buses", font=F(50, "Black"), fill=NAVY)
+    dr.text((60, 122), f"{D['when']} · as at {D['at']}", font=F(28, "SemiBold"), fill=GREY)
+    c = t["tiles"]
+    g = 20
+    # big tile: cancelled
+    dr.rounded_rectangle((60, 190, 600, 560), 36, fill=c[0])
+    dr.text((95, 225), "Cancelled today", font=F(32, "Bold"), fill=NAVY)
+    num = f"{D['cxl']:,}"
+    dr.text((90, 270), num, font=fit(dr, num, "Black", 190, 480), fill=NAVY)
+    dr.text((95, 500), f"{D['cxl_pct']} of {D['sched']:,} trips", font=F(30, "SemiBold"), fill=NAVY)
+    # dial tile
+    dr.rounded_rectangle((620, 190, 1020, 560), 36, fill=c[1])
+    dial(im, 820, 400, 140, D["score"], "Today's service", ring=c[1])
+    dr = ImageDraw.Draw(im)
+    tiles = [(60, 580, 380, 820, c[2], "On time", on), (400, 580, 720, 820, c[3], "Worst route", wr),
+             (740, 580, 1020, 820, c[4], "AM peak", D["am"][0])]
+    for x0, y0, x1, y1, col, lab, big in tiles:
+        dr.rounded_rectangle((x0, y0, x1, y1), 36, fill=col)
+        dr.text((x0 + 32, y0 + 30), lab, font=F(30, "Bold"), fill=NAVY)
+        dr.text((x0 + 28, y0 + 85), big, font=fit(dr, big, "Black", 96, x1 - x0 - 60), fill=NAVY)
+    dr.rounded_rectangle((60, 840, 1020, 930), 36, fill=c[5])
+    wk = f"Last 7 days: {D['wk_cxl']:,} cancelled ({D['wk_pct']})" + (f" · {D['wk_on']} on time" if D["wk_on"] else "")
+    dr.text((540, 885), wk, font=fit(dr, wk, "ExtraBold", 32, 900), fill=NAVY, anchor="mm")
+    footer(dr, 955, "#6b7a8c", NAVY)
+    return im
+
+
 # ---------------------------------------------------------------- themes
 BEACH = [
     dict(name="Ocean", h1="#0e7c86", h2="#36b5c1", bg="#fff8ee", hero="#ef6f5e", ring="#2fb5a3", label="#0e7c86", pill="#0b5f67", a1="#f4a340", a2="#6c7ae0"),
-    dict(name="Sunset", h1="#e8613c", h2="#f7b267", bg="#fff6ef", hero="#d6455d", ring="#3a86c8", label="#c4532e", pill="#b0441f", a1="#f4a340", a2="#3a86c8"),
-    dict(name="Bush", h1="#2f7d4f", h2="#6dbb74", bg="#f6faf2", hero="#e06c3c", ring="#2f9e5a", label="#2f7d4f", pill="#22603b", a1="#e0a030", a2="#3a86c8"),
-    dict(name="Harbour", h1="#1f5fbf", h2="#4f9be8", bg="#f3f7fd", hero="#ef6f5e", ring="#3a86e8", label="#1f5fbf", pill="#174a96", a1="#f4a340", a2="#7b5cc7"),
     dict(name="Jacaranda", h1="#6f4fc0", h2="#b39ae8", bg="#f8f5fd", hero="#e0567a", ring="#7b5cc7", label="#6a4bb5", pill="#55399b", a1="#f4a340", a2="#2fb5a3"),
 ]
-STATUS = [dict(name=n.title(), tex=n, bg=b) for n, b in
-          [("stripes", "#f4f6f9"), ("dots", "#f7f4ef"), ("waves", "#f1f7fa"), ("bus", "#f5f5f7"), ("split", "#f6f3f8")]]
+STATUS = [dict(name="Bold", tex="stripes", bg="#f4f6f9"), dict(name="Soft", tex="rings", bg="#ffffff", soft=True)]
 SKY = [
     dict(name="Midday", s1="#78c4ff", s2="#f0f8ff", sun="#ffd54f", sea="#3aa0d8", sand="#f3dfb4", bus="#1d4f91", t2="white"),
     dict(name="Golden hour", s1="#ff9a6b", s2="#fff0e4", sun="#fff1a8", sea="#4b7fc0", sand="#f0cf9e", bus="#1d4f91", t2="white", sun_at=(980, 330)),
-    dict(name="Dawn", s1="#ffb3c1", s2="#fff6f2", sun="#ffe08a", sea="#6cb7d9", sand="#f5dfc0", bus="#c0392b", t2="white", sun_at=(120, 330)),
-    dict(name="Tropical", s1="#4fd3d9", s2="#ebfcfa", sun="#fff3a0", sea="#1aa7a0", sand="#f6e3b6", bus="#e07b00", t2="white"),
-    dict(name="Dusk", s1="#a996ec", s2="#f6f2ff", sun="#ffd9a0", sea="#5b6fd0", sand="#ecd9c6", bus="#1d4f91", t2="white", sun_at=(1000, 300)),
 ]
 DIAL = [
     dict(name="Mint", bg="#eefaf4", blob1="#bdf0d6", blob2="#cdebff", acc="#1f8a5b"),
     dict(name="Peach", bg="#fff4ec", blob1="#ffd2b8", blob2="#ffe7a8", acc="#d4572b"),
-    dict(name="Sky", bg="#eef5ff", blob1="#c4dcff", blob2="#d8cdfb", acc="#2f6fd0"),
-    dict(name="Lemon", bg="#fffbea", blob1="#fff0a0", blob2="#c9f0d0", acc="#a07400"),
-    dict(name="Blush", bg="#fdf0f4", blob1="#ffcadb", blob2="#ffe0c2", acc="#c43e6b"),
 ]
-LAYOUTS = [("Beach", L_beach, BEACH), ("Status", L_status, STATUS), ("Sky", L_sky, SKY), ("Big dial", L_bigdial, DIAL)]
-# Interleaved so the layout changes every day: Beach/Ocean, Status/Stripes, Sky/Midday, Big dial/Mint, Beach/Sunset ...
-POOL = [(f"{ln} · {th['name']}", fn, th) for i in range(5) for ln, fn, themes in LAYOUTS for th in [themes[i]]]
+TICKET = [
+    dict(name="Opal blue", bg="#cfe4ff", paper="#fffdf7", acc="#1f5fbf", muted="#7c8a9a", foot="#2a4a7a"),
+    dict(name="Retro orange", bg="#ffd9b8", paper="#fffaf2", acc="#e0621f", muted="#8a7a6a", foot="#7a3a12"),
+]
+PAPER = [dict(name="Newsprint", bg="#f6f1e7", acc="#c0392b"), dict(name="Salmon", bg="#fdeee0", acc="#1f5fbf")]
+POSTER = [dict(name="Sunshine", bg="#ffd23f", ink="#0f2747", hot="#d6455d"),
+          dict(name="Aqua", bg="#7fe3d6", ink="#0f2747", hot="#c43e6b")]
+DONUT = [dict(name="Lilac", bg="#f3effd", acc="#6f4fc0", hot="#ef6f5e"), dict(name="Seafoam", bg="#ecf8f5", acc="#1a9a8a", hot="#f08a3a")]
+ROUTE = [dict(name="Teal line", bg="#f2f8f8", line="#0e8f8a", acc="#0e8f8a"), dict(name="Orange line", bg="#fff7f0", line="#ea6a1f", acc="#ea6a1f")]
+BENTO = [
+    dict(name="Pastels", bg="#fbfaf7", acc="#6c7ae0", tiles=["#ffd6cc", "#ffffff", "#cdeccf", "#d8d4fb", "#ffeaa6", "#cfe8ff"]),
+    dict(name="Beach hues", bg="#f4fbfb", acc="#0e7c86", tiles=["#bfeee9", "#ffffff", "#ffe0b8", "#ffd0dc", "#d6ecff", "#f9f1c8"]),
+]
+LAYOUTS = [("Beach", L_beach, BEACH), ("Ticket", L_ticket, TICKET), ("Sky", L_sky, SKY), ("Poster", L_poster, POSTER),
+           ("Status", L_status, STATUS), ("Donut", L_donut, DONUT), ("Newspaper", L_paper, PAPER), ("Bento", L_bento, BENTO),
+           ("Big dial", L_bigdial, DIAL), ("Route", L_route, ROUTE)]
+# 10 layouts x 2 colourways, interleaved so the layout changes every day and each repeats only every 10 days
+POOL = [(f"{ln} · {th['name']}", fn, th) for i in range(2) for ln, fn, themes in LAYOUTS for th in [themes[i]]]
 
 
 def pick(date):
@@ -319,8 +575,12 @@ def colours_for(date):
         return t["h1"], t["h2"], t["bg"], t["hero"]
     if fn is L_sky:
         return mix(t["s1"], t["bus"], .35), t["s1"], "#f5f8fc", "#e8604c"
-    if fn is L_bigdial:
-        return t["acc"], mix(t["acc"], "#ffffff", .45), t["bg"], t["acc"]
+    if fn is L_poster:
+        return mix(t["bg"], t["ink"], .25), t["bg"], "#fbfaf6", t["hot"]
+    if "line" in t:
+        return t["line"], mix(t["line"], "#ffffff", .4), t["bg"], t["line"]
+    if "acc" in t:
+        return t["acc"], mix(t["acc"], "#ffffff", .45), t["bg"] if fn is not L_ticket else "#f5f8fc", t.get("hot", "#e8604c")
     return "#1f5fbf", "#4f9be8", t["bg"], "#e8604c"
 
 
