@@ -36,6 +36,7 @@ POST_AT = (17, 30)       # 5:30 pm, mid evening peak while commuters are on the 
 WEEKLY_AT = (8, 0)       # Mondays 8:00 am: week in review (Monday to Sunday just gone)
 POST_UNTIL, WEEKLY_UNTIL = 21, 12   # if the tracker was down, skip the post rather than send it late at night
 MAX_TRIES = 3
+LAST_ERROR = ""   # why the last Facebook post failed (token removed), saved in posted.json
 
 
 def rows(path):
@@ -399,7 +400,9 @@ def post_facebook(text, image_path):
         r = requests.post(f"{FB_API}/{page}/photos", data={"caption": text, "access_token": token},
                           files={"source": ("card.png", fh, "image/png")}, timeout=60)
     if r.status_code >= 400:
-        print("Facebook error:", re.sub(r"access_token=[^&\s]+", "access_token=***", r.text[:500]))
+        global LAST_ERROR
+        LAST_ERROR = re.sub(r"access_token=[^&\s]+", "access_token=***", r.text[:300])
+        print("Facebook error:", LAST_ERROR)
         return False
     print("Facebook: posted")
     return True
@@ -439,7 +442,9 @@ def publish(kind="summary", dry=False):
     try:
         return post_facebook(f["text"], img)
     except Exception as exc:
-        print(f"Facebook failed: {type(exc).__name__}: {str(exc)[:200]}")
+        global LAST_ERROR
+        LAST_ERROR = f"{type(exc).__name__}: {str(exc)[:200]}"
+        print("Facebook failed:", LAST_ERROR)
         return False
 
 
@@ -475,6 +480,7 @@ def auto():
             fb[kind] = today
         else:
             fb[f"{kind}_tries"] = {today: tries + 1}
+            fb["last_error"] = f"{now.isoformat(timespec='minutes')} {kind}: {LAST_ERROR or 'no figures yet'}"
         changed = True
     if changed:
         os.makedirs(OUT_DIR, exist_ok=True)
