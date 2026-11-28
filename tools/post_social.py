@@ -373,6 +373,20 @@ def configured():
     return bool((os.environ.get("FB_PAGE_ID", "").strip() or PAGE_ID) and os.environ.get("FB_PAGE_TOKEN", "").strip())
 
 
+# Hashtags added to the end of every Facebook post. Neutral: no operator-blaming or political tags.
+HASHTAGS = {
+    "summary": "#NorthernBeachesBusWatch #NorthernBeaches #NorthernBeachesBuses #BLine #SydneyBuses",
+    "bad":     "#NorthernBeachesBusWatch #NorthernBeaches #BusCancellations #SydneyCommute #BLine",
+    "weekly":  "#NorthernBeachesBusWatch #NorthernBeaches #SydneyCommute #PublicTransport #TransportNSW",
+}
+
+
+def with_hashtags(text, kind, score):
+    if kind != "weekly" and score >= 3:   # Bad or Extremely bad on the dial
+        kind = "bad"
+    return f"{text}\n\n{HASHTAGS.get(kind, HASHTAGS['summary'])}"
+
+
 def publish(kind="summary", dry=False):
     os.makedirs(OUT_DIR, exist_ok=True)
     img = os.path.join(OUT_DIR, f"{kind}.png")
@@ -382,6 +396,7 @@ def publish(kind="summary", dry=False):
     else:
         f = figures()
         draw_card(f, img)
+    f["text"] = with_hashtags(f["text"], kind, f.get("score", 0))
     print(f["text"])
     if dry:
         return True
