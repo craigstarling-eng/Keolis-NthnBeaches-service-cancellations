@@ -64,7 +64,7 @@ date,code,name,scheduled,cancelled,observed,late,ontime
 2026-11-28,GSBC003,Transit Systems NSW,1734,5,1729,99,1630
 2026-11-28,GSBC004,CDC NSW R4,2066,30,2033,105,1928
 2026-11-28,GSBC007,Busways North West,1851,24,1821,200,1621
-2026-11-28,GSBC008,Keolis Downer Northern Beaches,2596,21,2537,179,2358
+2026-11-28,GSBC008,Keolis Downer Northern Beaches,2596,21,2538,179,2359
 2026-11-28,GSBC009,Transdev John Holland Buses,3888,50,3838,261,3577
 2026-11-28,GSBC010,U-Go Mobility,1803,14,1788,143,1645
 2026-11-28,GSBC014,CDC NSW R14,787,1,782,57,725
@@ -97,11 +97,11 @@ date,code,name,scheduled,cancelled,observed,late,ontime
 2026-11-28,agency:7077,Operator 7077,0,0,221,13,208
 2026-11-29,GSBC001,Busways R1,1993,0,22,1,21
 2026-11-29,GSBC002,Transit Systems NSW SW,1115,0,0,0,0
-2026-11-29,GSBC003,Transit Systems NSW,1486,0,15,1,14
-2026-11-29,GSBC004,CDC NSW R4,1807,0,55,5,50
-2026-11-29,GSBC007,Busways North West,1626,0,41,5,36
+2026-11-29,GSBC003,Transit Systems NSW,1486,0,16,2,14
+2026-11-29,GSBC004,CDC NSW R4,1807,0,60,7,53
+2026-11-29,GSBC007,Busways North West,1626,0,42,5,37
 2026-11-29,GSBC008,Keolis Downer Northern Beaches,2455,0,0,0,0
-2026-11-29,GSBC009,Transdev John Holland Buses,3812,1,98,8,90
+2026-11-29,GSBC009,Transdev John Holland Buses,3812,1,102,10,92
 2026-11-29,GSBC010,U-Go Mobility,1341,0,15,0,15
 2026-11-29,GSBC014,CDC NSW R14,654,0,0,0,0
 2026-11-29,agency:2450,Operator 2450,0,0,1,0,1
@@ -111,10 +111,10 @@ date,code,name,scheduled,cancelled,observed,late,ontime
 2026-11-29,agency:2607,Operator 2607,0,0,3,0,3
 2026-11-29,agency:3000,Operator 3000,0,0,9,1,8
 2026-11-29,agency:700003,Operator 700003,0,0,5,0,5
-2026-11-29,agency:700011,Operator 700011,0,0,14,0,14
+2026-11-29,agency:700011,Operator 700011,0,0,15,0,15
 2026-11-29,agency:7016,Operator 7016,0,0,11,0,11
 2026-11-29,agency:7024,Operator 7024,0,0,3,1,2
-2026-11-29,agency:7028,Operator 7028,0,0,3,0,3
+2026-11-29,agency:7028,Operator 7028,0,0,3,1,2
 2026-11-29,agency:7051,Operator 7051,0,0,22,0,22
 2026-11-29,agency:7054,Operator 7054,0,0,11,0,11
 2026-11-29,agency:7057,Operator 7057,0,0,15,1,14
