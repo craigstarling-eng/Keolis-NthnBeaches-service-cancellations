@@ -20,6 +20,9 @@ from zoneinfo import ZoneInfo
 import requests
 from PIL import Image, ImageDraw, ImageFont
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import card_styles  # noqa: E402  pool of 20 post image designs
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(HERE, "..", "data")
 OUT_DIR = os.path.join(DATA, "social")
@@ -283,6 +286,37 @@ def weekly_figures():
             "score": rating(w)[0]}
 
 
+def card_data(day=None):
+    """Figures for the daily image (tools/card_styles.py). day: 'YYYY-MM-DD', default today."""
+    now = dt.datetime.now(SYD)
+    today = dt.date.fromisoformat(day) if day else now.date()
+    daily = rows("history/r8_daily.csv")
+    routes = rows("history/r8_routes_daily.csv")
+    d = period(daily, routes, {today.isoformat()})
+    w = period(daily, routes, {(today - dt.timedelta(days=i)).isoformat() for i in range(7)})
+    pk = d["peak"]
+    score = rating(d)[0] if d["sched"] else 0
+    name, col = RATINGS[min(int(score), 4)]
+    return {"when": today.strftime("%A %-d %B"), "at": grabbed_at(now) if not day else "5:30 pm",
+            "cxl": d["cxl"], "sched": d["sched"], "cxl_pct": pct(d["cxl"], d["sched"]),
+            "cxl_f": d["cxl"] / d["sched"] if d["sched"] else 0,
+            "on_pct": 100 * d["on"] / d["obs"] if d["obs"] >= 100 else None, "obs": d["obs"],
+            "am": (pct(pk["am_cancelled"], pk["am_scheduled"]), pk["am_cancelled"]),
+            "pm": (pct(pk["pm_cancelled"], pk["pm_scheduled"]), pk["pm_cancelled"]),
+            "worst": d["worst"], "wk_cxl": w["cxl"], "wk_pct": pct(w["cxl"], w["sched"]),
+            "wk_f": w["cxl"] / w["sched"] if w["sched"] else 0,
+            "wk_on": pct(w["on"], w["obs"]) if w["obs"] >= 300 else "", "wk_on_f": w["on"] / w["obs"] if w["obs"] >= 300 else 0,
+            "score": score, "rating": name, "rcol": col}
+
+
+def draw_weekly_new(f, path):
+    t = f["total"]
+    strip = lambda s: re.sub(r"^[^\w(]+", "", s) if s else ""
+    W = {"when": f["when"], "total": t, "score": f["score"], "worst": f["worst"], "pct": pct(t["cxl"], t["sched"]),
+         "on": pct(t["on"], t["obs"]) if t["obs"] >= 300 else "", "bad_day": strip(f["bad_day"]), "change": strip(f["change"])}
+    card_styles.draw_weekly(W, path, dt.datetime.now(SYD).date())
+
+
 def draw_weekly(f, path):
     im = Image.new("RGB", (1080, 1080), "#0f2747")
     d = ImageDraw.Draw(im)
@@ -392,10 +426,10 @@ def publish(kind="summary", dry=False):
     img = os.path.join(OUT_DIR, f"{kind}.png")
     if kind == "weekly":   # Monday morning week in review
         f = weekly_figures()
-        draw_weekly(f, img)
+        draw_weekly_new(f, img)
     else:
         f = figures()
-        draw_card(f, img)
+        print("Image style:", card_styles.draw_daily(card_data(), img, dt.datetime.now(SYD).date()))
     f["text"] = with_hashtags(f["text"], kind, f.get("score", 0))
     print(f["text"])
     if dry:
