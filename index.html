@@ -112,6 +112,9 @@ section[hidden]{display:none}
 .nstop h3{font-size:16px;margin:0}
 .nstop .d{font-size:13px;color:var(--text-secondary);margin:2px 0 4px}
 .rt{display:inline-block;min-width:44px;text-align:center;font-weight:800;font-size:13px;padding:2px 6px;border-radius:6px;background:var(--text-primary);color:var(--surface-1);margin-right:6px}
+.fleet{display:inline-block;font-size:12px;font-weight:700;padding:2px 8px;border-radius:99px;border:1px solid var(--text-secondary);color:var(--text-primary);text-decoration:none;margin-right:6px;cursor:pointer;background:var(--surface-1)}
+.fleet:hover{border-color:var(--series-1);color:var(--series-1)}
+.busbox{display:flex;gap:8px;margin-top:10px}.busbox input{flex:1;min-width:0;font:inherit;font-size:16px;padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text-primary)}
 .status-row{display:flex;gap:10px;align-items:stretch;margin:0 0 10px}
 .status-side{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:8px}
 .status-side .wx{margin:0}
@@ -181,6 +184,12 @@ section[hidden]{display:none}
   </div></div>
   </section>
   <section data-tab="near" hidden>
+  <div class="card" id="busCard">
+    <h2>Find a bus by its number</h2>
+    <p class="lede">Type the fleet number shown on the front, side or back of the bus (e.g. 1666) to see what route it's on, where it is and how late it's running. Tap a 🚌 number anywhere on the site to look that bus up.</p>
+    <form class="busbox" id="busForm"><input id="busQ" inputmode="numeric" placeholder="Bus number, e.g. 1666" autocomplete="off" aria-label="Bus number"><button class="btn primary" type="submit">Find bus</button></form>
+    <div id="busOut" style="margin-top:10px"></div>
+  </div>
   <div class="card">
     <h2>Buses near me</h2>
     <p class="lede">Your closest Keolis stops and the next hour of buses from each, with cancellations and live delays.</p>
@@ -428,7 +437,7 @@ section[hidden]{display:none}
   <p class="sub" id="visits" hidden>👀 <b id="visitCount"></b> visits to this site</p>
 </div>
 <script>
-let S, L, R, G, O, TT, TS, CD = null, E = [], BOT = null;
+let S, L, R, G, O, TT, TS, CD = null, E = [], BOT = null, F = null;
 let state = {off: 60, metric: "rate", range: 30, peak: "30", reg: "d30", share: "today", route: null, league: "cxl"};
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -448,6 +457,8 @@ async function load() {
   CD = await j("data/cdc.json").catch(() => null);
   if (!TT || TT.date !== L.date) TT = await j("data/timetable_today.json").catch(() => null);
   if (!TS) TS = await j("data/trip_stats.json").catch(() => null);
+  F = await j("data/fleet.json").catch(() => null);
+  if (BUS.q) busLookup(BUS.q, false);
   if (BOT === null) BOT = ((await j("data/telegram.json").catch(() => ({}))) || {}).bot || "";
   render();
 }
@@ -741,6 +752,8 @@ function officialSection() {
 
 // ---------- tabs
 function showTab(name) {
+  const bm = /^bus=(\d+)$/.exec(name || "");
+  if (bm) { name = "near"; setTimeout(() => { $("busQ").value = bm[1]; if (L) busLookup(bm[1], false); else BUS.q = bm[1]; }, 0); }
   const names = ["mybus", "near", "school", "stats", "report", "about"];
   if (!names.includes(name)) name = "mybus";
   document.querySelectorAll("section[data-tab]").forEach(sec => sec.hidden = sec.dataset.tab !== name);
@@ -970,7 +983,7 @@ function myBus() {
     }
     if (a && a[2] != null) badges += `<span class="badge ${a[2] >= 3 ? "warn" : ""}">${OCC[a[2]] || ""}</span>`;
     const r = rel(t), al = alertLink(mb.route, t[1], t[2]);
-    return `<div class="trip"><div class="t ${past ? "past" : ""}">${fmtT(t[1])}</div><div>${badges}<div class="meta">To ${esc(t[2])}${t[3] ? ` · from ${esc(t[3])}` : ""}</div>${extra ? `<div class="meta"><b>${extra}</b></div>` : ""}${r ? `<div class="meta">${r}</div>` : ""}${al ? `<div class="meta"><a href="${al}" target="_blank" rel="noopener">🔔 Alert me if this bus is cancelled</a></div>` : ""}</div></div>`;
+    return `<div class="trip"><div class="t ${past ? "past" : ""}">${fmtT(t[1])}</div><div>${fleetTag(t[0])}${badges}<div class="meta">To ${esc(t[2])}${t[3] ? ` · from ${esc(t[3])}` : ""}</div>${extra ? `<div class="meta"><b>${extra}</b></div>` : ""}${r ? `<div class="meta">${r}</div>` : ""}${al ? `<div class="meta"><a href="${al}" target="_blank" rel="noopener">🔔 Alert me if this bus is cancelled</a></div>` : ""}</div></div>`;
   }).join("") : `<p class="empty">No ${esc(mb.route)} buses in this direction around that time today.</p>`;
 
   // best bets
@@ -980,6 +993,54 @@ function myBus() {
     : `<p class="empty">Not enough history yet. This fills in after about a week of tracking${TS && TS.days ? ` (${TS.days} day${TS.days === 1 ? "" : "s"} so far)` : ""}.</p>`;
 }
 
+
+// ---------- find a bus by fleet number (and the bus running each trip)
+const BUS = {q: "", map: null, layer: null, idx: null, idxFor: null};
+const fleetOf = tid => F && F.date === (L && L.date) && F.trips ? F.trips[tid] : null;
+const fleetTag = tid => { const b = fleetOf(tid); return b ? `<a class="fleet" href="#bus=${esc(b)}" data-bus="${esc(b)}" title="Look up bus ${esc(b)}">🚌 ${esc(b)}</a>` : ""; };
+function tripIndex() {   // trip id -> [route, start, headsign, first stop]
+  if (BUS.idxFor === TT) return BUS.idx;
+  BUS.idx = {}; BUS.idxFor = TT;
+  if (TT && TT.routes) Object.entries(TT.routes).forEach(([r, ts]) => ts.forEach(t => BUS.idx[t[0]] = [r, t[1], t[2], t[3]]));
+  return BUS.idx;
+}
+function goBus(num) { history.replaceState(null, "", "#bus=" + num); showTab("near"); $("busQ").value = num; busLookup(num, true); $("busCard").scrollIntoView({behavior: "smooth", block: "start"}); }
+document.addEventListener("click", e => { const a = e.target.closest("a.fleet"); if (!a) return; e.preventDefault(); e.stopPropagation(); goBus(a.dataset.bus); });
+async function busLookup(raw, scroll) {
+  const num = String(raw || "").replace(/\D/g, ""), out = $("busOut");
+  BUS.q = num;
+  if (!num) { out.innerHTML = ""; return; }
+  if (!F || F.date !== L.date) { out.innerHTML = `<p class="empty">Bus numbers are still loading. Try again in a few minutes.</p>`; return; }
+  const idx = tripIndex(), now = F.now[num], today = Object.entries(F.trips).filter(([, b]) => b === num).map(([t]) => t)
+    .filter(t => idx[t]).sort((a, b) => hm(idx[a][1]) - hm(idx[b][1]));
+  if (!now && !today.length) { out.innerHTML = `<p class="empty">Bus ${esc(num)} hasn't been seen on a timetabled trip today. Check the number on the front, side or back of the bus. Only Keolis and CDC buses on Northern Beaches routes are covered.</p>`; return; }
+  let html = "";
+  if (now && idx[now[0]]) {
+    const [route, start, hs, from] = idx[now[0]], a = (L.active || {})[now[0]], ago = Math.max(0, Math.round((Date.now() / 1000 - now[3]) / 60));
+    const live = a && (a[1] != null ? a[1] : a[0]);
+    const late = live == null ? `<span class="badge">No delay info</span>` : live > 5 ? `<span class="badge warn">${live} min late</span>` : live < -1 ? `<span class="badge warn">${-live} min early</span>` : `<span class="badge ok">On time</span>`;
+    const occ = a && a[2] != null ? `<span class="badge ${a[2] >= 3 ? "warn" : ""}">${OCC[a[2]] || ""}</span>` : "";
+    html += `<div class="trip"><div class="t"><span class="sub" style="display:block;font-size:11px;font-weight:600">BUS</span>${esc(num)}</div><div><span class="rt">${esc(route)}</span>${late}${occ}
+      <div class="meta">To <b>${esc(hs)}</b>${from ? ` · left ${esc(from)}` : ""} at ${fmtT(start)}</div>
+      <div class="meta">Position from ${ago <= 1 ? "just now" : ago + " min ago"} · <a href="https://www.google.com/maps/search/?api=1&query=${now[1]},${now[2]}" target="_blank" rel="noopener">Open in Google Maps</a></div></div></div>
+      <div id="busMap" style="height:220px;border-radius:10px;margin-top:8px;border:1px solid var(--border)"></div>`;
+  } else {
+    html += `<p class="sub">Bus ${esc(num)} isn't on a timetabled trip right now (it may be between trips, out of service or back at the depot).</p>`;
+  }
+  if (today.length) html += `<h2 style="margin-top:12px;font-size:15px">Trips bus ${esc(num)} has run today</h2>` + today.map(t => { const [r, st, hs] = idx[t]; return `<div class="trip" style="padding:6px 0"><div class="t" style="font-size:15px">${fmtT(st)}</div><div><span class="rt">${esc(r)}</span> To ${esc(hs)}</div></div>`; }).join("");
+  out.innerHTML = html;
+  if (now && idx[now[0]]) {
+    try {
+      await loadLeaflet();
+      if (BUS.map) { BUS.map.remove(); BUS.map = null; }
+      BUS.map = leaflet.map("busMap", {zoomControl: true, attributionControl: true}).setView([now[1], now[2]], 15);
+      leaflet.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {maxZoom: 19, attribution: "© OpenStreetMap contributors"}).addTo(BUS.map);
+      leaflet.circleMarker([now[1], now[2]], {radius: 10, color: "#d93636", fillOpacity: .9}).addTo(BUS.map).bindTooltip("Bus " + num, {permanent: true, direction: "top"});
+    } catch (e) { const m = $("busMap"); if (m) m.remove(); }
+  }
+  if (scroll) $("busCard").scrollIntoView({behavior: "smooth", block: "start"});
+}
+$("busForm").onsubmit = e => { e.preventDefault(); const v = $("busQ").value.replace(/\D/g, ""); if (v) { history.replaceState(null, "", "#bus=" + v); busLookup(v, false); } };
 
 // ---------- near me
 const NR = {data: null, idx: null, pos: null, label: "", busy: false};
@@ -1048,7 +1109,7 @@ async function nearRender() {
       if (a && a[2] != null && a[2] >= 3) badge += `<span class="badge warn">${OCC[a[2]] || ""}</span>`;
       const exp = x.exp, mins = exp - now;
       const when = mins <= 0 ? "Due" : mins < 60 ? `${mins} min` : fmtM(exp);
-      return `<div class="trip"><div class="t">${x.cx ? `<s>${fmtM(x.at)}</s>` : when}</div><div><span class="rt">${esc(x.route)}</span>${badge}<div class="meta">To ${esc(x.t[2])} · scheduled ${fmtM(x.at)}</div></div></div>`;
+      return `<div class="trip"><div class="t">${x.cx ? `<s>${fmtM(x.at)}</s>` : when}</div><div><span class="rt">${esc(x.route)}</span>${fleetTag(x.t[0])}${badge}<div class="meta">To ${esc(x.t[2])} · scheduled ${fmtM(x.at)}</div></div></div>`;
     }).join("") : `<p class="empty">No buses from this stop in the next hour.</p>`;
     return `<div class="nstop"><h3>${esc(name)}</h3><div class="d">${d < 1000 ? Math.round(d / 10) * 10 + " m" : (d / 1000).toFixed(1) + " km"} · about ${walk} min walk${NR.label === "you" ? "" : " from " + esc(NR.label)}</div>${rows}</div>`;
   }).join("");

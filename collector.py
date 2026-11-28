@@ -564,8 +564,13 @@ def service_date(feed_date, feed_start, static_start, today):
     return f"{sdate[:4]}-{sdate[4:6]}-{sdate[6:8]}"
 
 
-def read_occupancy(hdr, home):
-    """How full each Northern Beaches bus is right now (where the bus reports it)."""
+FLEET_FILE = os.path.join(DATA, "fleet.json")
+VEHICLES = {}   # (service date, trip id as used on the site) -> [fleet number, lat, lon, unix time], filled by read_occupancy
+
+
+def read_occupancy(hdr, home, cross=None):
+    """How full each Northern Beaches bus is right now (where the bus reports it). Also notes which
+    bus (fleet number, e.g. 1666) is running each Keolis / CDC trip, and where it is, in VEHICLES."""
     try:
         r = requests.get(f"{API}/vehiclepos/buses", headers=hdr, timeout=120)
         r.raise_for_status()
@@ -575,17 +580,42 @@ def read_occupancy(hdr, home):
         print("occupancy feed unavailable:", exc)
         return {}
     today = now_syd().strftime("%Y%m%d")
+    cross_trips = (cross or {}).get("trips", {})
     out = {}
     for e in feed.entity:
         if not e.HasField("vehicle"):
             continue
         v = e.vehicle
-        info = home["trips"].get(v.trip.trip_id)
-        if not info or not v.HasField("occupancy_status"):
+        tid = v.trip.trip_id
+        info, pre = home["trips"].get(tid), ""
+        if not info and tid in cross_trips:
+            info, pre = cross_trips[tid], "c:"
+        if not info:
             continue
         d = service_date(v.trip.start_date, v.trip.start_time, info[2], today)
-        out[(d, v.trip.trip_id)] = int(v.occupancy_status)
+        label = (v.vehicle.label or "").strip()
+        if label and v.HasField("position"):
+            VEHICLES[(d, pre + tid)] = [label, round(v.position.latitude, 5), round(v.position.longitude, 5), int(v.timestamp or 0)]
+        if not pre and v.HasField("occupancy_status"):
+            out[(d, tid)] = int(v.occupancy_status)
     return out
+
+
+def write_fleet(today):
+    """data/fleet.json: buses on the road now (fleet number -> trip and position), and which bus ran
+    each trip today, so the site can look up a bus by number or a trip by bus."""
+    state = load_state(today)
+    trips = state.setdefault("fleet", {})
+    now = {}
+    for (d, tid), (label, lat, lon, ts) in VEHICLES.items():
+        if d != today:
+            continue
+        trips[tid] = label
+        old = now.get(label)
+        if not old or ts > old[3]:   # a bus can briefly report two trips at a changeover: keep the newest
+            now[label] = [tid, lat, lon, ts]
+    save_state(today, state)
+    write_json(FLEET_FILE, {"date": today, "updated": now_syd().isoformat(timespec="seconds"), "now": now, "trips": trips})
 
 
 def read_feed(hdr, prefix_to_code, home, school_routes, cross=None):
@@ -1336,9 +1366,13 @@ def main():
     print(f"Feed trips: {len(seen)}; new home cancellations: {len(new)}")
 
     touched = apply_observations(seen)
-    occ_now = read_occupancy(hdr, home) if status == "ok" else {}
+    occ_now = read_occupancy(hdr, home, cross) if status == "ok" else {}
     if occ_now:
         record_occupancy(occ_now)
+    try:   # "Find a bus" is an extra; never let it break tracking
+        write_fleet(iso(now_syd().date()))
+    except Exception as exc:
+        print("fleet data not written:", exc)
     today = now_syd().date()
     write_timetable(home, iso(today), cross)
     finalise_trips(home, cxl_rows)
