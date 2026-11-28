@@ -1,7 +1,7 @@
 """Pool of 20 light, colourful designs for the Facebook post images.
 
-10 different layouts x 2 colourways. The daily post rotates through them by date (a different layout every day);
-the Monday weekly post uses the day's theme colours on its own layout.
+10 different layouts x 2 colourways. The daily post picks one at random (, never repeating the last 3 layouts);
+the Monday weekly post borrows a random style's colours on its own layout.
 
   python tools/card_styles.py   -> renders every style with today's figures into data/social/styles/
 """
@@ -558,19 +558,50 @@ LAYOUTS = [("Beach", L_beach, BEACH), ("Ticket", L_ticket, TICKET), ("Sky", L_sk
 POOL = [(f"{ln} · {th['name']}", fn, th) for i in range(2) for ln, fn, themes in LAYOUTS for th in [themes[i]]]
 
 
-def pick(date):
-    return POOL[date.toordinal() % len(POOL)]
+LAST = os.path.join(HERE, "..", "data", "social", "last_style.json")
+
+
+def _recent():
+    try:
+        import json
+        with open(LAST) as fh:
+            return json.load(fh)
+    except Exception:
+        return []
+
+
+def pick(date=None):
+    """Random style for each post. Skips the layouts used in the last 3 posts so it never looks repetitive."""
+    import random
+    recent = _recent()
+    avoid = {n.split(" · ")[0] for n in recent[-3:]}
+    choices = [p for p in POOL if p[0].split(" · ")[0] not in avoid] or POOL
+    return random.choice(choices)
+
+
+def _remember(name):
+    import json
+    keep = (_recent() + [name])[-10:]
+    try:
+        os.makedirs(os.path.dirname(LAST), exist_ok=True)
+        with open(LAST, "w") as fh:
+            json.dump(keep, fh)
+    except OSError:
+        pass
 
 
 def draw_daily(D, path, date=None, index=None):
-    name, fn, theme = POOL[index] if index is not None else pick(date)
+    name, fn, theme = POOL[index] if index is not None else pick()
     fn(D, theme).convert("RGB").save(path, "PNG", optimize=True)
+    if index is None:
+        _remember(name)
     return name
 
 
-# ---------------------------------------------------------------- weekly (Monday) layout, uses the day's colours
-def colours_for(date):
-    _, fn, t = pick(date)
+# ---------------------------------------------------------------- weekly (Monday) layout, uses a random style's colours
+def colours_for(date=None):
+    name, fn, t = pick()
+    _remember(name)
     if fn is L_beach:
         return t["h1"], t["h2"], t["bg"], t["hero"]
     if fn is L_sky:
