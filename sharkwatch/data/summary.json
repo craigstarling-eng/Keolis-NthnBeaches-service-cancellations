@@ -1,70 +1,73 @@
 {
-  "generated_at": "2026-11-28T07:46:11+00:00",
-  "total_events": 7241,
+  "generated_at": "2026-11-28T07:48:59+00:00",
+  "total_events": 7340,
   "by_source": {
-    "wa_sharksmart": 48,
-    "qld_scp": 5884,
+    "wa_sharksmart": 147,
     "sa_pirsa": 5,
-    "asid": 1304
+    "asid": 1304,
+    "qld_scp": 5884
   },
   "by_state": {
-    "WA": 293,
-    "QLD": 6263,
+    "WA": 392,
     "SA": 91,
     "NSW": 474,
+    "QLD": 6263,
     "VIC": 73,
     "TAS": 28,
     "NT": 19
   },
   "by_type": {
-    "alert": 10,
-    "catch": 5884,
-    "sighting": 39,
-    "detection": 4,
-    "incident": 1304
+    "alert": 20,
+    "sighting": 80,
+    "detection": 51,
+    "tagging": 1,
+    "incident": 1304,
+    "catch": 5884
   },
   "last_24h": {
-    "WA": 1
+    "WA": 3
   },
   "last_7d": {
-    "WA": 35,
+    "WA": 102,
     "SA": 3
   },
   "last_30d_by_location": {
-    "Kelp Beds Beach, east of Esperance (WA)": 2,
-    "BSN477 Eagle Bay BEN Sign, north of Dunsborough (WA)": 1,
-    "esplanade & repton road (SA)": 1,
-    "F33 Port Beach BEN Sign, Perth Metro (WA)": 1,
-    "IR256 Port Denison, Dongara (WA)": 1,
-    "BSN230 Abbey BEN Sign, Busselton (WA)": 1,
-    "Eleanor Rocks, Perth Metro (WA)": 1,
-    "ND9 Swanbourne Beach BEN Sign, Perth Metro (WA)": 1,
-    "E1718 Wylie Head BEN Sign, Esperance (WA)": 1,
-    "Leighton (WA)": 1,
-    "Busselton Jetty, Busselton (WA)": 1,
-    "Swanbourne (WA)": 1,
-    "RO88 Peron BEN Sign, Rockingham (WA)": 1,
-    "Preston Beach, south of Mandurah (WA)": 1,
-    "Kelp Beds Surf Break, Esperance (WA)": 1,
-    "Port Beach (WA)": 1,
-    "BSN535 Bunker Bay BEN Sign, east of Cape Naturaliste (WA)": 1,
-    "Gardner Beach, east of Windy Harbour (WA)": 1,
-    "Bone Yards Surfing Spot, east of Cape Naturaliste (WA)": 1,
-    "West Beach, Esperance (WA)": 1,
-    "RO332 Secret Harbour Beach BEN Sign, north of Mandurah (WA)": 1,
-    "RO329 Secret Harbour Surf Life Saving Club BEN Sign, north of Mandurah (WA)": 1,
-    "BSN280 Marybrook BEN Sign, east of Dunsborough (WA)": 1,
-    "ST9 Watermans Bay BEN Sign, Perth Metro (WA)": 1,
-    "Hassell Beach, east of Albany (WA)": 1
+    "Eleanor Rocks, Perth Metro (WA)": 9,
+    "Leighton (WA)": 6,
+    "Preston Beach, south of Mandurah (WA)": 5,
+    "#CLOSED Lifeguards have closed Bunker Bay due to a shark sighting. #myWABeach ht (WA)": 5,
+    "Kelp Beds Beach, east of Esperance (WA)": 4,
+    "BSN535 Bunker Bay BEN Sign, east of Cape Naturaliste (WA)": 4,
+    "West Beach, Esperance (WA)": 4,
+    "BSN155 West Busselton BEN Sign, Busselton (WA)": 4,
+    "Bone Yards Surfing Spot, east of Cape Naturaliste (WA)": 3,
+    "Castle Point, Dunsborough (WA)": 3,
+    "BSN330 Quindalup Boat Ramp BEN Sign, east of Dunsborough (WA)": 3,
+    "CMB35 City Beach BEN Sign, Perth Metro (WA)": 3,
+    "BSN477 Eagle Bay BEN Sign, north of Dunsborough (WA)": 2,
+    "F33 Port Beach BEN Sign, Perth Metro (WA)": 2,
+    "IR256 Port Denison, Dongara (WA)": 2,
+    "BSN230 Abbey BEN Sign, Busselton (WA)": 2,
+    "ND9 Swanbourne Beach BEN Sign, Perth Metro (WA)": 2,
+    "E1718 Wylie Head BEN Sign, Esperance (WA)": 2,
+    "Busselton Jetty, Busselton (WA)": 2,
+    "RO88 Peron BEN Sign, Rockingham (WA)": 2,
+    "Kelp Beds Surf Break, Esperance (WA)": 2,
+    "Gardner Beach, east of Windy Harbour (WA)": 2,
+    "Port Beach (WA)": 2,
+    "RO332 Secret Harbour Beach BEN Sign, north of Mandurah (WA)": 2,
+    "RO329 Secret Harbour Surf Life Saving Club BEN Sign, north of Mandurah (WA)": 2
   },
   "last_30d_by_species": {
-    "Unknown": 40,
-    "White Shark": 2,
-    "Bronze Whaler": 1
+    "Unknown": 64,
+    "White Shark": 31,
+    "Bronze Whaler": 26,
+    "Hammerhead": 17,
+    "Tiger Shark": 14
   },
   "by_month": {
     "2026-11": {
-      "WA": 38,
+      "WA": 147,
       "SA": 5
     }
   },
