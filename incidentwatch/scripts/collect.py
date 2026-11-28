@@ -248,7 +248,7 @@ def save(name, obj):
     os.replace(tmp, path)
 
 
-def build_stats(events, stats):
+def build_stats(events, stats, since=None):
     days = {}
     for e in events:
         if not e.get("region"):
@@ -263,7 +263,7 @@ def build_stats(events, stats):
                 k["charged"] = k.get("charged", 0) + 1
             if e["cat"] == "road" and e.get("major"):
                 k["major"] = k.get("major", 0) + 1
-    oldest = min((e["ts"][:10] for e in events), default=None)
+    oldest = since or min((e["ts"][:10] for e in events), default=None)
     for reg in list(REGIONS) + ["all"]:
         s = stats.setdefault(reg, {})
         if oldest:  # recompute the window we still hold events for
@@ -305,7 +305,7 @@ def main():
         save(f"archive/{month}.json", arch + [e for e in evs if e["id"] not in ids])
 
     save("events.json", keep)
-    save("stats.json", build_stats(keep, load("stats.json", {})))
+    save("stats.json", build_stats(keep, load("stats.json", {}), since=cutoff))
     status["updated"] = NOW.isoformat(timespec="minutes")
     status["regions"] = {k: v[0] for k, v in REGIONS.items()}
     save("status.json", status)
