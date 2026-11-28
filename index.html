@@ -108,6 +108,8 @@ section[hidden]{display:none}
 .dial svg{width:100%;display:block;margin:0 auto}
 .dial .lvl{font-size:15px;font-weight:750;line-height:1.2}
 .dial .act{font-size:12px;font-weight:600;line-height:1.25}
+.dial .dlab{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text-secondary);margin-bottom:4px;line-height:1.2}
+.dial .dsub{font-size:11px;color:var(--text-secondary);margin-top:4px;line-height:1.25}
 @media(max-width:480px){.dial{width:118px;padding:5px 6px 6px}}
 </style>
 </head>
@@ -449,17 +451,18 @@ function dialScore(cxl, otr) {
     return 4.97;
   };
   const a = pos(cxl, CXL_STEPS, true), b = otr == null ? 0 : pos(otr, OTR_STEPS, false);
+  dialScore.by = b > a ? "otr" : "cxl";   // which measure set the rating
   return Math.max(0, Math.min(4.97, Math.max(a, b)));
 }
 function renderDial() {
   const h = L.last_hour, el = $("dial");
-  let cxl, otr, why, grey = false;
+  let cxl, otr, why, grey = false, basis = "Last hour";
   if (h && h.scheduled >= 30) {
     cxl = 100 * h.cancelled / h.scheduled;
     otr = h.observed >= 20 ? 100 * h.ontime / h.observed : null;
     why = `Last hour: ${nf(h.cancelled)} of ${nf(h.scheduled)} trips cancelled` + (otr != null ? ` · ${pc(otr)} on time` : "");
   } else if (!h && L.scheduled) {
-    cxl = L.cancel_pct || 0; otr = L.observed >= 20 ? L.ontime_pct : null;
+    cxl = L.cancel_pct || 0; otr = L.observed >= 20 ? L.ontime_pct : null; basis = "Today so far";
     why = `Today so far: ${pc(L.cancel_pct)} cancelled` + (otr != null ? ` · ${pc(otr)} on time` : "");
   } else { grey = true; why = "Not enough buses running right now to rate the service."; }
   const C = 160, Y = 165, R = 128, RO = 152;
@@ -482,8 +485,9 @@ function renderDial() {
     lvl = DIAL[Math.floor(s)];
   }
   svg += `<circle cx="${C}" cy="${Y}" r="14" fill="#fff" stroke="#141414" stroke-width="2.5"/></svg>`;
-  el.innerHTML = svg + (lvl
-    ? `<div class="lvl" style="color:${lvl[0] === "Fair" ? "#9a7a00" : lvl[1]}">${lvl[0]}</div><div class="act">${lvl[2]}</div>`
+  const reason = lvl ? (dialScore.by === "otr" ? `${pc(otr)} on time` : `${pc(cxl)} cancelled`) : "";
+  el.innerHTML = `<div class="dlab">Buses right now</div>` + svg + (lvl
+    ? `<div class="lvl" style="color:${lvl[0] === "Fair" ? "#9a7a00" : lvl[1]}">${lvl[0]}</div><div class="act">${lvl[2]}</div><div class="dsub">${basis}: ${reason}</div>`
     : `<div class="lvl" style="color:var(--text-secondary)">No rating</div>`);
   $("dialWhy").textContent = " · " + why;
 }
