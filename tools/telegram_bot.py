@@ -237,6 +237,8 @@ def alerts():
     changed = False
     for chat, subs in list(store["subs"].items()):
         for sub in subs:
+            if chat not in store["subs"]:   # blocked the bot part-way through: stop messaging them
+                break
             centre = hm(sub["time"])
             for t in cancelled:
                 if t["route"] != sub["route"] or (sub["dir"] and t["headsign"] != sub["dir"]):

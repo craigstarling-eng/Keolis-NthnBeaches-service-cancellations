@@ -901,6 +901,8 @@ def build_outputs(today, live_extra, status):
             hours[(m // 60) % 24] += 1
     wd_sum, wd_days = [0] * 7, [0] * 7
     for r in r8:
+        if r["date"] == tstr or r["date"] in PARTIAL_DAYS:   # part days would drag the average down
+            continue
         w = dt.date.fromisoformat(r["date"]).weekday()
         wd_sum[w] += int(r["cancelled"] or 0)
         wd_days[w] += 1
@@ -1328,7 +1330,8 @@ def main():
             changed = True
     if new:
         cxl_rows.extend(new)
-    if new or changed or fix_after_midnight(cxl_rows, home):
+    moved = fix_after_midnight(cxl_rows, home)   # run every time (it used to be skipped when new rows were logged)
+    if new or changed or moved:
         write_csv(CXL_LOG, CXL_FIELDS, cxl_rows)
     print(f"Feed trips: {len(seen)}; new home cancellations: {len(new)}")
 
@@ -1349,8 +1352,13 @@ def main():
         upsert_csv(R8_DAILY, R8_DAILY_FIELDS, [daily], ["date"],
                    keep_max=())
         upsert_csv(R8_ROUTES, R8_ROUTES_FIELDS, route_rows, ["date", "route"])
-        upsert_csv(REGIONS_DAILY, REGIONS_FIELDS, region_rows(regions, date, state), ["date", "code"],
+        reg_rows = region_rows(regions, date, state)
+        for r in reg_rows:   # Keolis: use the permanent log, which drops trips that ran after all
+            if r["code"] == HOME_CODE:
+                r["cancelled"] = daily["cancelled"]
+        upsert_csv(REGIONS_DAILY, REGIONS_FIELDS, [r for r in reg_rows if r["code"] != HOME_CODE], ["date", "code"],
                    keep_max=("cancelled",))
+        upsert_csv(REGIONS_DAILY, REGIONS_FIELDS, [r for r in reg_rows if r["code"] == HOME_CODE], ["date", "code"])
         if date == iso(today):
             now_m = now_syd().hour * 60 + now_syd().minute
             due = sum(1 for r in cxl_today if (hhmm_to_min(r["start_time"]) or 0) <= now_m)

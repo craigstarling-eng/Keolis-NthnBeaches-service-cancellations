@@ -34,6 +34,7 @@ FB_API = "https://graph.facebook.com/v26.0"
 PAGE_ID = "1455302057670675"   # Northern Beaches Bus Watch (public)
 POST_AT = (17, 30)       # 5:30 pm, mid evening peak while commuters are on the bus home
 WEEKLY_AT = (8, 0)       # Mondays 8:00 am: week in review (Monday to Sunday just gone)
+POST_UNTIL, WEEKLY_UNTIL = 21, 12   # if the tracker was down, skip the post rather than send it late at night
 MAX_TRIES = 3
 
 
@@ -127,11 +128,12 @@ OTR_STEPS = [95, 90, 85, 75]   # % on time: lower edge of Good, Fair, Poor, Bad 
 
 
 def _pos(v, steps, up):
+    v = round(v, 1)   # rate the same one-decimal figure the post shows
     e = [0 if up else 100, *steps, 20 if up else 50]
     for i in range(5):
         lo, hi = e[i], e[i + 1]
-        if (v < hi) if up else (v > hi):
-            return i + (v - lo) / (hi - lo)
+        if (v <= hi) if up else (v >= hi):   # a value on the edge belongs to the better band
+            return i + min((v - lo) / (hi - lo), 0.999)
     return 4.97
 
 
@@ -455,9 +457,9 @@ def auto():
     fb = state.setdefault("facebook", {})
     today = now.date().isoformat()
     due = []
-    if now.weekday() == 0 and (now.hour, now.minute) >= WEEKLY_AT:
+    if now.weekday() == 0 and (now.hour, now.minute) >= WEEKLY_AT and now.hour < WEEKLY_UNTIL:
         due.append("weekly")
-    if (now.hour, now.minute) >= POST_AT:
+    if (now.hour, now.minute) >= POST_AT and now.hour < POST_UNTIL:
         due.append("summary")
     changed = False
     for kind in due:
