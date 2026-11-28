@@ -91,12 +91,15 @@ def collect() -> list[dict]:
         urls += [ARCHIVE_URL.format(year=y) for y in ARCHIVE_YEARS]
     for url in urls:
         try:
-            html = get(url).text
+            html = get(url, wait_selector="table").text
         except Exception as e:  # noqa: BLE001
             print(f"[{SOURCE}] skip {url}: {e}")
             continue
         save_raw(f"{SOURCE}_{abs(hash(url)) % 10**8}.html", html)
-        for e in parse_html(html, url):
+        found = parse_html(html, url)
+        if not found:
+            print(f"[{SOURCE}] no rows on {url[-60:]} ({len(html)} bytes, tables={html.lower().count('<table')})")
+        for e in found:
             if e["id"] not in seen:
                 seen.add(e["id"])
                 events.append(e)

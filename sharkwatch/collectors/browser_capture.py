@@ -16,7 +16,7 @@ from __future__ import annotations
 import json
 import re
 
-from common import clean, event, make_id, save_raw, write_json, RAW
+from common import RAW, browser, clean, event, make_id, save_raw, write_json
 
 LAT_KEYS = ("lat", "latitude", "y")
 LON_KEYS = ("lon", "lng", "long", "longitude", "x")
@@ -139,8 +139,6 @@ def wanted(url: str, hosts) -> bool:
 def capture(source: str, page_url: str, click_texts=("Open shark map",), wait_ms=15000,
             hosts=()) -> list[dict]:
     """Return list of {"url", "json"} for every relevant JSON response the page loads."""
-    from playwright.sync_api import sync_playwright
-
     payloads: list[dict] = []
 
     def on_response(resp):
@@ -154,11 +152,10 @@ def capture(source: str, page_url: str, click_texts=("Open shark map",), wait_ms
         except Exception:  # noqa: BLE001
             pass
 
-    with sync_playwright() as pw:
-        browser = pw.chromium.launch()
-        ctx = browser.new_context(viewport={"width": 1400, "height": 1000}, locale="en-AU",
-                                  timezone_id="Australia/Sydney")
-        ctx.on("response", on_response)
+    ctx = browser().new_context(viewport={"width": 1400, "height": 1000}, locale="en-AU",
+                                timezone_id="Australia/Sydney")
+    ctx.on("response", on_response)
+    try:
         page = ctx.new_page()
         page.goto(page_url, wait_until="domcontentloaded", timeout=90000)
         page.wait_for_timeout(5000)
@@ -170,7 +167,8 @@ def capture(source: str, page_url: str, click_texts=("Open shark map",), wait_ms
         page.wait_for_timeout(wait_ms)
         iframes = [f.url for f in page.frames if f.url and f.url != page_url and wanted(f.url, ())]
         save_raw(f"{source}_page.txt", page.inner_text("body"))
-        browser.close()
+    finally:
+        ctx.close()
 
     write_json(RAW / f"{source}_capture.json", payloads)
     write_json(RAW / f"{source}_endpoints.json", {

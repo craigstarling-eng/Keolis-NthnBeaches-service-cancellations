@@ -100,25 +100,67 @@ def parse_df(df: pd.DataFrame, url: str, dataset: str) -> list[dict]:
     return out
 
 
+DATASTORE = "https://www.data.qld.gov.au/api/3/action/datastore_search?resource_id={rid}&limit=5000&offset={off}"
+SLUGS = {
+    "statewide": "shark-control-program-shark-catch-statistics",
+    "gbrmp": "qld-shark-control-program-catch-statistics-great-barrier-reef-marine-park",
+}
+
+
+def package(ds_id: str, label: str) -> dict | None:
+    for key in (ds_id, SLUGS[label]):
+        try:
+            j = get(CKAN.format(id=key), expect_file=True).json()
+            if j.get("success") and j.get("result"):
+                return j["result"]
+            print(f"[{SOURCE}] package_show {key}: {str(j)[:200]}")
+        except Exception as e:  # noqa: BLE001
+            print(f"[{SOURCE}] package_show {key}: {e}")
+    return None
+
+
+def datastore_df(rid: str) -> pd.DataFrame | None:
+    """Read a resource through the CKAN datastore API (works when file downloads are blocked)."""
+    rows, off = [], 0
+    while True:
+        j = get(DATASTORE.format(rid=rid, off=off), expect_file=True).json()
+        if not j.get("success"):
+            return None
+        recs = j["result"].get("records", [])
+        rows += recs
+        if len(recs) < 5000:
+            break
+        off += 5000
+    if not rows:
+        return None
+    df = pd.DataFrame(rows)
+    return df.drop(columns=[c for c in df.columns if c in ("_id", "_full_text")])
+
+
 def collect() -> list[dict]:
     events = []
     for ds_id, label in DATASETS.items():
-        try:
-            pkg = get(CKAN.format(id=ds_id), expect_file=True).json()["result"]
-        except Exception as e:  # noqa: BLE001
-            print(f"[{SOURCE}] CKAN failed for {label}: {e}")
+        pkg = package(ds_id, label)
+        if not pkg:
             continue
         for res in pkg.get("resources", []):
             fmt = (res.get("format") or res["url"].rsplit(".", 1)[-1]).lower()
             if fmt not in {"csv", "xls", "xlsx"}:
                 continue
             url = res["url"]
+            df = None
             try:
-                content = get(url, expect_file=True, timeout=60).content
-                save_raw(f"{SOURCE}_{label}_{res['id'][:8]}.{fmt}", content)
-                events += parse_df(read_table(content, fmt), url, label)
+                if res.get("datastore_active"):
+                    df = datastore_df(res["id"])
+                if df is None:
+                    content = get(url, expect_file=True, timeout=60).content
+                    save_raw(f"{SOURCE}_{label}_{res['id'][:8]}.{fmt}", content)
+                    df = read_table(content, fmt)
+                found = parse_df(df, url, label)
+                print(f"[{SOURCE}] {len(found)} rows <- {res.get('name', url)[:70]}")
+                events += found
             except Exception as e:  # noqa: BLE001
-                print(f"[{SOURCE}] skip {url}: {e}")
+                print(f"[{SOURCE}] skip {res.get('name', url)[:70]}: {e}")
     print(f"[{SOURCE}] {len(events)} events")
     return events
 

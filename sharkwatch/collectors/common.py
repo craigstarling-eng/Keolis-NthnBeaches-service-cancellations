@@ -62,17 +62,22 @@ class Resp:
 _BROWSER = {}
 
 
-def _browser_ctx():
-    if "ctx" not in _BROWSER:
+def browser():
+    """One shared headless Chromium for the whole run (Playwright allows only one sync instance)."""
+    if "b" not in _BROWSER:
         from playwright.sync_api import sync_playwright
         pw = sync_playwright().start()
-        b = pw.chromium.launch()
-        _BROWSER.update(pw=pw, b=b, ctx=b.new_context(locale="en-AU", timezone_id="Australia/Sydney"),
-                        warmed=set())
+        _BROWSER.update(pw=pw, b=pw.chromium.launch(), warmed=set())
+    return _BROWSER["b"]
+
+
+def _browser_ctx():
+    if "ctx" not in _BROWSER:
+        _BROWSER["ctx"] = browser().new_context(user_agent=UA, locale="en-AU", timezone_id="Australia/Sydney")
     return _BROWSER["ctx"]
 
 
-def browser_get(url: str, expect_file: bool = False) -> Resp:
+def browser_get(url: str, expect_file: bool = False, wait_selector: str | None = None) -> Resp:
     """Fetch through real headless Chrome (for sites that block plain scripts)."""
     ctx = _browser_ctx()
     origin = "/".join(url.split("/")[:3])
@@ -86,7 +91,12 @@ def browser_get(url: str, expect_file: bool = False) -> Resp:
             r = ctx.request.get(url, timeout=90000)
             return Resp(r.body(), url)
         page.goto(url, wait_until="domcontentloaded", timeout=60000)
-        page.wait_for_timeout(3000)
+        if wait_selector:
+            try:
+                page.wait_for_selector(wait_selector, timeout=20000)
+            except Exception:  # noqa: BLE001
+                print(f"  [browser] '{wait_selector}' never appeared on {url}; title={page.title()!r}")
+        page.wait_for_timeout(2000)
         return Resp(page.content().encode(), url)
     finally:
         page.close()
@@ -106,7 +116,7 @@ def _looks_blocked(content: bytes, expect_file: bool) -> bool:
     return any(w in head for w in (b"access denied", b"request blocked", b"attention required"))
 
 
-def get(url: str, expect_file: bool = False, **kw):
+def get(url: str, expect_file: bool = False, wait_selector: str | None = None, **kw):
     """GET with retries; falls back to headless Chrome if the site blocks scripts."""
     timeout = kw.pop("timeout", 30)
     for attempt in range(2):
@@ -119,7 +129,8 @@ def get(url: str, expect_file: bool = False, **kw):
             return r
         except requests.RequestException:
             time.sleep(2 * (attempt + 1))
-    r = browser_get(url, expect_file=expect_file)
+    print(f"  [get] plain request blocked, using browser: {url[:100]}")
+    r = browser_get(url, expect_file=expect_file, wait_selector=wait_selector)
     if _looks_blocked(r.content, expect_file):
         raise RuntimeError(f"blocked even in browser: {url}")
     return r
