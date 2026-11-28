@@ -173,6 +173,7 @@ def rfs():
                          "https://www.rfs.nsw.gov.au/fire-information/fires-near-me",
                          fields.get("RESPONSIBLE AGENCY") or "NSW RFS",
                          status=fields.get("STATUS"), alert=p.get("category"), size=fields.get("SIZE"),
+                         location=fields.get("LOCATION"), updated=fields.get("UPDATED"),
                          lat=lat, lng=lng))
     return out
 
@@ -228,7 +229,11 @@ def road():
         groups = p.get("attendingGroups") or []
         out.append(event("road", "road-" + str(f.get("id") or p.get("id") or hashlib.md5(title.encode()).hexdigest()[:10]),
                          cat, title, sub, info, when, "https://www.livetraffic.com", "Live Traffic NSW",
-                         major=bool(p.get("isMajor")) or None, attending=groups, lat=lat, lng=lng))
+                         major=bool(p.get("isMajor")) or None, attending=groups, lat=lat, lng=lng,
+                         advice=" ".join(str(p.get(k) or "").strip() for k in ("adviceA", "adviceB", "otherAdvice")).strip()[:400],
+                         impact=", ".join(x for x in [r0.get("impactedLanes") and str(r0.get("impactedLanes")), r0.get("trafficVolume")] if x and not x.startswith("[")) or None,
+                         updated=dt.datetime.fromtimestamp(p["lastUpdated"] / 1000, TZ).isoformat(timespec="minutes") if p.get("lastUpdated") else None,
+                         ended=bool(p.get("end") or p.get("ended")) or None))
     return out
 
 
@@ -283,7 +288,7 @@ def main():
             for e in got:
                 if e["id"] in events:
                     old = events[e["id"]]  # keep first-seen time; refresh status fields
-                    for k in ("status", "alert", "size", "attending", "major"):
+                    for k in ("status", "alert", "size", "attending", "major", "advice", "impact", "updated", "ended"):
                         if k in e:
                             old[k] = e[k]
                 else:

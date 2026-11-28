@@ -58,7 +58,15 @@ td.n{text-align:right;font-variant-numeric:tabular-nums;width:3.5em}
 .chips button{font:inherit;font-size:13px;border:1px solid var(--border);background:var(--surface-1);color:var(--text-primary);padding:5px 10px;border-radius:999px;cursor:pointer}
 .chips button[aria-pressed=true]{border-color:var(--text-primary);font-weight:600}
 .list{list-style:none;margin:0;padding:0}
-.list li{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--grid)}
+.list li{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--grid);cursor:pointer}
+.list li:hover .ttl{text-decoration:underline}
+.list .ttl::after{content:" ▾";color:var(--text-secondary);font-size:11px}
+.list li.open .ttl::after{content:" ▴"}
+.det{display:none;margin-top:8px;padding:10px 12px;background:var(--bg);border-radius:10px;font-size:13.5px}
+.list li.open .det{display:block}
+.det dl{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin:0 0 8px}
+.det dt{color:var(--text-secondary)}.det dd{margin:0}
+.det .links a{display:inline-block;margin-right:14px;font-weight:600;text-decoration:underline}
 .list .t{color:var(--text-secondary);font-size:12px;width:62px;flex:none;font-variant-numeric:tabular-nums}
 .list .m{font-size:12px;color:var(--text-secondary)}
 .list a{color:inherit;text-decoration:none}
@@ -253,9 +261,27 @@ function renderEvents(days){
   $("#list").innerHTML = shown.length ? shown.map(e=>{
     const d=new Date(e.ts); const t=d.toLocaleTimeString("en-AU",{timeZone:"Australia/Sydney",hour:"numeric",minute:"2-digit"});
     const day = days.length>1 ? fmtDay(e.ts.slice(0,10),{weekday:"short",day:"numeric"})+"<br>" : "";
-    const extra=[e.suburb, e.type, e.status, e.attending&&e.attending.length?"Attending: "+e.attending.join(", "):"", e.src].filter(Boolean).map(esc).join(" · ");
-    return `<li><div class="t">${day}${t}</div><div><div>${icon[e.cat]} <a href="${esc(e.url)}" target="_blank" rel="noopener">${esc(e.title)}</a></div><div class="m">${extra}</div></div></li>`;
+    const extra=[e.suburb, e.type, e.status].filter(Boolean).map(esc).join(" · ");
+    const fmt = v => { const d=new Date(v); return isNaN(d) ? v : d.toLocaleString("en-AU",{timeZone:"Australia/Sydney",weekday:"short",day:"numeric",month:"short",hour:"numeric",minute:"2-digit"}); };
+    const rows = [
+      ["When", fmt(e.ts) + (e.cat==="police" ? " (time published)" : "")],
+      ["Where", [e.location || e.suburb, e.council && e.council+" council"].filter(Boolean).join(" · ")],
+      ["Type", e.type + (e.major ? " · major incident" : "")],
+      ["Status", e.status || (e.ended ? "Cleared" : "")],
+      ["Alert level", e.alert], ["Size", e.size],
+      ["Attending", (e.attending||[]).join(", ")],
+      ["Traffic", e.impact], ["Advice", e.advice],
+      ["Last update", e.updated && fmt(e.updated)],
+      ["Charges", e.charged ? "Arrest or charges mentioned" : ""],
+      ["Source", e.src],
+    ].filter(r=>r[1]);
+    const map = e.lat ? `https://www.google.com/maps/search/?api=1&query=${e.lat},${e.lng}` : (e.suburb ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(e.suburb+" NSW")}` : null);
+    const srcLabel = {police:"Read police release", fire:e.src==="Fire & Rescue NSW"?"Read FRNSW release":"RFS Fires Near Me", road:"Live Traffic NSW"}[e.cat];
+    return `<li><div class="t">${day}${t}</div><div style="flex:1;min-width:0"><div>${icon[e.cat]} <span class="ttl">${esc(e.title)}</span></div><div class="m">${extra}</div>
+      <div class="det"><dl>${rows.map(([k,v])=>`<dt>${k}</dt><dd>${esc(v)}</dd>`).join("")}</dl>
+      <div class="links">${map?`<a href="${esc(map)}" target="_blank" rel="noopener">📍 Map</a>`:""}<a href="${esc(e.url)}" target="_blank" rel="noopener">🔗 ${srcLabel}</a></div></div></div></li>`;
   }).join("") : `<li class="empty">No incidents recorded for this period.</li>`;
+  $("#list").querySelectorAll("li:not(.empty)").forEach(li=>li.onclick=ev=>{ if(ev.target.closest("a")) return; li.classList.toggle("open"); });
 }
 
 $("#region").onchange = e=>{ state.region=e.target.value; try{localStorage.setItem("siw-region",state.region);}catch(_){} history.replaceState(null,"","#"+state.region); render(); };
