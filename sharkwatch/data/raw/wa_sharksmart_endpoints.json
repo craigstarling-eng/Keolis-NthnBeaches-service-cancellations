@@ -1,0 +1,88 @@
+{
+  "page": "https://www.sharksmart.com.au/shark-activity",
+  "iframes": [
+    "https://www.sharksmart.com.au/sitemap/",
+    "https://platform.twitter.com/widgets/widget_iframe.1227a5674072e080ffb1ba14ac0c1079.html?origin=https%3A%2F%2Fwww.sharksmart.com.au",
+    "https://6101524.fls.doubleclick.net/activityi;dc_pre=CIum5qiTqpgDFSEcvAEdTe84aQ;src=6101524;type=shark0;cat=remar0;rcb=1;ord=4858475281491;npa=0;auiddc=1999113453.1795851257;uaa=x86;uab=64;uafvl=HeadlessChrome%3B159.0.8154.6%7CNot%252FA)Brand%3B8.0.0.0%7CChromium%3B159.0.8154.6;uamb=0;uam=;uap=Linux;uapv=;uaw=0;pscdl=noapi;frm=0;_tu=KFA;gtm=45fe6bh1v9189921318z872701866za20gzb72701866zd72701866xeaxf1;gcd=13l3l3l3l1l1;dma=0;dc_fmt=2;tag_exp=115938465~115938469~117776795~120213116~120385422~120469145~120469153~121246026~121246034;epver=2;ref=https%3A%2F%2Fwww.sharksmart.com.au%2Fshark-activity;dc_random=1795851271_HH9xCGgpxF2HZrUWNrmY-RsYH1guTdlbsQ;_dc_test=1;~oref=https%3A%2F%2Fwww.sharksmart.com.au%2Fsitemap%2F?",
+    "about:blank"
+  ],
+  "json_endpoints": [
+    {
+      "url": "https://syndication.twitter.com/settings?session_id=77f5cc19bdab95967ba675ad9ba5e2c5cdc56249",
+      "status": 200,
+      "top_keys": [
+        "should_obtain_cookie_consent",
+        "features"
+      ]
+    },
+    {
+      "url": "https://maps.googleapis.com/maps/api/mapsjs/gen_204?csp_test=true",
+      "status": 200,
+      "top_keys": []
+    },
+    {
+      "url": "https://www.sharksmart.com.au/shark-activity/alerts?ie_cachebust=1795851256",
+      "status": 200,
+      "top_keys": "list[10]"
+    },
+    {
+      "url": "https://www.sharksmart.com.au/shark-activity/twitter-feed?date_range=02&ie_cachebust=1795851256604",
+      "status": 200,
+      "top_keys": "list[100]"
+    },
+    {
+      "url": "https://www.sharksmart.com.au/shark-activity/detection-feed?date_range=02&ie_cachebust=1795851256604",
+      "status": 200,
+      "top_keys": [
+        "feed"
+      ]
+    },
+    {
+      "url": "https://connect.facebook.net/app_config/json/270923384486751/",
+      "status": 200,
+      "top_keys": [
+        "fedcm"
+      ]
+    },
+    {
+      "url": "https://www.sharksmart.com.au/api/safety-layers",
+      "status": 200,
+      "top_keys": "list[103]"
+    },
+    {
+      "url": "https://www.sharksmart.com.au/api/ben-signs",
+      "status": 200,
+      "top_keys": "list[1741]"
+    },
+    {
+      "url": "https://www.sharksmart.com.au/shark-activity/twitter-feed?ie_cachebust=1795851256707",
+      "status": 200,
+      "top_keys": "list[100]"
+    },
+    {
+      "url": "https://www.sharksmart.com.au/shark-activity/detection-feed?date_range=02&ie_cachebust=1795851256705",
+      "status": 200,
+      "top_keys": [
+        "feed"
+      ]
+    },
+    {
+      "url": "https://maps.googleapis.com/$rpc/google.internal.maps.mapsjs.v1.MapsJsInternalService/GetViewportInfo",
+      "status": 200,
+      "top_keys": "list[10]"
+    },
+    {
+      "url": "https://www.sharksmart.com.au/shark-activity/alerts?ie_cachebust=1795851262",
+      "status": 200,
+      "top_keys": "list[10]"
+    },
+    {
+      "url": "https://syndication.twitter.com/settings?session_id=0d1e1ccba17f606340b75e9bc2b71c0ab21583c3",
+      "status": 200,
+      "top_keys": [
+        "should_obtain_cookie_consent",
+        "features"
+      ]
+    }
+  ]
+}

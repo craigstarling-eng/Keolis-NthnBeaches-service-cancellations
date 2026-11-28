@@ -1,0 +1,32 @@
+{
+  "sa_pirsa": {
+    "ok": true,
+    "found": 0,
+    "added": 0,
+    "at": "2026-11-28T07:33:14+00:00"
+  },
+  "nsw_sharksmart": {
+    "ok": true,
+    "found": 0,
+    "added": 0,
+    "at": "2026-11-28T07:34:14+00:00"
+  },
+  "wa_sharksmart": {
+    "ok": true,
+    "found": 1892,
+    "added": 1892,
+    "at": "2026-11-28T07:34:46+00:00"
+  },
+  "qld_scp": {
+    "ok": true,
+    "found": 0,
+    "added": 0,
+    "at": "2026-11-28T07:35:11+00:00"
+  },
+  "asid": {
+    "ok": true,
+    "found": 1304,
+    "added": 1304,
+    "at": "2026-11-28T07:35:15+00:00"
+  }
+}
