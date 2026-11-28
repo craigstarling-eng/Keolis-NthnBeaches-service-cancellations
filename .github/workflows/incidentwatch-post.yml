@@ -1,0 +1,51 @@
+name: incidentwatch-post
+# Sydney Incident Watch Facebook posts: daily 5:30pm and Monday 8am (Sydney time).
+# Uses its OWN Facebook secrets (IW_FB_PAGE_ID / IW_FB_PAGE_TOKEN) so it never posts to the Bus Watch page.
+# Without them it just saves incidentwatch/post/latest.png + latest.txt for copy-paste.
+on:
+  schedule:
+    - cron: "30 6 * * *"
+    - cron: "30 7 * * *"
+    - cron: "0 21 * * 0"
+    - cron: "0 22 * * 0"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Which post"
+        type: choice
+        options: [daily, weekly]
+        default: daily
+concurrency: { group: incidentwatch, cancel-in-progress: false }
+permissions: { contents: write }
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults: { run: { working-directory: incidentwatch } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install pillow
+      - name: Make and send post
+        env:
+          FB_PAGE_ID: ${{ secrets.IW_FB_PAGE_ID }}
+          FB_PAGE_TOKEN: ${{ secrets.IW_FB_PAGE_TOKEN }}
+          REGION: ${{ vars.IW_REGION || 'northern-beaches' }}
+          SITE_URL: https://nbbuswatch.github.io/incidentwatch/
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            python scripts/post.py "${{ inputs.mode }}" --force
+          elif [ "${{ github.event.schedule }}" = "0 21 * * 0" ] || [ "${{ github.event.schedule }}" = "0 22 * * 0" ]; then
+            python scripts/post.py weekly
+          else
+            python scripts/post.py daily
+          fi
+      - name: Save post image/text
+        run: |
+          git config user.name "incidentwatch-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add post
+          git diff --cached --quiet && exit 0
+          git commit -m "incidentwatch post" -q
+          for i in 1 2 3 4; do git pull --rebase -q && git push -q && break; sleep $((i*5)); done

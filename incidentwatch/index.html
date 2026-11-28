@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sydney Incident Watch – daily police, fire & road incidents by region</title>
+<meta name="description" content="Free, independent daily breakdown of publicised police, fire and road incidents across Sydney's regions, from official NSW open data.">
+<meta property="og:title" content="Sydney Incident Watch">
+<meta property="og:description" content="Daily police, fire and road incidents across Sydney's regions — from official NSW data.">
+<style>
+:root{
+  color-scheme:light;
+  --bg:#f6f7f9;--surface-1:#ffffff;--border:#e3e6ea;--grid:#eceef1;
+  --text-primary:#191919;--text-secondary:#5f6670;
+  --police:#257de0;--fire:#f47230;--road:#00b894;
+  --accent:#191919;
+}
+@media (prefers-color-scheme:dark){:root{
+  color-scheme:dark;
+  --bg:#121212;--surface-1:#1c1c1c;--border:#2e2e2e;--grid:#2a2a2a;
+  --text-primary:#efefef;--text-secondary:#9c9c9c;
+  --police:#338ced;--fire:#e76624;--road:#00a888;--accent:#efefef;
+}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text-primary);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:980px;margin:0 auto;padding:16px}
+header{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:flex-end;justify-content:space-between;margin-bottom:14px}
+h1{font-size:22px;margin:0;letter-spacing:-.01em}
+.sub{color:var(--text-secondary);font-size:13px;margin-top:2px}
+select{font:inherit;padding:8px 10px;border-radius:10px;border:1px solid var(--border);background:var(--surface-1);color:var(--text-primary);max-width:100%}
+.seg{display:inline-flex;background:var(--surface-1);border:1px solid var(--border);border-radius:10px;padding:3px;gap:2px;margin-bottom:14px}
+.seg button{font:inherit;font-size:14px;border:0;background:none;color:var(--text-secondary);padding:6px 12px;border-radius:8px;cursor:pointer}
+.seg button[aria-pressed=true]{background:var(--accent);color:var(--surface-1)}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+@media (max-width:620px){.tiles{grid-template-columns:1fr}}
+.card{background:var(--surface-1);border:1px solid var(--border);border-radius:14px;padding:14px 16px}
+.tile .lab{display:flex;align-items:center;gap:8px;color:var(--text-secondary);font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.dot{width:10px;height:10px;border-radius:3px;display:inline-block;flex:none}
+.tile .num{font-size:40px;font-weight:700;line-height:1.1;margin:6px 0 2px;font-variant-numeric:tabular-nums}
+.tile .cmp{font-size:13px;color:var(--text-secondary)}
+.tile .tops{font-size:13px;margin-top:8px;color:var(--text-secondary)}
+.tile .tops b{color:var(--text-primary);font-weight:600}
+h2{font-size:16px;margin:0 0 10px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+@media (max-width:720px){.grid2{grid-template-columns:1fr}}
+.legend{display:flex;gap:14px;font-size:13px;color:var(--text-secondary);margin-bottom:6px;flex-wrap:wrap}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+#chart{position:relative}
+#chart svg{display:block;width:100%;height:auto;overflow:visible}
+.tip{position:absolute;pointer-events:none;background:var(--surface-1);border:1px solid var(--border);border-radius:10px;padding:8px 10px;font-size:13px;box-shadow:0 4px 14px rgba(0,0,0,.12);white-space:nowrap;display:none;z-index:2}
+.tip .row{display:flex;align-items:center;gap:6px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+td,th{padding:6px 4px;border-bottom:1px solid var(--grid);text-align:left}
+th{color:var(--text-secondary);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+td.n{text-align:right;font-variant-numeric:tabular-nums;width:3.5em}
+.bar{height:6px;border-radius:3px;background:var(--text-secondary);opacity:.35}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.chips button{font:inherit;font-size:13px;border:1px solid var(--border);background:var(--surface-1);color:var(--text-primary);padding:5px 10px;border-radius:999px;cursor:pointer}
+.chips button[aria-pressed=true]{border-color:var(--text-primary);font-weight:600}
+.list{list-style:none;margin:0;padding:0}
+.list li{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--grid)}
+.list .t{color:var(--text-secondary);font-size:12px;width:62px;flex:none;font-variant-numeric:tabular-nums}
+.list .m{font-size:12px;color:var(--text-secondary)}
+.list a{color:inherit;text-decoration:none}
+.list a:hover{text-decoration:underline}
+.empty{color:var(--text-secondary);font-size:14px;padding:8px 0}
+.note{font-size:12.5px;color:var(--text-secondary);line-height:1.5}
+footer{margin:22px 0 30px}
+footer a{color:inherit}
+.health span{display:inline-block;margin-right:10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Sydney Incident Watch</h1>
+      <div class="sub" id="updated">Loading…</div>
+    </div>
+    <label><span class="sub" style="display:block">Region</span>
+      <select id="region" aria-label="Region"></select></label>
+  </header>
+
+  <div class="seg" role="group" aria-label="Period" id="period">
+    <button data-p="today" aria-pressed="true">Today</button>
+    <button data-p="yesterday" aria-pressed="false">Yesterday</button>
+    <button data-p="7" aria-pressed="false">7 days</button>
+    <button data-p="30" aria-pressed="false">30 days</button>
+  </div>
+
+  <section class="tiles" id="tiles"></section>
+
+  <section class="card" style="margin-bottom:14px">
+    <h2>Last 30 days</h2>
+    <div class="legend" id="legend"></div>
+    <div id="chart"><div class="tip" id="tip"></div></div>
+  </section>
+
+  <section class="grid2">
+    <div class="card"><h2>What happened</h2><div id="types"></div></div>
+    <div class="card"><h2>By council area</h2><div id="councils"></div></div>
+  </section>
+
+  <section class="card">
+    <h2>Incident log</h2>
+    <div class="chips" id="chips"></div>
+    <ul class="list" id="list"></ul>
+  </section>
+
+  <footer class="note">
+    <p><b>What this counts:</b> police incidents that NSW Police publicised in media releases; fires from the NSW RFS incident feed and Fire &amp; Rescue NSW media releases; unplanned road incidents (crashes, breakdowns, hazards) from Live Traffic NSW. It is <b>not</b> every job police or firefighters attend, and recent incidents can still be added. Incident times for police releases are approximate (time published). Locations are matched from suburb names, so a few may be missed or placed in the wrong area.</p>
+    <p>Data: © State of NSW — NSW Police Force, NSW Rural Fire Service, Fire &amp; Rescue NSW, Transport for NSW (Live Traffic NSW Open Data, CC BY 4.0). Independent community project, not affiliated with any agency. In an emergency call Triple Zero (000).</p>
+    <p class="health" id="health"></p>
+  </footer>
+</div>
+
+<script>
+const CATS = [
+  {k:"police", name:"Police", icon:"👮"},
+  {k:"fire",   name:"Fire",   icon:"🔥"},
+  {k:"road",   name:"Road",   icon:"🚗"},
+];
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+let STATS={}, EVENTS=[], STATUS={}, state={region:"northern-beaches", period:"today", cat:"all"};
+
+function sydDate(d){ return new Intl.DateTimeFormat("en-CA",{timeZone:"Australia/Sydney"}).format(d); }
+function addDays(iso,n){ const d=new Date(iso+"T12:00:00Z"); d.setUTCDate(d.getUTCDate()+n); return d.toISOString().slice(0,10); }
+const TODAY = sydDate(new Date());
+function periodDays(p){
+  if(p==="today") return [TODAY];
+  if(p==="yesterday") return [addDays(TODAY,-1)];
+  const n=+p; return Array.from({length:n},(_,i)=>addDays(TODAY,-i));
+}
+function fmtDay(iso,opt={weekday:"short",day:"numeric",month:"short"}){ return new Date(iso+"T12:00:00Z").toLocaleDateString("en-AU",{...opt,timeZone:"UTC"}); }
+
+async function load(){
+  const bust = "?t=" + Math.floor(Date.now()/300000);
+  const [s,e,st] = await Promise.all(["stats","events","status"].map(n=>fetch(`data/${n}.json${bust}`).then(r=>r.ok?r.json():null).catch(()=>null)));
+  STATS=s||{}; EVENTS=e||[]; STATUS=st||{};
+  const sel=$("#region"), regs=STATUS.regions||{};
+  sel.innerHTML = `<option value="all">All of Sydney</option>` + Object.entries(regs).map(([k,v])=>`<option value="${k}">${esc(v)}</option>`).join("");
+  const fromHash = location.hash.slice(1);
+  let saved=null; try{ saved=localStorage.getItem("siw-region"); }catch(_){}
+  state.region = (fromHash in regs || fromHash==="all") ? fromHash : (saved in regs ? saved : "northern-beaches");
+  sel.value=state.region;
+  if(STATUS.updated){ const d=new Date(STATUS.updated); $("#updated").textContent = "Updated " + d.toLocaleString("en-AU",{timeZone:"Australia/Sydney",weekday:"short",hour:"numeric",minute:"2-digit"}); }
+  $("#health").innerHTML = [["police","Police releases"],["rfs","RFS feed"],["frnsw","FRNSW releases"],["road","Live Traffic"]].map(([k,n])=>{
+    const s=STATUS[k]||{}; const bad = s.error && (!s.ok || s.error.slice(0,16) > s.ok);
+    return `<span>${bad?"⚠️":"✅"} ${n}</span>`; }).join("");
+  render();
+}
+
+function dayCounts(region, day){ return (STATS[region]||{})[day] || {}; }
+function sumDays(region, days){
+  const out={}; for(const c of CATS) out[c.k]={n:0,types:{}};
+  for(const d of days){ const dc=dayCounts(region,d);
+    for(const c of CATS){ const x=dc[c.k]; if(!x) continue; out[c.k].n+=x.n;
+      for(const [t,v] of Object.entries(x.types||{})) out[c.k].types[t]=(out[c.k].types[t]||0)+v; } }
+  return out;
+}
+
+function render(){
+  const days = periodDays(state.period), r=state.region;
+  const cur = sumDays(r, days);
+  // baseline: daily average over the 28 days before this period
+  const base = sumDays(r, Array.from({length:28},(_,i)=>addDays(days[days.length-1],-1-i)));
+  const haveBase = Array.from({length:28},(_,i)=>addDays(days[days.length-1],-1-i)).filter(d=>STATS[r]&&STATS[r][d]).length;
+  $("#tiles").innerHTML = CATS.map(c=>{
+    const n=cur[c.k].n, avg = haveBase ? base[c.k].n/haveBase*days.length : null;
+    let cmp = "Building history…";
+    if(avg!==null && haveBase>=7){
+      const diff = avg ? Math.round((n-avg)/avg*100) : null;
+      cmp = avg<0.5 && n===0 ? "Usual: about 0" :
+        diff===null ? `Usual: ${avg.toFixed(1)}` :
+        Math.abs(diff)<10 ? `About usual (avg ${avg.toFixed(1)})` :
+        `${diff>0?"▲":"▼"} ${Math.abs(diff)}% ${diff>0?"above":"below"} usual (avg ${avg.toFixed(1)})`;
+    }
+    const tops = Object.entries(cur[c.k].types).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([t,v])=>`<b>${v}</b> ${esc(t.toLowerCase())}`).join(" · ");
+    return `<div class="card tile"><div class="lab"><span class="dot" style="background:var(--${c.k})"></span>${c.icon} ${c.name}</div>
+      <div class="num">${n}</div><div class="cmp">${cmp}</div><div class="tops">${tops||"Nothing recorded"}</div></div>`;
+  }).join("");
+  renderChart(r);
+  renderTypes(cur);
+  renderEvents(days);
+}
+
+function renderChart(r){
+  const days = Array.from({length:30},(_,i)=>addDays(TODAY,i-29));
+  const data = days.map(d=>{const dc=dayCounts(r,d); return {d, v:CATS.map(c=>(dc[c.k]||{}).n||0)};});
+  const box0=$("#chart"); const W=Math.max(300,Math.round(box0.clientWidth||900)),H=W<600?200:240,pl=30,pr=8,pt=10,pb=26, iw=W-pl-pr, ih=H-pt-pb;
+  const max = Math.max(4, ...data.map(x=>x.v.reduce((a,b)=>a+b,0)));
+  const step = Math.pow(10,Math.floor(Math.log10(max))); const nice = Math.ceil(max/step)*step;
+  const tickStep = nice/4; const bw = iw/data.length, gap=2, barW=Math.max(3,bw-6);
+  const y = v => pt+ih-(v/nice)*ih;
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Daily incidents by type, last 30 days">`;
+  for(let t=0;t<=nice+1e-9;t+=tickStep){ s+=`<line x1="${pl}" x2="${W-pr}" y1="${y(t)}" y2="${y(t)}" stroke="var(--grid)"/><text x="${pl-6}" y="${y(t)+4}" font-size="11" text-anchor="end" fill="var(--text-secondary)">${Math.round(t)}</text>`; }
+  data.forEach((x,i)=>{
+    const cx = pl+i*bw+(bw-barW)/2; let acc=0; const total=x.v.reduce((a,b)=>a+b,0);
+    const segs = CATS.map((c,j)=>({c,v:x.v[j]})).filter(o=>o.v>0);
+    segs.forEach((o,j)=>{
+      const y0=y(acc), y1=y(acc+o.v); acc+=o.v;
+      const h=Math.max(0,y0-y1-(j<segs.length-1?gap:0)), top = j===segs.length-1;
+      const rr = top?Math.min(4,barW/2,h):0;
+      // rounded top on the last segment only
+      const yy=y1, x0=cx, x1=cx+barW;
+      s+= rr ? `<path d="M${x0},${yy+h} V${yy+rr} Q${x0},${yy} ${x0+rr},${yy} H${x1-rr} Q${x1},${yy} ${x1},${yy+rr} V${yy+h} Z" fill="var(--${o.c.k})"/>`
+             : `<rect x="${x0}" y="${yy}" width="${barW}" height="${h}" fill="var(--${o.c.k})"/>`;
+    });
+    if((29-i)%7===0) s+=`<text x="${cx+barW/2}" y="${H-8}" font-size="11" text-anchor="middle" fill="var(--text-secondary)">${i===29?"Today":fmtDay(x.d,{day:"numeric",month:"short"})}</text>`;
+    s+=`<rect class="hit" data-i="${i}" x="${pl+i*bw}" y="${pt}" width="${bw}" height="${ih}" fill="transparent"/>`;
+  });
+  s+=`<line x1="${pl}" x2="${W-pr}" y1="${y(0)}" y2="${y(0)}" stroke="var(--text-secondary)" stroke-opacity=".5"/></svg>`;
+  const box=$("#chart"); box.querySelector("svg")?.remove(); box.insertAdjacentHTML("beforeend",s);
+  $("#legend").innerHTML = CATS.map(c=>`<span><span class="dot" style="background:var(--${c.k})"></span>${c.name}</span>`).join("");
+  const tip=$("#tip");
+  const show = (el)=>{ const x=data[+el.dataset.i]; const tot=x.v.reduce((a,b)=>a+b,0);
+    tip.innerHTML = `<b>${fmtDay(x.d)}</b> · ${tot} total` + CATS.map((c,j)=>`<div class="row"><span class="dot" style="background:var(--${c.k})"></span>${c.name}: ${x.v[j]}</div>`).join("");
+    tip.style.display="block"; const br=box.getBoundingClientRect(), er=el.getBoundingClientRect();
+    let left = er.left-br.left+er.width/2-tip.offsetWidth/2; left=Math.max(0,Math.min(left,br.width-tip.offsetWidth));
+    tip.style.left=left+"px"; tip.style.top="0px"; el.parentNode.querySelectorAll(".hit").forEach(h=>h.setAttribute("fill","transparent")); el.setAttribute("fill","rgba(127,127,127,.12)"); };
+  box.querySelectorAll(".hit").forEach(h=>{ h.addEventListener("mouseenter",()=>show(h)); h.addEventListener("click",()=>show(h)); });
+  box.querySelector("svg").addEventListener("mouseleave",()=>{tip.style.display="none"; box.querySelectorAll(".hit").forEach(h=>h.setAttribute("fill","transparent"));});
+}
+
+function renderTypes(cur){
+  const rows=[]; for(const c of CATS){ const t=Object.entries(cur[c.k].types).sort((a,b)=>b[1]-a[1]);
+    if(!t.length) continue; const mx=t[0][1];
+    rows.push(`<tr><th colspan="3"><span class="dot" style="background:var(--${c.k})"></span> ${c.icon} ${c.name}</th></tr>`);
+    t.forEach(([k,v])=>rows.push(`<tr><td>${esc(k)}</td><td style="width:35%"><div class="bar" style="width:${v/mx*100}%"></div></td><td class="n">${v}</td></tr>`)); }
+  $("#types").innerHTML = rows.length?`<table>${rows.join("")}</table>`:`<div class="empty">No incidents recorded for this period.</div>`;
+}
+
+function periodEvents(days){
+  const set=new Set(days);
+  return EVENTS.filter(e=>e.region && (state.region==="all"||e.region===state.region) && set.has(e.ts.slice(0,10)));
+}
+function renderEvents(days){
+  const evs = periodEvents(days), partial = days.length>14;
+  // councils
+  const cc={}; evs.forEach(e=>{ const k=e.council||"Unknown"; cc[k]=cc[k]||{police:0,fire:0,road:0}; cc[k][e.cat]++; });
+  const crow=Object.entries(cc).sort((a,b)=>(b[1].police+b[1].fire+b[1].road)-(a[1].police+a[1].fire+a[1].road));
+  $("#councils").innerHTML = crow.length ? `<table><tr><th>Council</th>${CATS.map(c=>`<th class="n" title="${c.name}">${c.icon}</th>`).join("")}</tr>`+
+    crow.map(([k,v])=>`<tr><td>${esc(k)}</td>${CATS.map(c=>`<td class="n">${v[c.k]}</td>`).join("")}</tr>`).join("")+`</table>`+(partial?`<p class="note">Council and log detail covers the last 14 days.</p>`:"")
+    : `<div class="empty">Nothing recorded for this period.</div>`;
+  // chips
+  const counts={all:evs.length}; CATS.forEach(c=>counts[c.k]=evs.filter(e=>e.cat===c.k).length);
+  $("#chips").innerHTML = [{k:"all",name:"All",icon:""},...CATS].map(c=>`<button data-c="${c.k}" aria-pressed="${state.cat===c.k}">${c.icon} ${c.name} (${counts[c.k]})</button>`).join("");
+  $("#chips").querySelectorAll("button").forEach(b=>b.onclick=()=>{state.cat=b.dataset.c; renderEvents(days);});
+  const shown = evs.filter(e=>state.cat==="all"||e.cat===state.cat).slice(0,300);
+  const icon = Object.fromEntries(CATS.map(c=>[c.k,c.icon]));
+  $("#list").innerHTML = shown.length ? shown.map(e=>{
+    const d=new Date(e.ts); const t=d.toLocaleTimeString("en-AU",{timeZone:"Australia/Sydney",hour:"numeric",minute:"2-digit"});
+    const day = days.length>1 ? fmtDay(e.ts.slice(0,10),{weekday:"short",day:"numeric"})+"<br>" : "";
+    const extra=[e.suburb, e.type, e.status, e.attending&&e.attending.length?"Attending: "+e.attending.join(", "):"", e.src].filter(Boolean).map(esc).join(" · ");
+    return `<li><div class="t">${day}${t}</div><div><div>${icon[e.cat]} <a href="${esc(e.url)}" target="_blank" rel="noopener">${esc(e.title)}</a></div><div class="m">${extra}</div></div></li>`;
+  }).join("") : `<li class="empty">No incidents recorded for this period.</li>`;
+}
+
+$("#region").onchange = e=>{ state.region=e.target.value; try{localStorage.setItem("siw-region",state.region);}catch(_){} history.replaceState(null,"","#"+state.region); render(); };
+$("#period").querySelectorAll("button").forEach(b=>b.onclick=()=>{ state.period=b.dataset.p; $("#period").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===b)); render(); });
+let rt; addEventListener("resize",()=>{clearTimeout(rt); rt=setTimeout(()=>renderChart(state.region),150);});
+load();
+setInterval(load, 5*60*1000);
+</script>
+</body>
+</html>
