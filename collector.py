@@ -573,6 +573,9 @@ DEPOTS = {"V": ("Brookvale", -33.766419, 151.269782), "F": ("Mona Vale", -33.674
           "N": ("North Sydney", -33.82891, 151.21856)}
 DEPOT_DAYS = 21                           # how many days of evidence to weigh
 DEPOT_SEEN = set()                        # (fleet number, depot code) seen parked at / leaving a depot this run
+VIDS = {}                                 # fleet number -> feed vehicle id, from buses on Keolis / CDC trips
+OFFTRIP = {}                              # fleet number -> [vehicle id, lat, lon, unix time] for buses reporting no passenger trip
+LASTPOS_MINUTES = 30                      # keep showing a bus's last known position for this long
 VEHICLES = {}   # (service date, trip id as used on the site) -> [fleet number, lat, lon, unix time], filled by read_occupancy
 
 
@@ -600,13 +603,17 @@ def read_occupancy(hdr, home, cross=None):
             info, pre = cross_trips[tid], "c:"
         if not info:
             label = (v.vehicle.label or "").strip()
-            if label and v.HasField("position"):   # a bus not on a passenger trip: is it at one of the depots?
+            if label and v.HasField("position"):   # a bus not on a passenger trip (layover, running dead, depot)
+                OFFTRIP[label] = [(v.vehicle.id or "").strip(), round(v.position.latitude, 5),
+                                  round(v.position.longitude, 5), int(v.timestamp or 0)]
                 for code, (_, dlat, dlon) in DEPOTS.items():
                     if km_between(v.position.latitude, v.position.longitude, dlat, dlon) <= 0.25:
                         DEPOT_SEEN.add((label, code))
             continue
         d = service_date(v.trip.start_date, v.trip.start_time, info[2], today)
         label = (v.vehicle.label or "").strip()
+        if label and (v.vehicle.id or "").strip():
+            VIDS[label] = v.vehicle.id.strip()
         if label and v.HasField("position"):
             VEHICLES[(d, pre + tid)] = [label, round(v.position.latitude, 5), round(v.position.longitude, 5), int(v.timestamp or 0)]
         if not pre and v.HasField("occupancy_status"):
@@ -627,6 +634,24 @@ def write_fleet(today):
         old = now.get(label)
         if not old or ts > old[3]:   # a bus can briefly report two trips at a changeover: keep the newest
             now[label] = [tid, lat, lon, ts]
+    # Buses that ran a trip today but aren't on one this minute (layover, between trips): still show where
+    # they are. The feed's vehicle id must match the one seen on its trips, so another operator's bus with
+    # the same fleet number is never mixed up with it.
+    vids = state.setdefault("vids", {})
+    vids.update(VIDS)
+    ran = set(trips.values())
+    for label, (vid, lat, lon, ts) in OFFTRIP.items():
+        if label in ran and label not in now and vid and vids.get(label) == vid:
+            now[label] = ["", lat, lon, ts]
+    # A bus missing from this snapshot of the feed: show its last known position for a while.
+    last = state.setdefault("lastpos", {})
+    cutoff = int(now_syd().timestamp()) - LASTPOS_MINUTES * 60
+    for label, p in list(last.items()):
+        if p[3] < cutoff:
+            del last[label]
+        elif label not in now:
+            now[label] = ["" if p[3] < cutoff + (LASTPOS_MINUTES - 10) * 60 else p[0]] + p[1:]
+    last.update(now)
     save_state(today, state)
     write_json(FLEET_FILE, {"date": today, "updated": now_syd().isoformat(timespec="seconds"), "now": now, "trips": trips})
     try:   # depots are an extra on top of the bus finder

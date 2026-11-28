@@ -1020,22 +1020,36 @@ async function busLookup(raw, scroll) {
     .filter(t => idx[t]).sort((a, b) => hm(idx[a][1]) - hm(idx[b][1]));
   if (!now && !today.length) { out.innerHTML = `<p class="empty">Bus ${esc(num)} hasn't been seen on a timetabled trip today. Check the number on the front, side or back of the bus. Only Keolis and CDC buses on Northern Beaches routes are covered.</p>`; return; }
   let html = "";
-  if (now && idx[now[0]]) {
-    const [route, start, hs, from] = idx[now[0]], a = (L.active || {})[now[0]], ago = Math.max(0, Math.round((Date.now() / 1000 - now[3]) / 60));
-    const live = a && (a[1] != null ? a[1] : a[0]);
-    const late = live == null ? `<span class="badge">No delay info</span>` : live > 5 ? `<span class="badge warn">${live} min late</span>` : live < -1 ? `<span class="badge warn">${-live} min early</span>` : `<span class="badge ok">On time</span>`;
-    const occ = a && a[2] != null ? `<span class="badge ${a[2] >= 3 ? "warn" : ""}">${OCC[a[2]] || ""}</span>` : "";
-    html += `<div class="trip"><div class="t"><span class="sub" style="display:block;font-size:11px;font-weight:600">BUS</span>${esc(num)}</div><div><span class="rt">${esc(route)}</span>${late}${occ}
-      <div class="meta">To <b>${esc(hs)}</b>${from ? ` · left ${esc(from)}` : ""} at ${fmtT(start)}</div>
-      ${depotLine(num)}
-      <div class="meta">Position from ${ago <= 1 ? "just now" : ago + " min ago"} · <a href="https://www.google.com/maps/search/?api=1&query=${now[1]},${now[2]}" target="_blank" rel="noopener">Open in Google Maps</a></div></div></div>
-      <div id="busMap" style="height:220px;border-radius:10px;margin-top:8px;border:1px solid var(--border)"></div>`;
+  const onTrip = now && now[0] && idx[now[0]];
+  if (now) {
+    const ago = Math.max(0, Math.round((Date.now() / 1000 - now[3]) / 60));
+    const where = `<div class="meta">${ago <= 1 ? "Position from just now" : "Last seen " + ago + " min ago"} · <a href="https://www.google.com/maps/search/?api=1&query=${now[1]},${now[2]}" target="_blank" rel="noopener">Open in Google Maps</a></div>`;
+    if (onTrip) {
+      const [route, start, hs, from] = idx[now[0]], a = (L.active || {})[now[0]];
+      const live = a && (a[1] != null ? a[1] : a[0]);
+      const late = live == null ? `<span class="badge">No delay info</span>` : live > 5 ? `<span class="badge warn">${live} min late</span>` : live < -1 ? `<span class="badge warn">${-live} min early</span>` : `<span class="badge ok">On time</span>`;
+      const occ = a && a[2] != null ? `<span class="badge ${a[2] >= 3 ? "warn" : ""}">${OCC[a[2]] || ""}</span>` : "";
+      html += `<div class="trip"><div class="t"><span class="sub" style="display:block;font-size:11px;font-weight:600">BUS</span>${esc(num)}</div><div><span class="rt">${esc(route)}</span>${late}${occ}
+        <div class="meta">To <b>${esc(hs)}</b>${from ? ` · left ${esc(from)}` : ""} at ${fmtT(start)}</div>
+        ${depotLine(num)}${where}</div></div>`;
+    } else {
+      html += `<div class="trip"><div class="t"><span class="sub" style="display:block;font-size:11px;font-weight:600">BUS</span>${esc(num)}</div><div><span class="badge">Between trips</span>
+        <div class="meta">Not carrying passengers right now (layover, running empty or heading to the depot).</div>
+        ${depotLine(num)}${where}</div></div>`;
+    }
+    html += `<div id="busMap" style="height:220px;border-radius:10px;margin-top:8px;border:1px solid var(--border)"></div>`;
   } else {
-    html += `<p class="sub">Bus ${esc(num)} isn't on a timetabled trip right now (it may be between trips, out of service or back at the depot).</p>${depotLine(num)}`;
+    html += `<p class="sub">Bus ${esc(num)} isn't reporting its position right now (it may be between trips, out of service or back at the depot).</p>${depotLine(num)}`;
   }
-  if (today.length) html += `<h2 style="margin-top:12px;font-size:15px">Trips bus ${esc(num)} has run today</h2>` + today.map(t => { const [r, st, hs] = idx[t]; return `<div class="trip" style="padding:6px 0"><div class="t" style="font-size:15px">${fmtT(st)}</div><div><span class="rt">${esc(r)}</span> To ${esc(hs)}</div></div>`; }).join("");
+  if (today.length) {
+    const nowM = new Date().getHours() * 60 + new Date().getMinutes();
+    const row = t => { const [r, st, hs] = idx[t]; const cur = onTrip && t === now[0]; return `<div class="trip" style="padding:6px 0"><div class="t" style="font-size:15px">${fmtT(st)}</div><div><span class="rt">${esc(r)}</span> To ${esc(hs)}${cur ? ` <span class="badge ok">Now</span>` : ""}</div></div>`; };
+    const done = today.filter(t => hm(idx[t][1]) <= nowM), next = today.filter(t => hm(idx[t][1]) > nowM);
+    if (done.length) html += `<h2 style="margin-top:12px;font-size:15px">Trips bus ${esc(num)} has run today</h2>` + done.map(row).join("");
+    if (next.length) html += `<h2 style="margin-top:12px;font-size:15px">Coming up next</h2>` + next.map(row).join("");
+  }
   out.innerHTML = html;
-  if (now && idx[now[0]]) {
+  if (now) {
     try {
       await loadLeaflet();
       if (BUS.map) { BUS.map.remove(); BUS.map = null; }
