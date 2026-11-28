@@ -2,3 +2,4 @@ __pycache__/
 *.pyc
 data/raw/*
 !data/raw/*_endpoints.json
+!data/raw/*_capture.json

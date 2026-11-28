@@ -40,24 +40,89 @@ FIELDS = [
     "collected_at",
 ]
 
-UA = "SharkWatchAU/0.1 (+https://nbbuswatch.github.io/sharkwatch; public-safety info aggregator)"
+UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
+      "Chrome/131.0 Safari/537.36 SharkWatchAU (+https://nbbuswatch.github.io/sharkwatch)")
 SESSION = requests.Session()
-SESSION.headers["User-Agent"] = UA
+SESSION.headers.update({"User-Agent": UA, "Accept-Language": "en-AU,en;q=0.9"})
 
 
-def get(url: str, **kw) -> requests.Response:
-    """GET with 3 retries and a polite delay."""
-    last = None
-    for attempt in range(3):
+class Resp:
+    """Minimal response object so callers work the same for requests and browser fetches."""
+    def __init__(self, content: bytes, url: str):
+        self.content, self.url = content, url
+
+    @property
+    def text(self) -> str:
+        return self.content.decode("utf-8", errors="replace")
+
+    def json(self):
+        return json.loads(self.content)
+
+
+_BROWSER = {}
+
+
+def _browser_ctx():
+    if "ctx" not in _BROWSER:
+        from playwright.sync_api import sync_playwright
+        pw = sync_playwright().start()
+        b = pw.chromium.launch()
+        _BROWSER.update(pw=pw, b=b, ctx=b.new_context(locale="en-AU", timezone_id="Australia/Sydney"),
+                        warmed=set())
+    return _BROWSER["ctx"]
+
+
+def browser_get(url: str, expect_file: bool = False) -> Resp:
+    """Fetch through real headless Chrome (for sites that block plain scripts)."""
+    ctx = _browser_ctx()
+    origin = "/".join(url.split("/")[:3])
+    page = ctx.new_page()
+    try:
+        if origin not in _BROWSER["warmed"]:  # visit the site once to pick up cookies / pass checks
+            page.goto(origin, wait_until="domcontentloaded", timeout=60000)
+            page.wait_for_timeout(3000)
+            _BROWSER["warmed"].add(origin)
+        if expect_file:
+            r = ctx.request.get(url, timeout=90000)
+            return Resp(r.body(), url)
+        page.goto(url, wait_until="domcontentloaded", timeout=60000)
+        page.wait_for_timeout(3000)
+        return Resp(page.content().encode(), url)
+    finally:
+        page.close()
+
+
+def close_browser():
+    if "b" in _BROWSER:
+        _BROWSER["b"].close()
+        _BROWSER["pw"].stop()
+        _BROWSER.clear()
+
+
+def _looks_blocked(content: bytes, expect_file: bool) -> bool:
+    head = content[:600].lstrip().lower()
+    if expect_file:
+        return not head or head.startswith((b"<!doctype", b"<html")) or b"<html" in head[:200]
+    return any(w in head for w in (b"access denied", b"request blocked", b"attention required"))
+
+
+def get(url: str, expect_file: bool = False, **kw):
+    """GET with retries; falls back to headless Chrome if the site blocks scripts."""
+    timeout = kw.pop("timeout", 30)
+    for attempt in range(2):
         try:
-            r = SESSION.get(url, timeout=kw.pop("timeout", 30), **kw)
+            r = SESSION.get(url, timeout=timeout, **kw)
+            if r.status_code in (401, 403, 429) or _looks_blocked(r.content, expect_file):
+                break
             r.raise_for_status()
             time.sleep(1)
             return r
-        except requests.RequestException as e:  # noqa: PERF203
-            last = e
+        except requests.RequestException:
             time.sleep(2 * (attempt + 1))
-    raise last  # type: ignore[misc]
+    r = browser_get(url, expect_file=expect_file)
+    if _looks_blocked(r.content, expect_file):
+        raise RuntimeError(f"blocked even in browser: {url}")
+    return r
 
 
 def now_iso() -> str:

@@ -123,8 +123,22 @@ def extract(payloads: list[dict], source: str, state: str, page_url: str) -> lis
     return events
 
 
-def capture(source: str, page_url: str, click_texts=("Open shark map",), wait_ms=15000) -> list[dict]:
-    """Return list of {"url", "json"} for every JSON response the page loads."""
+# Responses that are never shark events (map tiles, social widgets, signage layers)
+SKIP_URL_PARTS = ("googleapis", "gstatic", "twitter.com/settings", "syndication.twitter", "facebook",
+                  "doubleclick", "google-analytics", "googletagmanager", "hotjar", "/ben-signs",
+                  "/safety-layers", "mapbox", "arcgisonline", "openstreetmap", "sentry")
+
+
+def wanted(url: str, hosts) -> bool:
+    u = url.lower()
+    if any(p in u for p in SKIP_URL_PARTS):
+        return False
+    return not hosts or any(h in u for h in hosts)
+
+
+def capture(source: str, page_url: str, click_texts=("Open shark map",), wait_ms=15000,
+            hosts=()) -> list[dict]:
+    """Return list of {"url", "json"} for every relevant JSON response the page loads."""
     from playwright.sync_api import sync_playwright
 
     payloads: list[dict] = []
@@ -132,6 +146,8 @@ def capture(source: str, page_url: str, click_texts=("Open shark map",), wait_ms
     def on_response(resp):
         ct = (resp.headers.get("content-type") or "").lower()
         if "json" not in ct and not resp.url.split("?")[0].endswith((".json", ".geojson")):
+            return
+        if not wanted(resp.url, hosts):
             return
         try:
             payloads.append({"url": resp.url, "status": resp.status, "json": resp.json()})
@@ -144,14 +160,15 @@ def capture(source: str, page_url: str, click_texts=("Open shark map",), wait_ms
                                   timezone_id="Australia/Sydney")
         ctx.on("response", on_response)
         page = ctx.new_page()
-        page.goto(page_url, wait_until="networkidle", timeout=60000)
+        page.goto(page_url, wait_until="domcontentloaded", timeout=90000)
+        page.wait_for_timeout(5000)
         for label in click_texts:
             try:
                 page.get_by_text(label, exact=False).first.click(timeout=5000)
             except Exception:  # noqa: BLE001
                 pass
         page.wait_for_timeout(wait_ms)
-        iframes = [f.url for f in page.frames if f.url and f.url != page_url]
+        iframes = [f.url for f in page.frames if f.url and f.url != page_url and wanted(f.url, ())]
         save_raw(f"{source}_page.txt", page.inner_text("body"))
         browser.close()
 

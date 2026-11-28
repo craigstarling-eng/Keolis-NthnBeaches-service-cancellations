@@ -16,7 +16,7 @@ import nsw_sharksmart
 import qld_scp
 import sa_pirsa
 import wa_sharksmart
-from common import DATA, load_events, merge, now_iso, write_json
+from common import DATA, close_browser, load_events, merge, now_iso, write_json
 
 GROUPS = {
     "live": [sa_pirsa, nsw_sharksmart, wa_sharksmart],
@@ -95,6 +95,7 @@ def main(group: str = "live") -> None:
         except Exception as e:  # noqa: BLE001  one bad source must not stop the rest
             status[name] = {"ok": False, "error": str(e)[:300], "at": now_iso()}
         print(name, status[name])
+    close_browser()
     prev = {}
     sp = DATA / "status.json"
     if sp.exists():

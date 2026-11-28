@@ -8,7 +8,7 @@ PAGE = "https://www.sharksmart.nsw.gov.au/shark-activity"
 
 
 def collect():
-    return _collect(SOURCE, "NSW", PAGE, click_texts=("Open shark map",))
+    return _collect(SOURCE, "NSW", PAGE, click_texts=("Open shark map",), wait_ms=25000)
 
 
 if __name__ == "__main__":
