@@ -27,7 +27,7 @@ Not covered (no public feed): VIC, TAS, NT. Dorsal is private — don't scrape i
 - `status.json` — last run result per source (use it for a "data health" badge).
 - `raw/*_endpoints.json` — what the NSW/WA maps actually loaded (see below).
 
-`event_type` values: `sighting`, `detection`, `drone`, `tagging`, `catch`, `incident`, `alert`.
+`event_type` values: `sighting`, `detection`, `drone`, `tagging`, `catch`, `incident`, `alert`, `closure`.
 
 ## How it runs
 

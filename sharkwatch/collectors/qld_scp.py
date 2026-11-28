@@ -7,6 +7,7 @@ Updated by QLD roughly annually/periodically -> run daily, not every 15 min.
 from __future__ import annotations
 
 import io
+import re
 
 import pandas as pd
 
@@ -14,8 +15,9 @@ from common import clean, event, get, make_id, save_raw
 
 SOURCE = "qld_scp"
 CKAN = "https://www.data.qld.gov.au/api/3/action/package_show?id={id}"
+# The statewide dataset (bb4eda21-…) went private in Nov 2026 ("Access denied"); add it back here
+# if QLD republishes it. The GBR Marine Park dataset is still public.
 DATASETS = {
-    "bb4eda21-d85d-4782-803d-c67393fb2da9": "statewide",  # Shark Control Program catch statistics by year
     "def48c7b-fe46-4566-8f64-fc831156f464": "gbrmp",      # Great Barrier Reef Marine Park subset
 }
 
@@ -59,8 +61,9 @@ def to_date(v) -> str:
     v = clean(v)
     if not v:
         return ""
-    try:
-        return pd.to_datetime(v, dayfirst=True).date().isoformat()
+    try:  # ISO dates (datastore API) must NOT be read day-first, or 2026-04-12 becomes 4 Dec
+        iso = bool(re.match(r"\d{4}-\d{2}-\d{2}", v))
+        return pd.to_datetime(v, dayfirst=not iso).date().isoformat()
     except (ValueError, TypeError):
         return v
 
@@ -93,7 +96,7 @@ def parse_df(df: pd.DataFrame, url: str, dataset: str) -> list[dict]:
         details = "; ".join([f"dataset: {dataset}"] + [f"{k}: {g(k)}" for k in ("fate", "sex", "gear") if g(k)])
         out.append(event(
             SOURCE, "QLD", "catch", to_date(row[c["date"]]), loc,
-            species=g("species"), size_m=g("length"), count=g("number") or "1",
+            species=g("species").title(), size_m=g("length"), count=g("number") or "1",
             details=details, reported_by="QLD Shark Control Program", url=url,
             id=make_id(SOURCE, dataset, url.rsplit("/", 1)[-1], i),
         ))

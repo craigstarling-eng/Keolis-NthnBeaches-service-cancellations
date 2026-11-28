@@ -87,7 +87,7 @@ def parse_html(html: str, url: str) -> list[dict]:
 def collect() -> list[dict]:
     events, seen = [], set()
     urls = list(LIVE_URLS)
-    if env_flag("BACKFILL"):
+    if env_flag("BACKFILL"):  # old archive pages now 404; kept in case PIRSA restores them
         urls += [ARCHIVE_URL.format(year=y) for y in ARCHIVE_YEARS]
     for url in urls:
         try:

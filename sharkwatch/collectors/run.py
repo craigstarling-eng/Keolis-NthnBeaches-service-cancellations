@@ -12,14 +12,15 @@ from collections import Counter, defaultdict
 from datetime import datetime, timedelta, timezone
 
 import asid
-import nsw_sharksmart
 import qld_scp
 import sa_pirsa
 import wa_sharksmart
 from common import DATA, close_browser, load_events, merge, now_iso, write_json
 
 GROUPS = {
-    "live": [sa_pirsa, nsw_sharksmart, wa_sharksmart],
+    # nsw_sharksmart is off: the NSW map sits behind a Cloudflare bot check we won't bypass.
+    # Re-enable if NSW DPIRD grants a data feed.
+    "live": [sa_pirsa, wa_sharksmart],
     "historical": [qld_scp, asid],
 }
 GROUPS["all"] = GROUPS["live"] + GROUPS["historical"]
